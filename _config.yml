@@ -1,15 +1,15 @@
 # Site settings
-title: Gungnir
-SEOTitle: Jekyll theme Gungnir
-description: Jekyll version of the blog theme Gungnir.
-keyword: "jekyll, theme, blog, blog theme"
-url: "https://jekyll-theme-gungnir.vercel.app"      # your host, for absolute URL
-baseurl: ""                                         # for example, '/blog' if your blog hosted on 'host/blog'
+title: Whitemir
+SEOTitle: Whitemir's blog
+description: I wanna sleep.
+keyword: "Coding until the day I become a Rolls-Royce owner"
+url: "https://coldburgundy.github.io/"      # your host, for absolute URL
+baseurl: "/blog"                                         # for example, '/blog' if your blog hosted on 'host/blog'
 avatar: "img/header-avatar.jpeg"                    # the avatar showing on the homepage
 
 
 # GitHub repository (if the site is hosted by GitHub)
-repository: Renovamen/jekyll-theme-gungnir
+repository: ColdBurgundy/coldburgundy.github.io
 repository_branch: main
 
 
@@ -54,12 +54,12 @@ collections:
 # SNS settings
 sns:
   RSS: true
-  github_username: Renovamen
+  github_username: Coldburgundy
   weibo_username:
-  zhihu_username: chao-neng-gui-su
-  twitter_username: renovamen_zxh
-  facebook_username: renovamen.zou
-  linkedin_username: xiaohan-zou-55bba0160
+  zhihu_username: 
+  twitter_username: 
+  facebook_username: 
+  linkedin_username: 
   email_address: renovamenzxh@gmail.com
 
 
