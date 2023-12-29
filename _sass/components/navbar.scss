@@ -348,6 +348,18 @@
           content: none;
         }
       }
+
+      .sub-menu li a {
+        font-family: 'MaruBuriBold', sans-serif;
+        font-size: 16px;
+        color:#e46666;
+      }
+      
+      .sub-menu li a.non-clickable-menu-item {
+        font-family: 'MaruBuri', sans-serif;
+        font-size: 18px;
+        color: #2e2d2d;
+      }
     }
   }
   &.invert {
