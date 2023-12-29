@@ -18,12 +18,7 @@
   pointer-events: none; // 포인터 이벤트를 비활성화하여 클릭 방지
 }
 
-.menu-icon {
-  width: 20px; /* 아이콘 크기 조정 */
-  height: 20px;
-  margin-right: 5px; /* 텍스트와의 간격 조정 */
-  vertical-align: middle; /* 수직 정렬 */
-}
+
 
 @media (max-width: $MQDesktop) {
   .main-container {

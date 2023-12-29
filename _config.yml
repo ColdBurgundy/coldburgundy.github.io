@@ -123,7 +123,8 @@ menus:
       - title: CLRS
         font: fas fa-user-astronaut
         url: /CLRS/
-        icon: "algorithm.png"
+        icon_style: fa-solid
+        icon: fa-book-journal-whills
       - title: BOJ(acmicpc.net)
         font: fas fa-user-astronaut
         url: /BOJ/            

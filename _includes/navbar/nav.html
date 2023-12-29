@@ -43,9 +43,7 @@
                 {% else %}
                 <!-- 클릭할 수 있는 서브메뉴 항목 -->
                 <a href="{{ submenu.url | prepend: site.baseurl }}" class="faa-parent animated-hover">
-                  {% if submenu.icon %} <!-- 아이콘이 정의된 경우 -->
-                    <img src="/img/icons/{{ submenu.icon }}" alt="Icon" class="menu-icon">
-                  {% endif %}
+                <i class="{{ submenu.icon_style }} {{ submenu.icon }}"></i>
                 {{ submenu.title }}</a>
                 {% endif %}
                 <!--
