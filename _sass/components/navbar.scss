@@ -284,9 +284,9 @@
       }
       .sub-menu {
 
-        column-count: 4; /* 4개의 열을 만들고 싶다면 이 값을 설정 */
-        -moz-column-count: 4; /* Firefox를 위한 접두어 */
-        -webkit-column-count: 4; /* Chrome, Safari, Opera를 위한 접두어 */      
+        column-count: 3; /* 4개의 열을 만들고 싶다면 이 값을 설정 */
+        -moz-column-count: 3; /* Firefox를 위한 접두어 */
+        -webkit-column-count: 3; /* Chrome, Safari, Opera를 위한 접두어 */      
         column-gap: 20px; /* 열 사이의 간격을 조정 */
         -moz-column-gap: 20px;
         -webkit-column-gap: 20px;
@@ -299,7 +299,7 @@
         top: 55px;
         left: 50%;
         margin-left: -350px;
-        width: 700px;
+        width: 1000px;
         border-radius: 5px;
         box-shadow: var(--dropdown-shadow);
         -webkit-animation: fadeIn 0.3s 0.1s ease both;
