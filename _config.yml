@@ -120,6 +120,7 @@ menus:
       - title: Algorithms
         font: fas fa-user-astronaut
         url: /#
+        icon: "algorithm.png"
       - title: CLRS
         font: fas fa-user-astronaut
         url: /CLRS/
