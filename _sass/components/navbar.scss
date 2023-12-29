@@ -260,14 +260,14 @@
   left: 0;
   width: 100%;
   z-index: 3;
-  @include sans-serif();
+  font-family: 'MaruBuri-Regular', sans-serif; // 폰트 패밀리 변경
   .navbar-brand {
     font-weight: 800;
     // materialize
     color: white;
     line-height: 20px;
     padding: 20px;
-    @include gungnir-font();
+    font-family: 'MaruBuri-Regular', sans-serif; // 폰트 패밀리 변경
     &:hover {
       color: $white-faded;
     }
@@ -316,6 +316,7 @@
         transform: translateX(-50%); /* X축 기준으로 -50%만큼 이동시켜 정중앙에 위치하도록 함 */
         //margin-left: -350px;
         width: 1200px;
+        height: 742px;
         //max-width: 90%;
         border-radius: 5px;
         box-shadow: var(--dropdown-shadow);
