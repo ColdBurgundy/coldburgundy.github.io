@@ -108,9 +108,11 @@ menus:
       - title: Advice to me
         font: fas fa-user-astronaut    
         url: /Advice-to-me
+        icon: "think.png"
       - title: Miscellaneous thoughts
         font: fas fa-user-astronaut    
         url: /Miscellaneous-thoughts
+        icon: "idea.png"
   - title: Untitled 『Study CS』
     font: fas fa-paw
     submenus:
@@ -126,13 +128,15 @@ menus:
         icon: "algorithm.png"
       - title: BOJ(acmicpc.net)
         font: fas fa-user-astronaut
-        url: /BOJ/            
+        url: /BOJ/ 
+        icon: "boj.png"           
       - title: Computer Architecture
         font: fas fa-user-astronaut
         url: /#
       - title: CSAPP
         font: fas fa-user-astronaut
         url: /CSAPP/
+        icon: "book.png"
       - title: Operating System
         font: fas fa-user-astronaut
         url: /#
@@ -142,9 +146,11 @@ menus:
       - title: 64비트 멀티코어 OS 원리와 구조 1
         font: fas fa-user-astronaut
         url: /64비트-멀티코어-OS-원리와-구조-1/
+        icon: "book.png"
       - title: 64비트 멀티코어 OS 원리와 구조 2
         font: fas fa-user-astronaut
-        url: /64비트-멀티코어-OS-원리와-구조-2/                              
+        url: /64비트-멀티코어-OS-원리와-구조-2/  
+        icon: "book.png"                            
       - title: Network
         font: fas fa-user-astronaut
         url: /#       
