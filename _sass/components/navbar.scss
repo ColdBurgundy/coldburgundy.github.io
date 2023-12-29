@@ -260,14 +260,14 @@
   left: 0;
   width: 100%;
   z-index: 3;
-  font-family: 'MaruBuri-Regular', sans-serif; // 폰트 패밀리 변경
+  font-family: 'MaruBuri', sans-serif; // 폰트 패밀리 변경
   .navbar-brand {
     font-weight: 800;
     // materialize
     color: white;
     line-height: 20px;
     padding: 20px;
-    font-family: 'MaruBuri-Regular', sans-serif; // 폰트 패밀리 변경
+    font-family: 'MaruBuri', sans-serif; // 폰트 패밀리 변경
     &:hover {
       color: $white-faded;
     }
