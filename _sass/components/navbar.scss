@@ -11,6 +11,13 @@
   background-color: transparent;
 }
 
+/* 클릭할 수 없는 메뉴 아이템 스타일 */
+.non-clickable-menu-item {
+  color: #e46666; // 클릭할 수 없음을 나타내기 위해 색상 설정
+  cursor: default; // 기본 커서로 설정하여 클릭할 수 없음을 나타냄
+  pointer-events: none; // 포인터 이벤트를 비활성화하여 클릭 방지
+}
+
 @media (max-width: $MQDesktop) {
   .main-container {
     $nav-transition: transform 0.5s, border-radius 1s;

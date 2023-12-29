@@ -116,37 +116,40 @@ menus:
     submenus:
       - title: Data Structure
         font: fas fa-user-astronaut
+        url: /#
       - title: Algorithms
         font: fas fa-user-astronaut
-        submenus:
-          - title: CLRS
-            font: fas fa-user-astronaut
-            url: /CLRS/
-          - title: BOJ(acmicpc.net)
-            font: fas fa-user-astronaut
-            url: /BOJ/            
+        url: /#
+      - title: CLRS
+        font: fas fa-user-astronaut
+        url: /CLRS/
+      - title: BOJ(acmicpc.net)
+        font: fas fa-user-astronaut
+        url: /BOJ/            
       - title: Computer Architecture
         font: fas fa-user-astronaut
-        submenus:
-          - title: CSAPP
-            font: fas fa-user-astronaut
-            url: /CSAPP/
+        url: /#
+      - title: CSAPP
+        font: fas fa-user-astronaut
+        url: /CSAPP/
       - title: Operating System
         font: fas fa-user-astronaut
-        submenus:
-          - title: Operating System Concepts 10e
-            font: fas fa-user-astronaut
-            url: /Operating-System-Concepts-10e/
-          - title: 64비트 멀티코어 OS 원리와 구조 1
-            font: fas fa-user-astronaut
-            url: /64비트-멀티코어-OS-원리와-구조-1/
-          - title: 64비트 멀티코어 OS 원리와 구조 2
-            font: fas fa-user-astronaut
-            url: /64비트-멀티코어-OS-원리와-구조-1/                              
+        url: /#
+      - title: Operating System Concepts 10e
+        font: fas fa-user-astronaut
+        url: /Operating-System-Concepts-10e/
+      - title: 64비트 멀티코어 OS 원리와 구조 1
+        font: fas fa-user-astronaut
+        url: /64비트-멀티코어-OS-원리와-구조-1/
+      - title: 64비트 멀티코어 OS 원리와 구조 2
+        font: fas fa-user-astronaut
+        url: /64비트-멀티코어-OS-원리와-구조-2/                              
       - title: Network
-        font: fas fa-user-astronaut       
+        font: fas fa-user-astronaut
+        url: /#       
       - title: Database
-        font: fas fa-user-astronaut                                          
+        font: fas fa-user-astronaut
+        url: /#                                          
   - title: Projects
     font: fas fa-book
     url: /projects/

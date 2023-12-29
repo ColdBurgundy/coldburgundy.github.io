@@ -37,9 +37,18 @@
             <ul class="sub-menu">
               {% for submenu in page.submenus %}
               <li>
+                {% if submenu.url contains "#" %}
+                <!-- 클릭할 수 없는 서브메뉴 항목 -->
+                <a href="#" class="non-clickable-menu-item">{{ submenu.title }}</a>
+                {% else %}
+                <!-- 클릭할 수 있는 서브메뉴 항목 -->
+                <a href="{{ submenu.url | prepend: site.baseurl }}" class="faa-parent animated-hover">{{ submenu.title }}</a>
+                {% endif %}
+                <!--
                 <a href="{{ submenu.url | prepend: site.baseurl }}" class="faa-parent animated-hover">
                 <i class="{{submenu.font}} fa-lg faa-wrench"></i>
                 {{ submenu.title }}
+                -->
                 </a>
               </li>
               {% endfor %}
