@@ -291,18 +291,18 @@
         -moz-column-gap: 20px;
         -webkit-column-gap: 20px;
 
-        left: 50%; /* 왼쪽 기준 50% 위치에 놓임 */
-        transform: translateX(-50%); /* X축 기준으로 -50%만큼 이동시켜 정중앙에 위치하도록 함 */
-        
+
         display: none;
         background: var(--bg);
         list-style-type: none;
         position: absolute;
         padding: 10px 0;
         top: 55px;
-        left: 50%;
-        margin-left: -350px;
-        width: 1000px;
+        left: 50%; /* 왼쪽 기준 50% 위치에 놓임 */
+        transform: translateX(-50%); /* X축 기준으로 -50%만큼 이동시켜 정중앙에 위치하도록 함 */
+        //margin-left: -350px;
+        width: auto;
+        max-width: 90%;
         border-radius: 5px;
         box-shadow: var(--dropdown-shadow);
         -webkit-animation: fadeIn 0.3s 0.1s ease both;
@@ -320,14 +320,17 @@
           }
         }
         &:before {
+          /*
           content: "";
           position: absolute;
-          top: -20px;
-          left: 50%;
-          margin-left: -10px;
-          border-width: 10px;
+          top: -20px; // 이 위치에 따라 위에 삼각형이 생길 수 있음 
+          left: 50%; // 중앙에 배치됨을 나타냄 
+          margin-left: -10px; // 삼각형의 중앙을 조정 
+          border-width: 10px; // 삼각형의 크기 
           border-style: solid;
           border-color: transparent transparent var(--bg) transparent;
+          */
+          content: none;
         }
       }
     }
