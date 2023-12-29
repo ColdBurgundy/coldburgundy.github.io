@@ -291,6 +291,9 @@
         -moz-column-gap: 20px;
         -webkit-column-gap: 20px;
 
+        left: 50%; /* 왼쪽 기준 50% 위치에 놓임 */
+        transform: translateX(-50%); /* X축 기준으로 -50%만큼 이동시켜 정중앙에 위치하도록 함 */
+        
         display: none;
         background: var(--bg);
         list-style-type: none;
