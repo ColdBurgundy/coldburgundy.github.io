@@ -56,8 +56,6 @@ header-mask: rgba(211, 136, 37, .5)
 			{% assign monthly_posts = monthly_posts | sort: 'date' | reverse %}
 
 			{%- assign _sorted_list = site.posts -%}
-			{%- assign _sorted_list = _sorted_list | sort: 'date' -%}
-			{%- assign _sorted_list = _sorted_list | reverse -%}
 
 
 			{% for _article in monthly_posts %}
