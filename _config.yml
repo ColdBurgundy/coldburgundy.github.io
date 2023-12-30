@@ -102,9 +102,12 @@ menus:
   - title: About
     font: fas fa-user-astronaut
     url: /about/
-  - title: Untitled 『Writing』
+  - title: Untitled 『Life』
     font: fas fa-paw
     submenus:
+      - title: Writing
+        font: fas fa-user-astronaut
+        url: /#
       - title: Advice to me
         font: fas fa-user-astronaut    
         url: /Advice-to-me/
@@ -113,6 +116,32 @@ menus:
         font: fas fa-user-astronaut    
         url: /Miscellaneous-thoughts/
         icon: "idea.png"
+      - title: Monthly tablet
+        font: fas fa-user-astronaut    
+        url: /monthly/
+        icon: "monthly.png"
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$
+
+
+      - title: Hobby
+        font: fas fa-user-astronaut
+        url: /#
+      - title: League of Legends
+        font: fas fa-user-astronaut    
+        url: /lol/
+        icon: "lol.png"
+      - title: Thoughts on Food
+        font: fas fa-user-astronaut    
+        url: /food/
+        icon: "food.png"
+      - title: The movie is interesting.
+        font: fas fa-user-astronaut    
+        url: /movie/
+        icon: "movie"
+
+
   - title: Untitled 『Studying CS』
     font: fas fa-paw
     submenus:
@@ -126,6 +155,8 @@ menus:
       - title: --------------------------------
         font: fas fa-user-astronaut      
         url: /$
+
+
       - title: Algorithms
         font: fas fa-user-astronaut
         url: /#
@@ -143,7 +174,9 @@ menus:
         icon: "boj.png"
       - title: --------------------------------
         font: fas fa-user-astronaut
-        url: /$           
+        url: /$          
+
+
       - title: Computer Architecture
         font: fas fa-user-astronaut
         url: /#
@@ -158,6 +191,8 @@ menus:
       - title: --------------------------------
         font: fas fa-user-astronaut
         url: /$
+
+
       - title: Operating System
         font: fas fa-user-astronaut
         url: /#
@@ -179,7 +214,9 @@ menus:
         icon: "book.png"
       - title: --------------------------------
         font: fas fa-user-astronaut
-        url: /$                            
+        url: /$
+
+
       - title: Network
         font: fas fa-user-astronaut
         url: /#
@@ -189,7 +226,9 @@ menus:
         icon: "secret.png"
       - title: --------------------------------
         font: fas fa-user-astronaut
-        url: /$       
+        url: /$ 
+
+
       - title: Database
         font: fas fa-user-astronaut
         url: /#
@@ -199,7 +238,9 @@ menus:
         icon: "secret.png"
       - title: --------------------------------
         font: fas fa-user-astronaut      
-        url: /$    
+        url: /$  
+
+
       - title: Language
         font: fas fa-user-astronaut
         url: /#
@@ -217,7 +258,9 @@ menus:
         icon: "python.png"
       - title: --------------------------------
         font: fas fa-user-astronaut      
-        url: /$                                          
+        url: /$  
+
+
   - title: Projects
     font: fas fa-book
     url: /projects/
