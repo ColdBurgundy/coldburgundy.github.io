@@ -12,7 +12,7 @@ multilingual: true
 <!-- Korean Version -->
 <div class="kr post-container">
     {% for post in site.posts %}
-        {% if post.title == 'Advice-to-me_kr' and post.lang == 'kr' %}
+        {% if post.title == 'Advice-to-me_kr.md' and post.lang == 'kr' %}
             {{ post.content }}
         {% endif %}
     {% endfor %}
@@ -21,7 +21,7 @@ multilingual: true
 <!-- English Version -->
 <div class="en post-container">
     {% for post in site.posts %}
-        {% if post.title == 'Advice-to-me_en' and post.lang == 'en' %}
+        {% if post.title == 'Advice-to-me_en.md' and post.lang == 'en' %}
             {{ post.content }}
         {% endif %}
     {% endfor %}
