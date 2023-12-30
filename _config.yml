@@ -119,7 +119,8 @@ menus:
       - title: Data Structure
         font: fas fa-user-astronaut
         url: /#
-      - title: --------------------
+      - title: ----------------------------------------
+        font: fas fa-user-astronaut      
         url: /$
       - title: Algorithms
         font: fas fa-user-astronaut
@@ -132,7 +133,8 @@ menus:
         font: fas fa-user-astronaut
         url: /BOJ/ 
         icon: "boj.png"
-      - title: --------------------
+      - title: ----------------------------------------
+        font: fas fa-user-astronaut
         url: /$           
       - title: Computer Architecture
         font: fas fa-user-astronaut
@@ -141,7 +143,8 @@ menus:
         font: fas fa-user-astronaut
         url: /CSAPP/
         icon: "book.png"
-      - title: --------------------
+      - title: ----------------------------------------
+        font: fas fa-user-astronaut
         url: /$
       - title: Operating System
         font: fas fa-user-astronaut
@@ -157,12 +160,14 @@ menus:
         font: fas fa-user-astronaut
         url: /64비트-멀티코어-OS-원리와-구조-2/  
         icon: "book.png"
-      - title: --------------------
+      - title: ----------------------------------------
+        font: fas fa-user-astronaut
         url: /$                            
       - title: Network
         font: fas fa-user-astronaut
         url: /#
-      - title: --------------------
+      - title: ----------------------------------------
+        font: fas fa-user-astronaut
         url: /$       
       - title: Database
         font: fas fa-user-astronaut
