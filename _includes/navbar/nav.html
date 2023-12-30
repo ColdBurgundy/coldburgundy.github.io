@@ -40,7 +40,7 @@
                 {% if submenu.url contains "#" %}
                 <!-- 클릭할 수 없는 서브메뉴 항목 -->
                 <a href="#" class="non-clickable-menu-item">{{ submenu.title }}</a>
-                {% elsif submenu.url contains "#" %}
+                {% elsif submenu.url contains "$" %}
                 <!-- 줄긋기 전용 -->
                 <a href="$" class="longline">{{ submenu.title }}</a>
                 {% else %}

@@ -19,7 +19,7 @@
 }
 
 .longline {
-  color: #3a3535; // 클릭할 수 없음을 나타내기 위해 색상 설정
+  color: #3a3535; // 
   cursor: default; // 기본 커서로 설정하여 클릭할 수 없음을 나타냄
   pointer-events: none; // 포인터 이벤트를 비활성화하여 클릭 방지
 }
@@ -341,7 +341,7 @@
           }
         }
         &:before {
-          /*
+          
           content: "";
           position: absolute;
           top: -20px; // 이 위치에 따라 위에 삼각형이 생길 수 있음 
@@ -350,7 +350,7 @@
           border-width: 10px; // 삼각형의 크기 
           border-style: solid;
           border-color: transparent transparent var(--bg) transparent;
-          */
+          
           content: none;
         }
       }
