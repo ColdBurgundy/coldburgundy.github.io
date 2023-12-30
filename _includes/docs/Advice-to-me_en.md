@@ -1,4 +1,4 @@
-2023.02.12
+### 2023.02.12
 
 #1. Let's be humble. Let's reflect. Let's think. Let's try. Let's be temperate. Let's be thankful.
 
@@ -16,7 +16,7 @@
 
 
 ---
-2023.11.26
+### 2023.11.26
 
 #8. Don't get too attached to the code.
 
