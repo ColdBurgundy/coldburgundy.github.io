@@ -142,6 +142,104 @@ menus:
         icon: "movie.png"
 
 
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+
+
   - title: Untitled 『Studying CS』
     font: fas fa-paw
     submenus:
@@ -286,76 +384,76 @@ menus:
       - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
       
