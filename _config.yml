@@ -348,7 +348,7 @@ menus:
         icon: "c.png"
       - title: C++
         font: fas fa-user-astronaut
-        url: /C++/
+        url: /CPP/
         icon: "cpp.png"
       - title: Python
         font: fas fa-user-astronaut
