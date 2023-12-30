@@ -119,6 +119,8 @@ menus:
       - title: Data Structure
         font: fas fa-user-astronaut
         url: /#
+      - title: --------------------
+        url: /$
       - title: Algorithms
         font: fas fa-user-astronaut
         url: /#
@@ -129,7 +131,9 @@ menus:
       - title: BOJ(acmicpc.net)
         font: fas fa-user-astronaut
         url: /BOJ/ 
-        icon: "boj.png"           
+        icon: "boj.png"
+      - title: --------------------
+        url: /$           
       - title: Computer Architecture
         font: fas fa-user-astronaut
         url: /#
@@ -137,6 +141,8 @@ menus:
         font: fas fa-user-astronaut
         url: /CSAPP/
         icon: "book.png"
+      - title: --------------------
+        url: /$
       - title: Operating System
         font: fas fa-user-astronaut
         url: /#
@@ -150,10 +156,14 @@ menus:
       - title: 64비트 멀티코어 OS 원리와 구조 2
         font: fas fa-user-astronaut
         url: /64비트-멀티코어-OS-원리와-구조-2/  
-        icon: "book.png"                            
+        icon: "book.png"
+      - title: --------------------
+        url: /$                            
       - title: Network
         font: fas fa-user-astronaut
-        url: /#       
+        url: /#
+      - title: --------------------
+        url: /$       
       - title: Database
         font: fas fa-user-astronaut
         url: /#                                          
