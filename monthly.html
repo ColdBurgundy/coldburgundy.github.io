@@ -6,10 +6,6 @@ header-img: "img/page-bg/monthly.png"
 header-mask: rgba(211, 136, 37, .5)
 ---
 
-<!--
-Credits: this page shamelessly borrowed a lot from:
-https://github.com/kitian616/jekyll-TeXt-theme
--->
 <!-- Page Header -->
 {% include intro-header.html type='page' short=true %}
 
@@ -17,105 +13,86 @@ https://github.com/kitian616/jekyll-TeXt-theme
 <div class="container">
 	<div class="row">
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
 			{% assign monthly_posts = site.posts | where_exp: "post", "post.url contains 'monthly'" %}
-			{% assign monthly_tags = "" %}
-			{% for post in monthly_posts %}
-			{% for tag in post.tags %}
-				{% unless monthly_tags contains tag %}
-				{% assign monthly_tags = monthly_tags | append: tag | append: "," %}
-				{% endunless %}
-			{% endfor %}
-			{% endfor %}
-			{% assign monthly_tags = monthly_tags | split: "," | uniq %}
-
-
-			{% for post in monthly_posts %}
-				{{ post.title }}
-			{% endfor %}
-
 
 			<!-- Tags (as filter) -->
-			<!--
 			<div id='tag_cloud' class="tags tags-sup js-tags">
 				<a class="tag-button--all" data-encode="">
 					Show All
-					<sup>{{ monthly_posts.size }}</sup>
+					<sup>{{monthly_posts.size}}</sup>
 				</a>
+
+
+				{% assign monthly_tags = "" %}
+				{% for post in monthly_posts %}
+					{% for tag in post.tags %}
+						{% unless monthly_tags contains tag %}
+						{% assign monthly_tags = monthly_tags | append: tag | append: "," %}
+						{% endunless %}
+					{% endfor %}
+				{% endfor %}
+				{% assign monthly_tags = monthly_tags | split: "," | uniq %}
 
 				{% capture tags %}
 				{% for tag in monthly_tags %}
-				{% assign tag_count = site.posts | where:"tags", tag | size %}
-				<a class="tag-button" title="{{ tag }}" rel="{{ tag_count }}">
-					{{ tag }}
-					<sup>{{ tag_count }}</sup>
-				</a>__SEPERATOR__
+					{% assign tag_count = monthly_posts | where:"tags", tag | size %}
+					<a data-sort="{{ monthly_posts.size | minus: tag_count | prepend: '0000' | slice: -4, 4 }}"
+						data-encode="{{ tag | strip | url_encode }}"
+						class="tag-button"
+						title="{{ tag }}" rel="{{ tag_count }}">
+						{{ tag }}
+						<sup>{{ tag_count }}</sup>
+					</a>__SEPERATOR__
 				{% endfor %}
 				{% endcapture %}
 
-
-				{{ tags | split:'__SEPERATOR__' | sort }}
-			</div>
-			-->
-
-			<div id='tag_cloud' class="tags tags-sup js-tags">
-				<a class="tag-button--all" data-encode="">
-				  Show All
-				  <sup>{{ monthly_posts.size }}</sup>
-				</a>
-			  
-				{% capture tags %}
-				  {% for tag in monthly_tags %}
-					{% assign tag_count = monthly_posts | where:"tags", tag | size %}
-					<a class="tag-button" title="{{ tag }}" rel="{{ tag_count }}">
-					  {{ tag }}
-					  <sup>{{ tag_count }}</sup>
-					</a>__SEPERATOR__
-				  {% endfor %}
-				{% endcapture %}
-			  
 				{{ tags | split:'__SEPERATOR__' | sort }}
 			</div>
 
             <!-- Article List -->
 			<div class="mini-post-list js-result d-none">
-				{% assign monthly_posts = monthly_posts | sort: 'date' | reverse %}
 
-				{%- for _article in monthly_posts -%}
-					{%- assign _tags = '' -%}
-					{%- for _tag in _article.tags -%}
-						{%- assign _tag_encode = _tag | strip | url_encode -%}
-						{%- if forloop.last -%}
-							{%- assign _tags = _tags | append: _tag_encode -%}
-						{%- else -%}
-							{%- assign _tags = _tags | append: _tag_encode | append: ',' -%}
-						{%- endif -%}
-					{%- endfor -%}
+			{% assign monthly_posts = monthly_posts | sort: 'date' | reverse %}
 
-					{%- assign _currentdate = _article.date | date: '%Y' -%}
-					{%- if _currentdate != _date -%}
-						{%- unless forloop.first -%}</section>{%- endunless -%}
-						<section>
-						<span class="fa listing-seperator">
-							<span class="tag-text">{{ _currentdate }}</span>
-						</span>
-						{%- assign _date = _currentdate -%}
-					{%- endif -%}
+			{%- assign _sorted_list = site.posts -%}
+			{%- assign _sorted_list = _sorted_list | sort: 'date' -%}
+			{%- assign _sorted_list = _sorted_list | reverse -%}
 
-					<div class="post-preview item" data-tags="{{ _tags }}">
-						<a href="{{ _article.url | prepend: site.baseurl }}">
-							<h2 class="post-title">
-								{{ _article.title }}
-							</h2>
-							{% if _article.subtitle %}
-							<h3 class="post-subtitle">
-								{{ _article.subtitle }}
-							</h3>
-							{% endif %}
-						</a>
-						<hr>
-					</div>
-					{%- if forloop.last -%}</section>{%- endif -%}
-				{%- endfor %}
+
+			{% for _article in monthly_posts %}
+				{% assign _tags = '' %}
+				{% for _tag in _article.tags %}
+					{% assign _tag_encode = _tag | strip | url_encode %}
+					{% assign _tags = _tags | append: _tag_encode | append: ',' %}
+				{% endfor %}
+
+				{% comment %} group by year {% endcomment %}
+				{% assign _currentdate = _article.date | date: '%Y' %}
+				{% if _currentdate != _date %}
+					{% unless forloop.first %}</section>{% endunless %}
+					<section>
+					<span class="fa listing-seperator">
+					<span class="tag-text">{{ _currentdate }}</span>
+					</span>
+					{% assign _date = _currentdate %}
+				{% endif %}
+
+				<div class="post-preview item" data-tags="{{ _tags }}">
+					<a href="{{ _article.url | prepend: site.baseurl }}">
+					<h2 class="post-title">
+						{{ _article.title }}
+					</h2>
+					{% if _article.subtitle %}
+					<h3 class="post-subtitle">
+						{{ _article.subtitle }}
+					</h3>
+					{% endif %}
+					</a>
+					<hr>
+				</div>
+				{% if forloop.last %}</section>{% endif %}
+			{% endfor %}
 			</div>
 		</div>
 	</div>
