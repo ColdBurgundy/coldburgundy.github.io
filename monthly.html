@@ -14,7 +14,7 @@ header-mask: rgba(211, 136, 37, .5)
 	<div class="row">
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 
-			{% assign monthly_posts = site.posts | where_exp: "post", "post.url contains 'monthly'" %}
+			{% assign monthly_posts = site.monthly | where_exp: "post", "post.url contains 'monthly'" | sort: 'date' | reverse %}
 
 			<!-- Tags (as filter) -->
 			<div id='tag_cloud' class="tags tags-sup js-tags">
@@ -52,11 +52,6 @@ header-mask: rgba(211, 136, 37, .5)
 
             <!-- Article List -->
 			<div class="mini-post-list js-result d-none">
-
-			{% assign monthly_posts = monthly_posts | sort: 'date' | reverse %}
-
-			{%- assign _sorted_list = site.posts -%}
-
 
 			{% for _article in monthly_posts %}
 				{% assign _tags = '' %}

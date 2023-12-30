@@ -43,6 +43,8 @@ cdn:
 future: true
 
 collections:
+  monthly:
+    output: true
   experiences:
     output: true
   publications:
