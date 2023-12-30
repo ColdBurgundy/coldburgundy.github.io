@@ -28,7 +28,9 @@
   width: 15px; /* 아이콘 크기 조정 */
   height: 15px;
   margin-right: 5px; /* 텍스트와의 간격 조정 */
-  vertical-align: middle; /* 수직 정렬 */
+  vertical-align: middle; /* 수직 정렬 */  
+  cursor: default; // 기본 커서로 설정하여 클릭할 수 없음을 나타냄
+  pointer-events: none; // 포인터 이벤트를 비활성화하여 클릭 방지
 }
 
 @media (max-width: $MQDesktop) {
@@ -321,7 +323,7 @@
         left: 50%; /* 왼쪽 기준 50% 위치에 놓임 */
         transform: translateX(-50%); /* X축 기준으로 -50%만큼 이동시켜 정중앙에 위치하도록 함 */
         //margin-left: -350px;
-        width: 1600px;
+        width: 1400px;
         height: 600px;
         //max-width: 90%;
         border-radius: 5px;

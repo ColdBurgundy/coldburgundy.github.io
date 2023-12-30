@@ -1,0 +1,28 @@
+---
+layout: post
+title: "Advice to me"
+subtitle: Read this article whenever your thoughts get complicated.
+header-img: img/theme.jpg
+header-mask: rgba(40, 57, 101, .4)
+catalog: true
+hide-author: true
+multilingual: true
+---
+
+<!-- Korean Version -->
+<div class="kr post-container">
+    {% for post in site.posts %}
+        {% if post.title == 'Advice-to-me_kr' and post.lang == 'kr' %}
+            {{ post.content }}
+        {% endif %}
+    {% endfor %}
+</div>
+
+<!-- English Version -->
+<div class="en post-container">
+    {% for post in site.posts %}
+        {% if post.title == 'Advice-to-me_en' and post.lang == 'en' %}
+            {{ post.content }}
+        {% endif %}
+    {% endfor %}
+</div>
