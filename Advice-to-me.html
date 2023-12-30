@@ -11,18 +11,12 @@ multilingual: true
 
 <!-- Korean Version -->
 <div class="kr post-container">
-    {% for post in site.posts %}
-        {% if post.title == 'Advice-to-me_kr' and post.lang == 'kr' %}
-            {{ post.content }}
-        {% endif %}
-    {% endfor %}
+    {% capture docs_kr %}{% include docs/Advice-to-me_kr.md %}{% endcapture %}
+    {{ docs_kr | markdownify }}
 </div>
 
 <!-- English Version -->
 <div class="en post-container">
-    {% for post in site.posts %}
-        {% if post.title == 'Advice-to-me_en' and post.lang == 'en' %}
-            {{ post.content }}
-        {% endif %}
-    {% endfor %}
+    {% capture docs_en %}{% include docs/Advice-to-me_en.md %}{% endcapture %}
+    {{ docs_en | markdownify }}
 </div>
