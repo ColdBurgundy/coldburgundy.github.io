@@ -52,42 +52,40 @@ https://github.com/kitian616/jekyll-TeXt-theme
 				{%- assign _sorted_list = site.posts | sort: 'date' | reverse -%}
 
 				{%- for _article in monthly_posts -%}
-					{%- if _article.path contains '/monthly/' -%} <!-- 폴더 경로 확인 -->
-						{%- assign _tags = '' -%}
-						{%- for _tag in _article.tags -%}
-							{%- assign _tag_encode = _tag | strip | url_encode -%}
-							{%- if forloop.last -%}
-								{%- assign _tags = _tags | append: _tag_encode -%}
-							{%- else -%}
-								{%- assign _tags = _tags | append: _tag_encode | append: ',' -%}
-							{%- endif -%}
-						{%- endfor -%}
-
-						{%- assign _currentdate = _article.date | date: '%Y' -%}
-						{%- if _currentdate != _date -%}
-							{%- unless forloop.first -%}</section>{%- endunless -%}
-							<section>
-							<span class="fa listing-seperator">
-								<span class="tag-text">{{ _currentdate }}</span>
-							</span>
-							{%- assign _date = _currentdate -%}
+					{%- assign _tags = '' -%}
+					{%- for _tag in _article.tags -%}
+						{%- assign _tag_encode = _tag | strip | url_encode -%}
+						{%- if forloop.last -%}
+							{%- assign _tags = _tags | append: _tag_encode -%}
+						{%- else -%}
+							{%- assign _tags = _tags | append: _tag_encode | append: ',' -%}
 						{%- endif -%}
+					{%- endfor -%}
 
-						<div class="post-preview item" data-tags="{{ _tags }}">
-							<a href="{{ _article.url | prepend: site.baseurl }}">
-								<h2 class="post-title">
-									{{ _article.title }}
-								</h2>
-								{% if _article.subtitle %}
-								<h3 class="post-subtitle">
-									{{ _article.subtitle }}
-								</h3>
-								{% endif %}
-							</a>
-							<hr>
-						</div>
-						{%- if forloop.last -%}</section>{%- endif -%}
+					{%- assign _currentdate = _article.date | date: '%Y' -%}
+					{%- if _currentdate != _date -%}
+						{%- unless forloop.first -%}</section>{%- endunless -%}
+						<section>
+						<span class="fa listing-seperator">
+							<span class="tag-text">{{ _currentdate }}</span>
+						</span>
+						{%- assign _date = _currentdate -%}
 					{%- endif -%}
+
+					<div class="post-preview item" data-tags="{{ _tags }}">
+						<a href="{{ _article.url | prepend: site.baseurl }}">
+							<h2 class="post-title">
+								{{ _article.title }}
+							</h2>
+							{% if _article.subtitle %}
+							<h3 class="post-subtitle">
+								{{ _article.subtitle }}
+							</h3>
+							{% endif %}
+						</a>
+						<hr>
+					</div>
+					{%- if forloop.last -%}</section>{%- endif -%}
 				{%- endfor %}
 			</div>
 		</div>
