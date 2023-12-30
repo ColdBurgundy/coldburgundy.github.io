@@ -17,12 +17,12 @@ https://github.com/kitian616/jekyll-TeXt-theme
 <div class="container">
 	<div class="row">
 		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-			{% assign monthly_posts = site.posts | where_exp:"post", "post.path contains '_posts/monthly'" %}
+			{% assign monthly_posts = site.posts | where_exp:"post", "post.path contains '/_posts/monthly/'" %}
 			{% assign monthly_tags = "" | split: "," %}
 			{% for post in monthly_posts %}
 				{% for tag in post.tags %}
 					{% unless monthly_tags contains tag %}
-					{% assign monthly_tags = monthly_tags | push: tag %}
+					{% assign monthly_tags = monthly_tags | concat: tag | uniq %}
 					{% endunless %}
 				{% endfor %}
 			{% endfor %}
@@ -35,15 +35,14 @@ https://github.com/kitian616/jekyll-TeXt-theme
 
 				{% capture tags %}
 				{% for tag in monthly_tags %}
-				<a data-sort="{{ site.posts.size | minus: tag[1].size | prepend: '0000' | slice: -4, 4 }}"
-					data-encode="{{ tag[0] | strip | url_encode }}"
-					class="tag-button"
-					title="{{ tag[0] }}" rel="{{ tag[1].size }}">
-					{{ tag[0] }}
-					<sup>{{tag[1].size}}</sup>
+				{% assign tag_count = site.posts | where:"tags", tag | size %}
+				<a class="tag-button" title="{{ tag }}" rel="{{ tag_count }}">
+					{{ tag }}
+					<sup>{{ tag_count }}</sup>
 				</a>__SEPERATOR__
 				{% endfor %}
 				{% endcapture %}
+
 
 				{{ tags | split:'__SEPERATOR__' | sort }}
 			</div>
@@ -52,7 +51,7 @@ https://github.com/kitian616/jekyll-TeXt-theme
 			<div class="mini-post-list js-result d-none">
 				{%- assign _sorted_list = site.posts | sort: 'date' | reverse -%}
 
-				{%- for _article in _sorted_list -%}
+				{%- for _article in monthly_posts -%}
 					{%- if _article.path contains '/monthly/' -%} <!-- 폴더 경로 확인 -->
 						{%- assign _tags = '' -%}
 						{%- for _tag in _article.tags -%}
