@@ -119,12 +119,20 @@ menus:
       - title: Data Structure
         font: fas fa-user-astronaut
         url: /#
-      - title: ------------------------------
+      - title: My Notes
+        font: fas fa-user-astronaut
+        url: /ds_notes/
+        icon: "secret.png"
+      - title: --------------------------------
         font: fas fa-user-astronaut      
         url: /$
       - title: Algorithms
         font: fas fa-user-astronaut
         url: /#
+      - title: My Notes
+        font: fas fa-user-astronaut
+        url: /algorithms_notes/
+        icon: "secret.png"
       - title: CLRS
         font: fas fa-user-astronaut
         url: /CLRS/
@@ -133,22 +141,30 @@ menus:
         font: fas fa-user-astronaut
         url: /BOJ/ 
         icon: "boj.png"
-      - title: ------------------------------
+      - title: --------------------------------
         font: fas fa-user-astronaut
         url: /$           
       - title: Computer Architecture
         font: fas fa-user-astronaut
         url: /#
+      - title: My Notes
+        font: fas fa-user-astronaut
+        url: /ca_notes/
+        icon: "secret.png"
       - title: CSAPP
         font: fas fa-user-astronaut
         url: /CSAPP/
         icon: "book.png"
-      - title: ------------------------------
+      - title: --------------------------------
         font: fas fa-user-astronaut
         url: /$
       - title: Operating System
         font: fas fa-user-astronaut
         url: /#
+      - title: My Notes
+        font: fas fa-user-astronaut
+        url: /os_notes/
+        icon: "secret.png"
       - title: Operating System Concepts 10e
         font: fas fa-user-astronaut
         url: /Operating-System-Concepts-10e/
@@ -161,18 +177,47 @@ menus:
         font: fas fa-user-astronaut
         url: /64비트-멀티코어-OS-원리와-구조-2/  
         icon: "book.png"
-      - title: ------------------------------
+      - title: --------------------------------
         font: fas fa-user-astronaut
         url: /$                            
       - title: Network
         font: fas fa-user-astronaut
         url: /#
-      - title: ------------------------------
+      - title: My Notes
+        font: fas fa-user-astronaut
+        url: /network_notes/
+        icon: "secret.png"
+      - title: --------------------------------
         font: fas fa-user-astronaut
         url: /$       
       - title: Database
         font: fas fa-user-astronaut
-        url: /#                                          
+        url: /#
+      - title: My Notes
+        font: fas fa-user-astronaut
+        url: /db_notes/
+        icon: "secret.png"
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$    
+      - title: Language
+        font: fas fa-user-astronaut
+        url: /#
+      - title: C
+        font: fas fa-user-astronaut
+        url: /C/
+        icon: "c.png"
+      - title: C++
+        font: fas fa-user-astronaut
+        url: /C++/
+        icon: "cpp.png"
+      - title: Python
+        font: fas fa-user-astronaut
+        url: /python/
+        icon: "python.png"
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$                                          
   - title: Projects
     font: fas fa-book
     url: /projects/
