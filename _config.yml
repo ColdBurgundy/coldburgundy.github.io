@@ -113,13 +113,13 @@ menus:
         font: fas fa-user-astronaut    
         url: /Miscellaneous-thoughts
         icon: "idea.png"
-  - title: Untitled 『Study CS』
+  - title: Untitled 『Studying CS』
     font: fas fa-paw
     submenus:
       - title: Data Structure
         font: fas fa-user-astronaut
         url: /#
-      - title: ----------------------------------------
+      - title: ------------------------------
         font: fas fa-user-astronaut      
         url: /$
       - title: Algorithms
@@ -133,7 +133,7 @@ menus:
         font: fas fa-user-astronaut
         url: /BOJ/ 
         icon: "boj.png"
-      - title: ----------------------------------------
+      - title: ------------------------------
         font: fas fa-user-astronaut
         url: /$           
       - title: Computer Architecture
@@ -143,7 +143,7 @@ menus:
         font: fas fa-user-astronaut
         url: /CSAPP/
         icon: "book.png"
-      - title: ----------------------------------------
+      - title: ------------------------------
         font: fas fa-user-astronaut
         url: /$
       - title: Operating System
@@ -160,13 +160,13 @@ menus:
         font: fas fa-user-astronaut
         url: /64비트-멀티코어-OS-원리와-구조-2/  
         icon: "book.png"
-      - title: ----------------------------------------
+      - title: ------------------------------
         font: fas fa-user-astronaut
         url: /$                            
       - title: Network
         font: fas fa-user-astronaut
         url: /#
-      - title: ----------------------------------------
+      - title: ------------------------------
         font: fas fa-user-astronaut
         url: /$       
       - title: Database
