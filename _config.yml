@@ -139,7 +139,7 @@ menus:
       - title: The movie is interesting.
         font: fas fa-user-astronaut    
         url: /movie/
-        icon: "movie"
+        icon: "movie.png"
 
 
   - title: Untitled 『Studying CS』
@@ -256,6 +256,129 @@ menus:
         font: fas fa-user-astronaut
         url: /python/
         icon: "python.png"
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+
+
+        
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: --------------------------------
+        font: fas fa-user-astronaut      
+        url: /$  
       - title: --------------------------------
         font: fas fa-user-astronaut      
         url: /$  
