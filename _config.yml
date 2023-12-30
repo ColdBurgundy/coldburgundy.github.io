@@ -262,7 +262,28 @@ menus:
 
 
         
-      - title: --------------------------------
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
+        font: fas fa-user-astronaut      
+        url: /$  
+      - title: 
         font: fas fa-user-astronaut      
         url: /$  
       - title: --------------------------------
@@ -337,51 +358,7 @@ menus:
       - title: --------------------------------
         font: fas fa-user-astronaut      
         url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$  
+      
 
 
   - title: Projects
