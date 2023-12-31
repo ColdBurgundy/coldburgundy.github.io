@@ -111,7 +111,7 @@ header-mask: rgba(211, 136, 37, .5)
 				var posts = document.querySelectorAll('.mini-post-list .post-preview');
 				posts.forEach(function(post) {
 					var tags = post.getAttribute('data-tags').split(',');
-					if (tag == 'all' || tags.includes(tag)) {
+					if (tag == 'Show All' || tags.includes(tag)) {
 						post.style.display = 'block';
 					} else {
 						post.style.display = 'none';
