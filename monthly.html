@@ -62,6 +62,18 @@ header-mask: rgba(211, 136, 37, .5)
 				{{ tags | split:'__SEPERATOR__' | sort }}
 			</div>
 
+
+
+			<!-- test -->
+			<div class="mini-post-list">
+				{%- for _article in site.monthly -%}
+					<div>
+						<a href="{{ _article.url | prepend: site.baseurl }}">
+							<h2>{{ _article.title }}</h2>
+						</a>
+					</div>
+				{%- endfor -%}
+			</div>
             <!-- Article List -->
 			<div class="mini-post-list js-result d-none">
 				{%- assign _sorted_list = site.monthly | sort: 'date' | reverse -%}
