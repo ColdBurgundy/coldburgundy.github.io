@@ -66,14 +66,30 @@ header-mask: rgba(211, 136, 37, .5)
 
 			<!-- test -->
 			<div class="mini-post-list">
+				{%- assign _date = nil -%}
 				{%- for _article in site.monthly -%}
-					<div>
+					{%- assign _currentdate = _article.date | date: '%Y' -%}
+					{%- if _currentdate != _date -%}
+						{%- unless forloop.first -%}</section>{%- endunless -%}
+						<section>
+						<h2>{{ _currentdate }}</h2>
+					{%- endif -%}
+			
+					<div class="post-preview">
 						<a href="{{ _article.url | prepend: site.baseurl }}">
-							<h2>{{ _article.title }}</h2>
+							<h3>{{ _article.title }}</h3>
+							{% if _article.subtitle %}
+							<p>{{ _article.subtitle }}</p>
+							{% endif %}
+							<p>Published on {{ _article.date | date: "%b %d, %Y" }}</p>
 						</a>
 					</div>
-				{%- endfor -%}
+			
+					{%- assign _date = _currentdate -%}
+					{%- if forloop.last -%}</section>{%- endif -%}
+				{% endfor %}
 			</div>
+			
             <!-- Article List -->
 			<div class="mini-post-list js-result d-none">
 				{%- assign _sorted_list = site.monthly | sort: 'date' | reverse -%}
