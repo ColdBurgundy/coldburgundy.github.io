@@ -64,14 +64,27 @@ header-mask: rgba(211, 136, 37, .5)
 
 				{{ tags | split:'__SEPERATOR__' | sort }}
 				-->
+
+
+				<!-- Collecting Tags from monthly Collection -->
+				{% assign monthly_tags = "" %}
+				{% for post in site.monthly %}
+					{% for tag in post.tags %}
+						{% unless monthly_tags contains tag %}
+							{% assign monthly_tags = monthly_tags | append: tag | append: "," %}
+						{% endunless %}
+					{% endfor %}
+				{% endfor %}
+				{% assign monthly_tags = monthly_tags | split: "," | uniq %}
+
 				<!-- Tag Buttons -->
-				{% for tag in site.tags %}
-				<a href="javascript:void(0);"
-				   class="tag-button"
-				   onclick="filterPosts('{{ tag[0] }}')">
-					{{ tag[0] }}
-					<sup>{{ tag[1].size }}</sup>
-				</a>
+				{% for tag in monthly_tags %}
+					<a href="javascript:void(0);"
+					class="tag-button"
+					onclick="filterPosts('{{ tag }}')">
+						{{ tag }}
+						<sup>{{ site.monthly | where: "tags", tag | size }}</sup>
+					</a>
 				{% endfor %}
 			</div>
 
