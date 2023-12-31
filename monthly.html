@@ -110,15 +110,21 @@ header-mask: rgba(211, 136, 37, .5)
 			function filterPosts(tag) {
 				var posts = document.querySelectorAll('.mini-post-list .post-preview');
 				posts.forEach(function(post) {
-					var tags = post.getAttribute('data-tags').split(',');
-					if (tag == 'all' || tags.includes(tag)) {
+					// 'all' 태그가 선택되면 모든 게시물을 표시
+					if (tag === 'all') {
 						post.style.display = 'block';
 					} else {
-						post.style.display = 'none';
+						var tags = post.getAttribute('data-tags').split(',');
+						if (tags.includes(tag)) {
+							post.style.display = 'block';
+						} else {
+							post.style.display = 'none';
+						}
 					}
 				});
 			}
 			</script>
+				
 			
             <!-- Article List -->
 			<div class="mini-post-list js-result d-none">
