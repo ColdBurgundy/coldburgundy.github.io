@@ -36,6 +36,9 @@ header-mask: rgba(211, 136, 37, .5)
 
 				{{ tags | split:'__SEPERATOR__' | sort }}
 				-->
+
+
+				<!--
 				{% capture tags %}
 					{% assign monthly_tags = "" %}
 					{% for post in site.monthly %}
@@ -60,35 +63,49 @@ header-mask: rgba(211, 136, 37, .5)
 				{% endcapture %}
 
 				{{ tags | split:'__SEPERATOR__' | sort }}
+				-->
+				<!-- Tag Buttons -->
+				{% for tag in site.tags %}
+				<a href="javascript:void(0);"
+				   class="tag-button"
+				   onclick="filterPosts('{{ tag[0] }}')">
+					{{ tag[0] }}
+					<sup>{{ tag[1].size }}</sup>
+				</a>
+				{% endfor %}
 			</div>
 
 
 
 			<!-- test -->
 			<div class="mini-post-list">
-				{%- assign _date = nil -%}
 				{%- for _article in site.monthly -%}
-					{%- assign _currentdate = _article.date | date: '%Y' -%}
-					{%- if _currentdate != _date -%}
-						{%- unless forloop.first -%}</section>{%- endunless -%}
-						<section>
-						<h2>{{ _currentdate }}</h2>
-					{%- endif -%}
-			
-					<div class="post-preview">
-						<a href="{{ _article.url | prepend: site.baseurl }}">
-							<h3>{{ _article.title }}</h3>
-							{% if _article.subtitle %}
-							<p>{{ _article.subtitle }}</p>
-							{% endif %}
-							<p>Published on {{ _article.date | date: "%b %d, %Y" }}</p>
-						</a>
-					</div>
-			
-					{%- assign _date = _currentdate -%}
-					{%- if forloop.last -%}</section>{%- endif -%}
-				{% endfor %}
+				<div class="post-preview item" data-tags="{{ _article.tags | join: ',' }}">
+					<a href="{{ _article.url | prepend: site.baseurl }}">
+						<h2 class="post-title">{{ _article.title }}</h2>
+						{% if _article.subtitle %}
+						<h3 class="post-subtitle">{{ _article.subtitle }}</h3>
+						{% endif %}
+						<p>Published on {{ _article.date | date: "%b %d, %Y" }}</p>
+					</a>
+				</div>
+				{%- endfor -%}
 			</div>
+
+			<!-- Javascript for Filtering Posts -->
+			<script>
+			function filterPosts(tag) {
+				var posts = document.querySelectorAll('.mini-post-list .post-preview');
+				posts.forEach(function(post) {
+					var tags = post.getAttribute('data-tags').split(',');
+					if (tag == 'all' || tags.includes(tag)) {
+						post.style.display = 'block';
+					} else {
+						post.style.display = 'none';
+					}
+				});
+			}
+			</script>
 			
             <!-- Article List -->
 			<div class="mini-post-list js-result d-none">
