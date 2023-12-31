@@ -53,6 +53,7 @@ header-mask: rgba(211, 136, 37, .5)
             <!-- Article List -->
 			<div class="mini-post-list js-result d-none">
 
+			<!--
 			{% for _article in monthly_posts %}
 				{% assign _tags = '' %}
 				{% for _tag in _article.tags %}
@@ -73,20 +74,33 @@ header-mask: rgba(211, 136, 37, .5)
 
 				<div class="post-preview item" data-tags="{{ _tags }}">
 					<a href="{{ _article.url | prepend: site.baseurl }}">
-					<h2 class="post-title">
-						{{ _article.title }}
-					</h2>
-					{% if _article.subtitle %}
-					<h3 class="post-subtitle">
-						{{ _article.subtitle }}
-					</h3>
-					{% endif %}
+						<h2 class="post-title">
+							{{ _article.title }}
+						</h2>
+						{% if _article.subtitle %}
+						<h3 class="post-subtitle">
+							{{ _article.subtitle }}
+						</h3>
+						{% endif %}
 					</a>
 					<hr>
 				</div>
 				{% if forloop.last %}</section>{% endif %}
 			{% endfor %}
 			</div>
+			-->
+
+			{% for _article in monthly_posts %}
+			<div class="post-preview">
+				<a href="{{ _article.url | prepend: site.baseurl }}">
+					<h2 class="post-title">{{ _article.title }}</h2>
+					{% if _article.subtitle %}
+					<h3 class="post-subtitle">{{ _article.subtitle }}</h3>
+					{% endif %}
+				</a>
+			</div>
+			{% endfor %}
+
 		</div>
 	</div>
 </div>
