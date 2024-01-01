@@ -45,6 +45,53 @@ future: true
 collections:
   monthly:
     output: true
+  lol:
+    output: true
+  food:
+    output: true
+  movie:
+    output: true
+
+    
+  ds_notes:
+    output: true
+    
+  algorithms_notes:
+    output: true
+  CLRS:
+    output: true
+  BOJ:
+    output: true
+    
+  ca_notes:
+    output: true
+  CSAPP:
+    output: true
+    
+  os_notes:
+    output: true
+  Operating-System-Concepts-10e:
+    output: true
+  64os1:
+    output: true
+  64os2:
+    output: true
+    
+  network_notes:
+    output: true
+    
+  db_notes:
+    output: true
+
+    
+  C:
+    output: true
+  CPP:
+    output: true
+  python:
+    output: true
+
+
   experiences:
     output: true
   publications:
@@ -306,11 +353,11 @@ menus:
         icon: "book.png"
       - title: 64비트 멀티코어 OS 원리와 구조 1
         font: fas fa-user-astronaut
-        url: /64비트-멀티코어-OS-원리와-구조-1/
+        url: /64os1/
         icon: "book.png"
       - title: 64비트 멀티코어 OS 원리와 구조 2
         font: fas fa-user-astronaut
-        url: /64비트-멀티코어-OS-원리와-구조-2/  
+        url: /64os2/  
         icon: "book.png"
       - title: --------------------------------
         font: fas fa-user-astronaut

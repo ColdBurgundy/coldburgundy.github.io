@@ -9,6 +9,17 @@ header-mask: rgba(211, 136, 37, .5)
 <!-- Page Header -->
 {% include intro-header.html type='page' short=true %}
 
+<!-- CSS for Custom Fonts -->
+<style>
+.custom-title {
+	font-family: 'MaruBuriBold', sans-serif; 
+}
+
+.custom-description {
+	font-family: 'MaruBuriSemiBold', serif;
+}
+</style>
+
 <!-- Main Content -->
 <div class="container">
 	<div class="row">
@@ -76,9 +87,9 @@ header-mask: rgba(211, 136, 37, .5)
 
 					<div class="post-preview item" data-tags="{{ _article.tags | join: ',' }}">
 						<a href="{{ _article.url | prepend: site.baseurl }}">
-							<h2 class="post-title">{{ _article.title }}</h2>
+							<h2 class="post-title custom-title">{{ _article.title }}</h2>
 							{% if _article.subtitle %}
-							<h3 class="post-subtitle">{{ _article.subtitle }}</h3>
+							<h3 class="post-subtitle custom-description">{{ _article.subtitle }}</h3>
 							{% endif %}
 						</a>
 						<hr>
