@@ -31,6 +31,9 @@ chart: true       # false (default), true
 mermaid: true     # false (default), true
 emoji-plus: true  # false (default), true
 
+kramdown:
+  math_engine: katex
+
 
 # CDN settings
 cdn:
