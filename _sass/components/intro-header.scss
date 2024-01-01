@@ -71,6 +71,7 @@
   }
   .post-heading {
     h1 {
+      font-family: 'MaruBuriSemiBold', sans-serif;
       font-size: 55px;
       margin-bottom: 24px;
     }
@@ -80,7 +81,7 @@
       display: block;
     }
     .subheading {
-      @include sans-serif();
+      font-family: 'MaruBuriSemiBold', sans-serif;
       font-size: 30px;
       line-height: 1.4;
       font-weight: normal;
@@ -88,7 +89,7 @@
       margin-top: -5px;
     }
     .meta {
-      @include serif();
+      font-family: 'MaruBuriSemiBold', sans-serif;
       font-weight: 300;
       font-size: 20px;
       a {
@@ -97,12 +98,15 @@
     }
     @media (max-width: ($MQMobile - 1px)) {
       h1 {
+        font-family: 'MaruBuriSemiBold', sans-serif;
         font-size: 30px;
       }
       .subheading {
+        font-family: 'MaruBuriSemiBold', sans-serif;
         font-size: 17px;
       }
       .meta {
+        font-family: 'MaruBuriSemiBold', sans-serif;
         font-size: 16px;
       }
     }
@@ -163,6 +167,7 @@
     margin-top: 15px;
     // Background
     .header-info-back {
+      font-family: 'MaruBuriSemiBold', sans-serif;
       font-size: 16px;
       background: rgba(0, 0, 0, 0.5);
       padding: 15px;
@@ -232,6 +237,7 @@
     background-color: rgba(0, 0, 0, 0.3);
     @include transition(0.6s ease);
     .fa {
+      font-family: 'MaruBuriSemiBold', sans-serif;
       font-size: 30px;
     }
     &:hover {
@@ -260,6 +266,7 @@
       display: none;
     }
     i {
+      font-family: 'MaruBuriSemiBold', sans-serif;
       font-size: 28px;
       color: #ffffff;
       @include transition(0.4s ease);
@@ -292,6 +299,7 @@
       background: rgba(0, 0, 0, 0.5);
       border-radius: 10px;
       .bubble-words {
+        font-family: 'MaruBuriSemiBold', sans-serif;
         font-size: 15px;
         padding: 10px 20px;
         color: #fff;
