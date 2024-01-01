@@ -31,8 +31,10 @@ chart: true       # false (default), true
 mermaid: true     # false (default), true
 emoji-plus: true  # false (default), true
 
+markdown: kramdown
 kramdown:
   math_engine: katex
+
 
 
 # CDN settings
