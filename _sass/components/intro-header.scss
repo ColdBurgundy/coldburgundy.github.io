@@ -175,10 +175,21 @@
         padding-bottom: 0;
         h1,
         .subheading {
-          @include gungnir-font();
+          font-family: 'MaruBuriSemiBold', sans-serif;
         }
         h1 {
           font-size: 25px;
+        }
+      }
+      .home-site-subheading {
+        padding-top: 0;
+        padding-bottom: 0;
+        h1,
+        .subheading {
+          font-family: 'MaruBuriSemiBold', sans-serif;
+        }
+        h1 {
+          font-size: 22px;
         }
       }
     }
