@@ -55,12 +55,13 @@
     h1 {
       margin-top: 0;
       font-size: 80px;
+      font-family: 'MaruBuriSemiBold', sans-serif;
       @media (max-width: ($MQMobile - 1px)) {
         font-size: 50px;
       }
     }
     .subheading {
-      @include sans-serif();
+      font-family: 'MaruBuriSemiBold', sans-serif;
       font-size: 18px;
       line-height: 1.1;
       display: block;
@@ -178,18 +179,8 @@
           font-family: 'MaruBuriSemiBold', sans-serif;
         }
         h1 {
-          font-size: 25px;
-        }
-      }
-      .home-site-subheading {
-        padding-top: 0;
-        padding-bottom: 0;
-        h1,
-        .subheading {
           font-family: 'MaruBuriSemiBold', sans-serif;
-        }
-        h1 {
-          font-size: 22px;
+          font-size: 25px;
         }
       }
     }
