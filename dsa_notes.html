@@ -1,8 +1,8 @@
 ---
-title: My explanation of data structure
+title: A summary of the Data Structures and Algorithm
 layout: default
-description: A space to record my explanations after studying data structure.
-header-img: "img/page-bg/ds_notes.png"
+description: A place to record the Data Structures and Algorithms I have studied so far
+header-img: "img/page-bg/dsa_notes.png"
 header-mask: rgba(211, 136, 37, .5)
 ---
 
@@ -28,27 +28,27 @@ header-mask: rgba(211, 136, 37, .5)
 			<div id='tag_cloud' class="tags tags-sup js-tags">
 				<a class="tag-button--all" data-encode="" onclick="filterPosts('all')">
 					Show All
-					<sup>{{site.ds_notes.size}}</sup>
+					<sup>{{site.dsa_notes.size}}</sup>
 				</a>
 
-				<!-- Collecting Tags from ds_notes Collection -->
-				{% assign ds_notes_tags = "" %}
-				{% for post in site.ds_notes %}
+				<!-- Collecting Tags from dsa_notes Collection -->
+				{% assign dsa_notes_tags = "" %}
+				{% for post in site.dsa_notes %}
 					{% for tag in post.tags %}
-						{% unless ds_notes_tags contains tag %}
-							{% assign ds_notes_tags = ds_notes_tags | append: tag | append: "," %}
+						{% unless dsa_notes_tags contains tag %}
+							{% assign dsa_notes_tags = dsa_notes_tags | append: tag | append: "," %}
 						{% endunless %}
 					{% endfor %}
 				{% endfor %}
-				{% assign ds_notes_tags = ds_notes_tags | split: "," | uniq %}
+				{% assign dsa_notes_tags = dsa_notes_tags | split: "," | uniq %}
 
 				<!-- Tag Buttons -->
-				{% for tag in ds_notes_tags %}
+				{% for tag in dsa_notes_tags %}
 					<a href="javascript:void(0);"
 					class="tag-button"
 					onclick="filterPosts('{{ tag }}')">
 						{{ tag }}
-						<sup>{{ site.ds_notes | where: "tags", tag | size }}</sup>
+						<sup>{{ site.dsa_notes | where: "tags", tag | size }}</sup>
 					</a>
 				{% endfor %}
 			</div>
@@ -70,7 +70,7 @@ header-mask: rgba(211, 136, 37, .5)
 			
             <!-- Article List -->
 			<div class="mini-post-list">
-				{%- assign _sorted_list = site.ds_notes | sort: 'date' | reverse -%}
+				{%- assign _sorted_list = site.dsa_notes | sort: 'date' | reverse -%}
 				{%- assign _date = nil -%}
 
 				{%- for _article in _sorted_list -%}

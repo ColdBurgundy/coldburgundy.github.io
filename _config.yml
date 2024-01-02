@@ -58,10 +58,7 @@ collections:
     output: true
 
     
-  ds_notes:
-    output: true
-    
-  algorithms_notes:
+  dsa_notes:
     output: true
   CLRS:
     output: true
@@ -297,24 +294,12 @@ menus:
   - title: Untitled 『Studying CS』
     font: fas fa-paw
     submenus:
-      - title: Data Structure
+      - title: Data Structures and Algorithms
         font: fas fa-user-astronaut
         url: /#
       - title: My Notes
         font: fas fa-user-astronaut
-        url: /ds_notes/
-        icon: "secret.png"
-      - title: --------------------------------
-        font: fas fa-user-astronaut      
-        url: /$
-
-
-      - title: Algorithms
-        font: fas fa-user-astronaut
-        url: /#
-      - title: My Notes
-        font: fas fa-user-astronaut
-        url: /algorithms_notes/
+        url: /dsa_notes/
         icon: "secret.png"
       - title: CLRS
         font: fas fa-user-astronaut
