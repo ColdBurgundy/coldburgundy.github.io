@@ -107,6 +107,7 @@ header-mask: rgba(211, 136, 37, .5)
 							<h3 class="post-subtitle custom-description">{{ _article.subtitle }}</h3>
 							{% endif %}
 						</a>
+						<img src="{{ _article.header-img | prepend: site.baseurl }}" class="post-header-img" />
 						<hr>
 					</div>
 					{%- if forloop.last -%}</section>{%- endif -%}
