@@ -103,11 +103,11 @@ header-mask: rgba(211, 136, 37, .5)
 					<div class="post-preview item" data-tags="{{ _article.tags | join: ',' }}">
 						<a href="{{ _article.url | prepend: site.baseurl }}">
 							<h2 class="post-title custom-title">{{ _article.title }}</h2>
+							<img src="{{ _article.header-img | prepend: site.baseurl }}" class="post-header-img" />
 							{% if _article.subtitle %}
 							<h3 class="post-subtitle custom-description">{{ _article.subtitle }}</h3>
 							{% endif %}
 						</a>
-						<img src="{{ _article.header-img | prepend: site.baseurl }}" class="post-header-img" />
 						<hr>
 					</div>
 					{%- if forloop.last -%}</section>{%- endif -%}
