@@ -225,6 +225,6 @@
 
 .post-header-img {
   float: right;
-  width: 70px; /* 또는 제목 크기에 맞는 다른 값 */
+  max-width: 70px; /* 또는 제목 크기에 맞는 다른 값 */
   height: auto;
 }
