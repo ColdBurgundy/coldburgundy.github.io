@@ -2,7 +2,7 @@
 title: Solving problems at CODEFORCES
 layout: default
 description: A place to write down solutions to problems I solved at CODEFORCES
-header-img: "img/page-bg/codeforces.png"
+header-img: "img/page-bg/CODEFORCES.png"
 header-mask: rgba(211, 136, 37, .5)
 ---
 
@@ -44,27 +44,27 @@ header-mask: rgba(211, 136, 37, .5)
 			<div id='tag_cloud' class="tags tags-sup js-tags">
 				<a class="tag-button--all" data-encode="" onclick="filterPosts('all')">
 					Show All
-					<sup>{{site.codeforces.size}}</sup>
+					<sup>{{site.CODEFORCES.size}}</sup>
 				</a>
 
-				<!-- Collecting Tags from codeforces Collection -->
-				{% assign codeforces_tags = "" %}
-				{% for post in site.codeforces %}
+				<!-- Collecting Tags from CODEFORCES Collection -->
+				{% assign CODEFORCES_tags = "" %}
+				{% for post in site.CODEFORCES %}
 					{% for tag in post.tags %}
-						{% unless codeforces_tags contains tag %}
-							{% assign codeforces_tags = codeforces_tags | append: tag | append: "," %}
+						{% unless CODEFORCES_tags contains tag %}
+							{% assign CODEFORCES_tags = CODEFORCES_tags | append: tag | append: "," %}
 						{% endunless %}
 					{% endfor %}
 				{% endfor %}
-				{% assign codeforces_tags = codeforces_tags | split: "," | uniq %}
+				{% assign CODEFORCES_tags = CODEFORCES_tags | split: "," | uniq %}
 
 				<!-- Tag Buttons -->
-				{% for tag in codeforces_tags %}
+				{% for tag in CODEFORCES_tags %}
 					<a href="javascript:void(0);"
 					class="tag-button"
 					onclick="filterPosts('{{ tag }}')">
 						{{ tag }}
-						<sup>{{ site.codeforces | where: "tags", tag | size }}</sup>
+						<sup>{{ site.CODEFORCES | where: "tags", tag | size }}</sup>
 					</a>
 				{% endfor %}
 			</div>
@@ -86,7 +86,7 @@ header-mask: rgba(211, 136, 37, .5)
 			
             <!-- Article List -->
 			<div class="mini-post-list">
-				{%- assign _sorted_list = site.codeforces | sort: 'date' | reverse -%}
+				{%- assign _sorted_list = site.CODEFORCES | sort: 'date' | reverse -%}
 				{%- assign _date = nil -%}
 
 				{%- for _article in _sorted_list -%}
