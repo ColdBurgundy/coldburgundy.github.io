@@ -65,6 +65,8 @@ collections:
     output: true
   BOJ:
     output: true
+  CODEFORCES:
+    output: true
     
   ca_notes:
     output: true
@@ -310,6 +312,10 @@ menus:
         font: fas fa-user-astronaut
         url: /BOJ/ 
         icon: "boj.png"
+      - title: CODEFORCES
+        font: fas fa-user-astronaut
+        url: /codeforces/ 
+        icon: "codeforces.png"
       - title: --------------------------------
         font: fas fa-user-astronaut
         url: /$          
