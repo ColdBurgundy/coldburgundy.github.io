@@ -67,6 +67,8 @@ collections:
     output: true
   CODEFORCES:
     output: true
+  LeetCode:
+    output: true
     
   ca_notes:
     output: true
@@ -316,6 +318,10 @@ menus:
         font: fas fa-user-astronaut
         url: /codeforces/ 
         icon: "codeforces.png"
+      - title: LeetCode
+        font: fas fa-user-astronaut
+        url: /leetcode/ 
+        icon: "leetcode.png"
       - title: --------------------------------
         font: fas fa-user-astronaut
         url: /$          
