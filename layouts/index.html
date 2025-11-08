@@ -1,47 +1,4 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w2.org/1999/xhtml">
-<script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><html lang="en">
-    <head>
-	<meta name="generator" content="Hugo 0.152.2">
-            <meta charset="utf-8" />
-    <title>Draktharr Lab </title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="My terminal cv">
-    <meta property="og:title" content="Draktharr Lab" />
-    <meta property="og:type" content="website"/>
-    <meta property="og:url" content="http://localhost:1313/" />
-    <link rel="sitemap" type="application/xml" title="Sitemap" href=""/>
-    <link rel="canonical" href="http://localhost:1313/" />    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
-    <link rel="shortcut icon" href="/favicon.ico">
-    <meta name="msapplication-TileColor" content="">
-
-
-    <script src="https://cdn.jsdelivr.net/npm/jquery"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.42.2/js/jquery.terminal.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery.terminal/js/less.min.js"></script>
-    <script src="https://unpkg.com/jquery.terminal/js/autocomplete_menu.js"></script>
-
-    <link href="/css/terminal.local.css" rel="stylesheet"/>
-
-    <style>
-        body {
-            width: 100%;
-            font-size: 18px;
-        }
-    </style>
-
-
-
-
-    </head>
-        <body>
-        
+{{ define "body" }}
 <script> 
 jQuery(document).ready(function($) {
     var animation = false;
@@ -57,25 +14,31 @@ jQuery(document).ready(function($) {
         softskills: "list soft skills",
         languages: "list spoken languages",
         projects: "list projects",
-         
+        {{ if .Site.Params.certifications }} 
             certifications: "list certifications",
-        
-        
-        
-            "newcommand": "This Section can have a different command name",
-        
-        
-        
+        {{ end }}
+        {{ if .Site.Params.startxLocation }}
+            startx: "starts graphical environment",
+        {{ end }}
+        {{ if .Site.Params.misc }}
+            {{ .Site.Params.misc.commandName | default "other" }}: "{{.Site.Params.misc.title }}",
+        {{ end }}
+        {{ if not .Site.Params.Source }}
+            source: "shows details about template powering this website",
+        {{ end }}
+        {{ if .Site.Params.version }}
             version: "Current version",
-        
-        
-        
+        {{ end }}
+        {{ if .Site.Params.exitLocation }}
+            exit: "exit the terminal",
+        {{ end }}
+        {{ if .Site.Params.blog }}
         posts: "List all posts",
-        
+        {{ if .Site.Params.listLS }}
         ls: "List all posts",
-        
+        {{ end }}
         cat: "Open a post",
-        
+        {{ end }}
         all: "Show all details about me",
     };
 
@@ -87,7 +50,7 @@ jQuery(document).ready(function($) {
         return barFilled + barBlank
     }
 
-    
+    // Calculate the tabbing to keep commands and descriptions aligned in the help message
     function padKey(key, length) {
         return key + ' '.repeat(length - key.length);
     }
@@ -111,36 +74,36 @@ jQuery(document).ready(function($) {
                commandsHelp();
 
     var whois = [
-     
-        '[[b;grey;]Name:]\t\t\tKim\n' + 
-        '[[b;grey;]Profession:]\t\tUnknown\n' +
-        '[[b;grey;]Location:]\t\tSomewhere\n' +
-        
-        '[[b;grey;]Email:]\t\t\tkkkk@cau.ac.kr\n' +
-        
-        
-        '[[b;grey;]Homepage:]\t\tNull\n' +
-        
-        
-        '\nJust student\r\n\r\n' +
-        
+    {{ with .Site.Params.whois.details }} 
+        '[[b;grey;]Name:]\t\t\t{{ .name }}\n' + 
+        '[[b;grey;]Profession:]\t\t{{ .profession }}\n' +
+        '[[b;grey;]Location:]\t\t{{ .location }}\n' +
+        {{ if .email }}
+        '[[b;grey;]Email:]\t\t\t{{ .email }}\n' +
+        {{ end }}
+        {{ if .homelink }}
+        '[[b;grey;]Homepage:]\t\t{{ .homelink }}\n' +
+        {{ end }}
+        {{ if .description }}
+        '{{ .description }}' +
+        {{ end }}
         '\r',
-    
+    {{ end }}
     ];
 
     function social() { 
         var hideName = false;
         let sMap = { 
-             
-                
-                "github": "https:\/\/github.com",
-                
-                "instagram": "https:\/\/instagram.com",
-                
-            
+            {{ with .Site.Params.social.details }} 
+                {{ range. }}
+                {{ .name }}: "{{ .url }}",
+                {{ end }}
+            {{ end }}
         };
 
-        
+        {{ if .Site.Params.social.settings.hideName }}
+        hideName = true
+        {{ end }}
         socialText = []
         for (let key in sMap) {
             if (sMap.hasOwnProperty(key)) {
@@ -184,167 +147,116 @@ jQuery(document).ready(function($) {
         });
     }
     var certifications = [
-    
-        
+    {{ with .Site.Params.certifications.details }}
+        {{ range . }}
             '---\n' +
-            '[[b;grey;]Example Cert]\n' +
-            'Date of Completion\n' +
-            
-            'Example Certifying Company\n' +
-            
-            
-            
-            'Badge: \thttps:\/\/www.link.to.badge\n' +
-            
+            '[[b;{{ .color | default "grey" }};]{{ .certName }}]\n' +
+            '{{ .date }}\n' +
+            {{ if .company }}
+            '{{ .company }}\n' +
+            {{ end }}
+            {{ if .description }}
+            '{{ .description }}\n' +
+            {{ end }}
+            {{ if .badge }}
+            'Badge: \t{{ .badge }}\n' +
+            {{ end }}
             '\r',
-        
-    
+        {{ end }}
+    {{ end }}
     ];
     
     var work = [
-    
-        
+    {{ with .Site.Params.work.details }}
+        {{ range .}}
             '---\n' +
-            '[[b;red;]Job With Red Title]\n' +
-            '-\n' +
-            'somewhere\n' +
-            'August 2010 - Present\n' +
+            '[[b;{{ .color | default "grey" }};]{{ .jobTitle }}]\n' +
+            '{{ .company }}\n' +
+            '{{ .location}}\n' +
+            '{{ .date }}\n' +
             '\n' +
-            'Some description about this red title job' +
+            '{{ .description }}' +
             '\r',
-        
-            '---\n' +
-            '[[b;purple;]Job with purple title]\n' +
-            '-\n' +
-            'somewhere elese\n' +
-            'July 2000  - July 2010\n' +
-            '\n' +
-            'Some description about this purple job' +
-            '\r',
-        
-    
+        {{ end }}
+    {{ end }}
     ];
 
     var education = [
-    
-        
+    {{ with .Site.Params.education.details }}
+        {{ range . }}
             '---\n' +
-            '[[b;red;]Red Color training]\n' +
-            'June 2019 - July 2019\n' +
-            
-                "Descrption about red color trianing\n" +
-            
+            '[[b;{{ .color | default "grey" }};]{{ .courseName }}]\n' +
+            '{{ .date }}\n' +
+            {{ if .description }}
+                "{{ .description }}\n" +
+            {{ end }}
             "\r",
-        
-            '---\n' +
-            '[[b;grey;]Default color training]\n' +
-            'Sept 2004 - Jun 2008\n' +
-            
-            "\r",
-        
-    
+        {{ end }}
+    {{ end }}
     ];
 
     var projects = [
-    
-        
+    {{ with .Site.Params.projects.details }}
+        {{ range .}}
             '---\n' +
-            '[[b;red;]Project Red]\n' +
-            'since 2019\n' +
-            'https:\/\/example.com\n' +
-            
-            'Describing red stuff\n' +
-            
+            '[[b;{{ .color | default "grey" }};]{{ .title }}]\n' +
+            '{{ .date }}\n' +
+            '{{ .link }}\n' +
+            {{ if .description }}
+            '{{ .description }}\n' +
+            {{ end }}
             "\r",
-      
-            '---\n' +
-            '[[b;blue;]Project Blue]\n' +
-            'since 2016\n' +
-            'https:\/\/example.com\/blue\n' +
-            
-            "\r",
-      
-            '---\n' +
-            '[[b;grey;]Project Default]\n' +
-            'Since 2017\n' +
-            'https:\/\/example.com\/default\n' +
-            
-            "\r",
-      
-    
+      {{ end }}
+    {{ end }}
     ];
 
     var skills = [
-    
-        
-            '[[b;grey;]Skill 1:]\n' +
-            progressBar( 90 ) +
-            '90' + '%\n' +
-            
+    {{ with .Site.Params.skills.details }}
+        {{ range . }}
+            '[[b;{{ .color | default "grey" }};]{{ .name }}:]\n' +
+            progressBar({{ .percentage }}) +
+            '{{ .percentage }}' + '%\n' +
+            {{ if .description }}
+            '{{ .description }}\n' +
+            {{ end }}
             '\r',
-        
-            '[[b;grey;]Skill 2:]\n' +
-            progressBar( 30 ) +
-            '30' + '%\n' +
-            
-            '\r',
-        
-            '[[b;blue;]Skill 3:]\n' +
-            progressBar( 50 ) +
-            '50' + '%\n' +
-            
-            'Skill names can have colors too\n' +
-            
-            '\r',
-        
-    
+        {{ end }}
+    {{ end }}
     ];
 
     var softSkills = [
-    
-        
-            '[[b;red;]SoftSkill 1:]\n' +
-            progressBar( 80 ) +
-            '80' + '%\n' + 
-            
+    {{ with .Site.Params.softSkills.details }}
+        {{ range . }}
+            '[[b;{{ .color | default "grey" }};]{{ .name }}:]\n' +
+            progressBar({{ .percentage }}) +
+            '{{ .percentage }}' + '%\n' + 
+            {{ if .description }}
+            '{{ .description }}\n' +
+            {{ end }}
             '\r',
-        
-            '[[b;grey;]SoftSkill 2:]\n' +
-            progressBar( 90 ) +
-            '90' + '%\n' + 
-            
-            'Description\n' +
-            
-            '\r',
-        
-    
+        {{ end }}
+    {{ end }}
     ];
   
     var languages = [
-    
-        
-            '[[b;Blue;]English:]\n' +
-            progressBar( 50 )+ 
-            '50' + '%\n' +
-            
+    {{ with .Site.Params.languages.details }}
+        {{ range . }}
+            '[[b;{{ .color | default "grey" }};]{{ .name }}:]\n' +
+            progressBar({{ .percentage }})+ 
+            '{{ .percentage }}' + '%\n' +
+            {{ if .description }}
+            '{{ .description }}\n' +
+            {{ end }}
             '\r',
-        
-            '[[b;grey;]Gibberish:]\n' +
-            progressBar( 100 )+ 
-            '100' + '%\n' +
-            
-            'pasghettipigglywiggly\n' +
-            
-            '\r',
-        
-    
+        {{ end }}
+    {{ end }}
     ];
 
     var misc = [
-         
-        '[[b;teal;]This Section can have a different command name]\n' +
-        '[[;orange;]\nHere the title and the content can have different colors\r\nThe content can be multi\r\n\r\nline\r\n\r\nAnd spaces       will be respected as well\r\nThis section will have the default command: misc\r\nbut you can name it something else with the property\r\ncommandName: \u003cString\u003e\r\nGive it a shot and try and uncomment the line \r\ncommandName: newcommand\r\nnow instead of misc you can execute the newcommand for this section\r\nAuto completion will know it too! :D\r\n\r\n]\n',
-         
+         {{ with .Site.Params.misc }}
+        '[[b;{{ .titleColor }};]{{ .title }}]\n' +
+        '[[;{{ .contentColor }};]{{ .content }}]\n',
+         {{ end }}
     ];
 
     var source =  '        _______            \n' +
@@ -371,17 +283,19 @@ jQuery(document).ready(function($) {
         projects,
         certifications,
         misc,
-        
-        
-        
+        {{ if .Site.Params.misc }}
+        {{ end }}
+        {{ if .Site.Params.source }}
         source,
-        
+        {{ end }}
     ]
 
     $('body').terminal(function(command, term) {
 
         var useLess = false;
-        
+        {{if .Site.Params.useLess }}
+        useLess = true;
+        {{ end }}
 
         function echoArray(array) {
             if (useLess) {
@@ -397,7 +311,7 @@ jQuery(document).ready(function($) {
                 }
             }
         }
-        
+        //Function used by StartX to draw the progressBar
         function progress(percent, width) {
             var size = Math.round(width*percent/100);
             var left = '', taken = '', i;
@@ -439,45 +353,63 @@ jQuery(document).ready(function($) {
                     
         switch(commands[0]) {
             case 'whois':
-                
+                {{ if .Site.Params.whois.settings.useLess }}
+                useLess = true;
+                {{ end }}
                 echoArray(whois);
                 break;
             case 'social':
-                
+                {{ if .Site.Params.social.settings.useLess }}
+                useLess = true;
+                {{ end }}
                 echoArray(social());
                 break;
             case 'work':
-                
+                {{ if .Site.Params.work.settings.useLess }}
+                useLess = true;
+                {{ end }}
                 echoArray(work);
                 break;
             case 'education':
-                
+                {{ if .Site.Params.education.settings.useLess }}
+                useLess = true;
+                {{ end }}
                 echoArray(education);
                 break;
             case 'skills':
-                
+                {{ if .Site.Params.skills.settings.useLess }}
                 useLess = true;
-                
+                {{ end }}
                 echoArray(skills);
                 break;
             case 'softskills':
-                
+                {{ if .Site.Params.softskills.settings.useLess }}
+                useLess = true;
+                {{ end }}
                 echoArray(softSkills);
                 break;
             case 'languages':
-                
+                {{ if .Site.Params.languages.settings.useLess }}
+                useLess = true;
+                {{ end }}
                 echoArray(languages);
                 break;
             case 'projects':
-                
+                {{ if .Site.Params.projects.settings.useLess }}
+                useLess = true;
+                {{ end }}
                 echoArray(projects);
                 break;
             case 'certifications':
-                
+                {{ if .Site.Params.certifications.settings.useLess }}
+                useLess = true;
+                {{ end }}
                 echoArray(certifications);
                 break;
-            case 'newcommand':
-                
+            case '{{ .Site.Params.misc.commandName | default "misc"}}':
+                {{ if .Site.Params.misc.settings.useLess }}
+                useLess = true;
+                {{ end }}
                 echoArray(misc);
                 break;
             case 'help':
@@ -485,34 +417,49 @@ jQuery(document).ready(function($) {
                 term.echo(help);
                 break;
             case 'all':
-                
+                {{ if .Site.Params.all.settings.useLess }}
+                useLess = true;
+                {{ end }}
                 echoArray(all.flat(1));
                 break;
-            
+            {{ if .Site.Params.startxLocation }}
+            case 'startx':
+                term.echo("loading ...");
+                loading();
+                setTimeout(function(){window.location = "{{ .Site.Params.startxLocation }}"}, 2000);
+                break;
+            {{ end }}
             case ':(){:|:&};:':
                 term.echo("nice try");
                 break;
             case 'source':
-                
+                {{ if .Site.Params.misc.settings.useLess }}
+                useLess = true;
+                {{ end }}
                 term.echo(source);
                 break;
             case 'exit':
-            
+            {{ if .Site.Params.exitLocation }}
+                term.echo("terminating ... ");
+                loading();
+                setTimeout(function(){window.location = '{{ .Site.Params.exitLocation }}'}, 2000);
+                break;
+            {{ else }}
                 term.echo("Terminating session, thanks for visiting");
                 loading();
                 setTimeout(function() {
                   term.pause();
                   term.clear();
-                  term.echo("[Session completed, the browserwindow can be safely closed]");
+                  term.echo("{{ .Site.Params.exitMessage }}");
                 }, 2000);
                 break;
-            
-            
+            {{ end }}
+            {{ if .Site.Params.version }}
             case 'version':
-                term.echo("2.0.0");
+                term.echo("{{ .Site.Params.version }}");
                 break;
-            
-            
+            {{ end }}
+            {{ if .Site.Params.blog }}
             case 'cat':
                 if (commands.length < 2) {
                     term.echo("Usage: cat <filename>");
@@ -525,7 +472,7 @@ jQuery(document).ready(function($) {
             case 'ls':
                 posts(term);
                 break;
-            
+            {{ end }}
             case '':
                 break;
             default:
@@ -534,23 +481,25 @@ jQuery(document).ready(function($) {
         }
     }, {
 
-         
+        {{ if .Site.Params.bootsequence }} 
           greetings: false,
           onInit: function(term) {
           term.pause();
-          term.typing('echo', 1, '\nUser request detected\r\nReserving Cloud Resources\r\n............................\r\nCloud Network ready\r\n........\r\nCloud Instance ready\r\n.......................\r\nInternet Breakout Ready, but Pong is preferred \r\n\r\nInititating CloudOS\r\nCloudOS Kernel Version 1.4.2: Sat February 29 23:21:41 CEST 2025; root:xnu-1699.22.73~1\/RELEASE_ARM_64\r\nLoglevel = quiet\r\n......\r\n............\r\n..................\r\n........................\r\n..............................\r\n....................................\r\n\r\nCopyright 1979, 1980, 1983, 1986, 1988, 1989, 1991, 1992, 1993, 1994\r\nThe Regents of the University of California. All rights reserved.\r\n\r\nCopyright 2024, 2025\r\nTerminalCV. MIT License (MIT)\r\n\r\n[CloudOSBoot1]: ready\r\n[CloudOSBoot2]: ready\r\n[Webserver]: ready \r\n[HUGO]: ready\r\n[TerminalCV]: ready\r\n\r\nBoot Complete, accepting user input.\r\n\r\n', function() {
+          term.typing('echo', 1, '{{ .Site.Params.bootsequence }}', function() {
             term.clear();
-            term.echo("[[b;white;]\n________                __      __  .__                          .____          ___.    \r\n╲______ ╲____________  │  │ ___╱  │_│  │__ _____ ______________  │    │   _____ ╲_ │__  \r\n│    │  ╲_  __ ╲__  ╲ │  │╱ ╱╲   __╲  │  ╲╲__  ╲╲_  __ ╲_  __ ╲ │    │   ╲__  ╲ │ __ ╲ \r\n│    \u0060   ╲  │ ╲╱╱ __ ╲│    \u003c  │  │ │   Y  ╲╱ __ ╲│  │ ╲╱│  │ ╲╱ │    │___ ╱ __ ╲│ ╲_╲ ╲\r\n╱_______  ╱__│  (____  ╱__│_ ╲ │__│ │___│  (____  ╱__│   │__│    │_______ (____  ╱___  ╱\r\n        ╲╱           ╲╱     ╲╱           ╲╱     ╲╱                       ╲╱    ╲╱    ╲╱ \r\n\r\n\r\nWelcome to my online resume\r\n\r\nType \u0027help\u0027 for a list of available commands\r\n\r\n]");
+            term.echo("[[b;{{ .Site.Params.greetingColor | default "white" }};]{{ .Site.Params.greeting }}]");
           });
           term.resume();
           },
-        
+        {{ else }} 
+          greetings: "[[b;{{ .Site.Params.greetingColor | default "white" }};]{{ .Site.Params.greeting }}]",
+        {{ end }}
 
-        prompt: '[[;red;][][[;pink;]user@DraktharrLab][[;red;]\\]][[;grey;]-][[;red;][][[;blue;]~\/home][[;red;]\\]][[;orange;]: ]',
+        prompt: '{{ with .Site.Params.prompt }}{{ with .core }}[[;{{ .beforeColor | default "grey" }};]{{ .before }}][[;{{ .color | default "grey" }};]{{ .text }}][[;{{ .afterColor | default "gey" }};]{{ .after }}]{{ end }}{{ with .separator }}[[;{{ .separatorColor | default "grey" }};]{{ .text }}]{{ end }}{{ with .path }}[[;{{ .beforeColor | default "grey" }};]{{ .before }}][[;{{ .color | default "grey" }};]{{ .text | default ":~$" }}][[;{{ .afterColor | default "grey" }};]{{ .after }}]{{ end }}{{ with .extra }}[[;{{ .color | default "grey" }};]{{ .text }}]{{ end }}{{ end }}',
 
         keydown: function(e, term) {
             if (animation) {
-                if (e.which == 68 && e.ctrlKey) { 
+                if (e.which == 68 && e.ctrlKey) { // CTRL+D
                     clearTimeout(timer);
                     animation = false;
                     term.echo(string + ' [[b;red;]FAIL]')
@@ -565,6 +514,4 @@ jQuery(document).ready(function($) {
     });
 });
 </script>
-
-        </body>
-</html>
+{{ end }}

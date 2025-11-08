@@ -1,5 +1,5 @@
 ## Example Config file
-baseURL: "coldburgundy.github.io"
+baseURL: "https://coldburgundy.github.io/"
 theme: "terminalcv"
 title: "Draktharr Lab"
 
@@ -7,9 +7,10 @@ params:
   version: "2.0.0"
   description: "My terminal cv"
   blog: true
+
   prompt:
     core:
-      text: "user@terminalCV"
+      text: "user@DraktharrLab"
       color: "pink"
       before: "["
       beforeColor: "red"
@@ -22,7 +23,7 @@ params:
     path:
       before: "["
       beforeColor: "red"
-      text: "~/terminalcv"
+      text: "~/home"
       color: "blue"
       after: '\]'
       afterColor: "red"
@@ -39,9 +40,9 @@ params:
   #exitLocation: "about:blank"
   exitMessage: "[Session completed, the browserwindow can be safely closed]"
   source: true
-  #use a ‎ (blank character) if your first character of the ascii art is a whitespace
+  #use a (blank character) if your first character of the ascii art is a whitespace
   greeting: |
-    ‎________                __      __  .__                          .____          ___.    
+    ________                __      __  .__                          .____          ___.    
     ╲______ ╲____________  │  │ ___╱  │_│  │__ _____ ______________  │    │   _____ ╲_ │__  
     │    │  ╲_  __ ╲__  ╲ │  │╱ ╱╲   __╲  │  ╲╲__  ╲╲_  __ ╲_  __ ╲ │    │   ╲__  ╲ │ __ ╲ 
     │    `   ╲  │ ╲╱╱ __ ╲│    <  │  │ │   Y  ╲╱ __ ╲│  │ ╲╱│  │ ╲╱ │    │___ ╱ __ ╲│ ╲_╲ ╲
@@ -94,7 +95,7 @@ params:
       name: "Kim"
       profession: "Unknown"
       location: "Somewhere"
-      email: "foo@someemail.com"
+      email: "kkkk@cau.ac.kr"
       homelink: "Null"
       description: |
         Just student
