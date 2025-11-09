@@ -39,44 +39,38 @@
 
 
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js" 
+        onload="renderMathInElement(document.body, {delimiters: [
+          {left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}
+        ]});"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/@sakun/system.css" />
+<link rel="stylesheet" href="/css/system.local.css">
+<script defer src="/js/custom-modal.js"></script>
+
+
+<link rel="stylesheet" href="/css/toc-sidebar.css">
+<script defer src="/js/toc-sidebar.js"></script>
     </head>
         <body>
         
 <script> 
 jQuery(document).ready(function($) {
+    var cwd = "~"; 
     var animation = false;
 
     var commands = {
         help: "shows help",
-        less: "Use less as output method",
-        whois: "list basic details",
-        social: "list social networks",
-        work: "list work experience",
-        education: "list education",
-        skills: "list core skills",
-        softskills: "list soft skills",
-        languages: "list spoken languages",
-        projects: "list projects",
-         
-            certifications: "list certifications",
-        
-        
-        
-            "newcommand": "This Section can have a different command name",
-        
-        
-        
-            version: "Current version",
-        
-        
-        
-        posts: "List all posts",
-        
-        ls: "List all posts",
-        
-        cat: "Open a post",
-        
-        all: "Show all details about me",
+        about: "shows details about me",
+        ls: "list categories or posts (e.g., 'ls untitled_cs')",
+        cd: "change directory (e.g., 'cd untitled_cs')", 
+        cat: "open a post (e.g., 'cat untitled_cs/os/post-name')",
+        less: "use less as output method",
+        clear: "clear the screen",
+        exit: "exit the terminal"
     };
 
     function progressBar(number) {
@@ -110,242 +104,313 @@ jQuery(document).ready(function($) {
                 '\n[[b;white;]Available commands:]\n' + 
                commandsHelp();
 
-    var whois = [
+
+
+
      
-        '[[b;grey;]Name:]\t\t\tKim\n' + 
-        '[[b;grey;]Profession:]\t\tUnknown\n' +
-        '[[b;grey;]Location:]\t\tSomewhere\n' +
-        
-        '[[b;grey;]Email:]\t\t\tkkkk@cau.ac.kr\n' +
-        
-        
-        '[[b;grey;]Homepage:]\t\tNull\n' +
-        
-        
-        '\nJust student\r\n\r\n' +
-        
-        '\r',
+
     
+    var about = [
+        '\n[[b;white;]About Me]\n',
+        'ColdBurgundy\'s Blog.',
+        'Contact: kkkk@cau.ac.kr', 
+        'CV: <a href="/my-cv.pdf" target="_blank">my-cv.pdf</a>' 
     ];
 
-    function social() { 
-        var hideName = false;
-        let sMap = { 
-             
-                
-                "github": "https:\/\/github.com",
-                
-                "instagram": "https:\/\/instagram.com",
-                
-            
-        };
+    
+    var root_ls = [
+        ' about',
+        ' untitled_cs',
+        ' untitled_life',
+        ' projects'
+    ];
+    
+    
+    var untitled_cs = [
+        '\n[[b;white;]Categories in untitled_cs:]\n',
+        ' os',
+        ' csapp',
+        ' clrs',
+        ' boj'
+    ];
 
+    
+    var untitled_life = [
+        '\n[[b;white;]Categories in untitled_life:]\n',
+        ' (아직 게시물이 없습니다.)'
+    ];
+    
+    
+    var projects_list = [
+        '\n[[b;white;]Projects:]\n',
+        ' (아직 게시물이 없습니다.)'
+    ];    
+
+    
+
+
+    
+
+    function posts(term, path, is_al) { 
+        var url = "/posts/"; 
         
-        socialText = []
-        for (let key in sMap) {
-            if (sMap.hasOwnProperty(key)) {
-                if (hideName) {
-                    socialText.push(sMap[key]);
-                } else { 
-                    let longestKeyLength = Math.max(...Object.keys(sMap).map(key => key.length));
-                    socialText.push(`${padKey(key, longestKeyLength)}\t${sMap[key]}`)
-                };
-            }
+        if (path) {
+            path = path.replace(/^\/+|\/+$/g, '');
+            url = "/posts/" + path + "/"; 
         }
 
-        return socialText
-    };
-
-    function posts(term) {
         $.ajax({
-            url: "posts/",
+            url: url,
             type: 'GET',
             success: function(data) {
-                term.echo(data, {raw: true}); 
+                
+                
+                
+                
+                var files = [];
+                try {
+                    
+                    var $html = $('<div/>').html(data);
+                    
+                    
+                    
+                    var $links = $html.find('article a, main a');
+                    
+                    if ($links.length === 0) {
+                        
+                        $links = $html.find('li a'); 
+                    }
+
+                    $links.each(function() {
+                        var text = $(this).text().trim();
+                        
+                        if (text && files.indexOf(text) === -1) {
+                            files.push(text);
+                        }
+                    });
+                } catch(e) {
+                    term.error("Error parsing post list HTML.");
+                }
+
+                
+                if (is_al) {
+                    
+                    echo_ls_al(term, path, files, 'd'); 
+                } else {
+                    
+                    if (files.length > 0) {
+                        var output = files.map(function(file) {
+                            
+                            return `[[b;blue;]${file}/]`; 
+                        });
+                        echoArray(output);
+                    } else {
+                        term.echo(""); 
+                    }
+                }
+                
+
             },
             error: function() {
-                term.echo("Error: Could not load posts data");
+                term.echo(""); 
             }
         });
     };
 
 
     function catPost(term, postdir) {
-        url = "/posts/" + postdir + "/";
+        
+        
+        
+        
+        postdir = postdir.replace(/^\/+|\/+$/g, ''); 
+        
+        
+        var url = "/posts/" + postdir + "/"; 
+
         $.ajax({
             url: url,
             type: 'GET',
             success: function(data) {
-                term.echo(data, {raw: true});
+                
+                showMacWindow(data, postdir);
             },
             error: function() {
                 term.echo("Error: Could not load post " + postdir);
             }
         });
     }
-    var certifications = [
-    
-        
-            '---\n' +
-            '[[b;grey;]Example Cert]\n' +
-            'Date of Completion\n' +
-            
-            'Example Certifying Company\n' +
-            
-            
-            
-            'Badge: \thttps:\/\/www.link.to.badge\n' +
-            
-            '\r',
-        
-    
-    ];
-    
-    var work = [
-    
-        
-            '---\n' +
-            '[[b;red;]Job With Red Title]\n' +
-            '-\n' +
-            'somewhere\n' +
-            'August 2010 - Present\n' +
-            '\n' +
-            'Some description about this red title job' +
-            '\r',
-        
-            '---\n' +
-            '[[b;purple;]Job with purple title]\n' +
-            '-\n' +
-            'somewhere elese\n' +
-            'July 2000  - July 2010\n' +
-            '\n' +
-            'Some description about this purple job' +
-            '\r',
-        
-    
-    ];
 
-    var education = [
-    
-        
-            '---\n' +
-            '[[b;red;]Red Color training]\n' +
-            'June 2019 - July 2019\n' +
-            
-                "Descrption about red color trianing\n" +
-            
-            "\r",
-        
-            '---\n' +
-            '[[b;grey;]Default color training]\n' +
-            'Sept 2004 - Jun 2008\n' +
-            
-            "\r",
-        
-    
-    ];
 
-    var projects = [
     
-        
-            '---\n' +
-            '[[b;red;]Project Red]\n' +
-            'since 2019\n' +
-            'https:\/\/example.com\n' +
-            
-            'Describing red stuff\n' +
-            
-            "\r",
-      
-            '---\n' +
-            '[[b;blue;]Project Blue]\n' +
-            'since 2016\n' +
-            'https:\/\/example.com\/blue\n' +
-            
-            "\r",
-      
-            '---\n' +
-            '[[b;grey;]Project Default]\n' +
-            'Since 2017\n' +
-            'https:\/\/example.com\/default\n' +
-            
-            "\r",
-      
-    
-    ];
+    var postViewActive = false;
+    var keyBuffer = [];
+    var terminalInstance = null;
 
-    var skills = [
     
-        
-            '[[b;grey;]Skill 1:]\n' +
-            progressBar( 90 ) +
-            '90' + '%\n' +
-            
-            '\r',
-        
-            '[[b;grey;]Skill 2:]\n' +
-            progressBar( 30 ) +
-            '30' + '%\n' +
-            
-            '\r',
-        
-            '[[b;blue;]Skill 3:]\n' +
-            progressBar( 50 ) +
-            '50' + '%\n' +
-            
-            'Skill names can have colors too\n' +
-            
-            '\r',
-        
-    
-    ];
+    var postViewActive = false;
+    var keyBuffer = [];
+    var terminalInstance = null;
 
-    var softSkills = [
-    
-        
-            '[[b;red;]SoftSkill 1:]\n' +
-            progressBar( 80 ) +
-            '80' + '%\n' + 
-            
-            '\r',
-        
-            '[[b;grey;]SoftSkill 2:]\n' +
-            progressBar( 90 ) +
-            '90' + '%\n' + 
-            
-            'Description\n' +
-            
-            '\r',
-        
-    
-    ];
-  
-    var languages = [
-    
-        
-            '[[b;Blue;]English:]\n' +
-            progressBar( 50 )+ 
-            '50' + '%\n' +
-            
-            '\r',
-        
-            '[[b;grey;]Gibberish:]\n' +
-            progressBar( 100 )+ 
-            '100' + '%\n' +
-            
-            'pasghettipigglywiggly\n' +
-            
-            '\r',
-        
-    
-    ];
+    async function showMacWindow(html, postTitle) {
+        if (!terminalInstance) {
+            terminalInstance = $('.terminal').data('terminal');
+        }
 
-    var misc = [
-         
-        '[[b;teal;]This Section can have a different command name]\n' +
-        '[[;orange;]\nHere the title and the content can have different colors\r\nThe content can be multi\r\n\r\nline\r\n\r\nAnd spaces       will be respected as well\r\nThis section will have the default command: misc\r\nbut you can name it something else with the property\r\ncommandName: \u003cString\u003e\r\nGive it a shot and try and uncomment the line \r\ncommandName: newcommand\r\nnow instead of misc you can execute the newcommand for this section\r\nAuto completion will know it too! :D\r\n\r\n]\n',
-         
-    ];
+        try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const postContentElement = doc.querySelector('article') || doc.querySelector('main') || doc.body;
+
+            
+            
+            let tocHTML = '<ul>';
+            const headers = postContentElement.querySelectorAll('h2, h3'); 
+            let currentH2List = false; 
+
+            headers.forEach((header, index) => {
+              
+              const id = 'toc-header-' + index;
+              header.setAttribute('id', id);
+              
+              const level = header.tagName.toLowerCase();
+              const text = header.textContent || "Untitled Section";
+              
+              if (level === 'h2') {
+                if (currentH2List) {
+                  tocHTML += '</ul></li>'; 
+                }
+                tocHTML += `<li><a href="#${id}">${text}</a>`;
+                currentH2List = true; 
+                tocHTML += '<ul>'; 
+              } else if (level === 'h3') {
+                 
+                if (!currentH2List) {
+                    tocHTML += '<li><ul>'; 
+                    currentH2List = true;
+                }
+                
+                tocHTML += `<li><a href="#${id}">${text}</a></li>`;
+              }
+            });
+
+            if (currentH2List) {
+              tocHTML += '</ul></li>'; 
+            }
+            tocHTML += '</ul>'; 
+            
+
+
+            const postOverlay = document.createElement('div');
+            postOverlay.className = 'vim-post-overlay';
+            
+            postOverlay.style.position = 'fixed';
+            postOverlay.style.top = '0';
+            postOverlay.style.left = '0';
+            postOverlay.style.width = '100vw';
+            postOverlay.style.height = '100vh';
+            postOverlay.style.zIndex = '9998';
+            postOverlay.style.background = '#ccc'; 
+
+            postOverlay.innerHTML = `
+                <div class="window active" style="width: 100%; height: 100%; margin: 0; border-radius: 0;">
+                    
+                    <div class="title-bar">
+                        <button aria-label="Close" class="close"></button>
+                        <h1 class="title">${postTitle}.md (Read Only)</h1>
+                        <button aria-label="Resize" disabled class="hidden"></button>
+                    </div>
+
+                    <div class="window-body window-body-with-toc" style="height: calc(100% - 28px); padding: 0; display: flex; flex-direction: row;">
+                        
+                        <nav class="toc">
+                            ${tocHTML}
+                            <svg class="toc-marker" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke="#444" stroke-width="3" fill="transparent" stroke-dasharray="0, 0, 0, 1000" stroke-linecap="round" stroke-linejoin="round" transform="translate(-0.5, -0.5)" />
+                            </svg>
+                        </nav>
+                        
+                        <article class="contents">
+                            <div class="paper">
+                                ${postContentElement.innerHTML}
+                            </div>
+                        </article>
+
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(postOverlay);
+            postViewActive = true; 
+
+            
+            postOverlay.querySelector('.close').addEventListener('click', () => {
+                closePostView();
+            });
+
+            
+            const tocElement = postOverlay.querySelector('.toc');
+            const contentElement = postOverlay.querySelector('.contents');
+
+            if (typeof initTocSidebar === 'function') {
+                initTocSidebar(tocElement, contentElement);
+            }
+
+            
+            if (window.renderMathInElement) {
+                window.renderMathInElement(contentElement, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
+                });
+            }
+        } catch (error) {
+            if (terminalInstance) {
+                terminalInstance.error(`Failed to display post viewer: ${error.message}`);
+            }
+        }
+    }
+
+    
+    function setupKeyListeners() {
+        document.addEventListener('keydown', (e) => {
+            if (!postViewActive) return;
+            if (e.key === 'Shift') return;
+            if (e.key === ':') {
+                keyBuffer = [':'];
+                e.preventDefault(); 
+                return;
+            }
+            if (e.key.toLowerCase() === 'q' && keyBuffer[0] === ':') {
+                keyBuffer.push('q');
+                if (keyBuffer.join('') === ':q') {
+                    closePostView();
+                    e.preventDefault();
+                }
+                return;
+            }
+            keyBuffer = [];
+        });
+    }
+
+    
+    function closePostView() {
+        const postOverlay = document.querySelector('.vim-post-overlay');
+        if (postOverlay) postOverlay.remove();
+        postViewActive = false;
+        keyBuffer = [];
+        if (terminalInstance) terminalInstance.focus();
+    }
+
+    
+    
+    setupKeyListeners();
+
+
+
+    
+
 
     var source =  '        _______            \n' +
                   '       |       |           \n' +
@@ -360,180 +425,277 @@ jQuery(document).ready(function($) {
                   '[[;red;]May the source be with you]\n' +
                   '[[;grey;]https://github.com/coolapso/hugo-theme-terminalcv\n';
 
-    var all = [ 
-        whois,
-        social(),
-        work,
-        education,
-        skills,
-        softSkills,
-        languages,
-        projects,
-        certifications,
-        misc,
-        
-        
-        
-        source,
-        
-    ]
+   
 
+    
     $('body').terminal(function(command, term) {
 
-        var useLess = false;
         
-
-        function echoArray(array) {
-            if (useLess) {
-                term.less(array, {
-                    onExit: function () {
-                        term.set_command('');
-                        term.scroll_to_bottom();
-                    },
-                });
-            } else {
-                for (i = 0; i < array.length; i += 1) {
-                    term.echo(array[i]);
-                }
-            }
-        }
         
-        function progress(percent, width) {
-            var size = Math.round(width*percent/100);
-            var left = '', taken = '', i;
-            for (i=size; i--;) {
-                taken += '=';
-            }
-            if (taken.length > 0) {
-                taken = taken.replace(/=$/, '>');
-            }
-            for (i=width-size; i--;) {
-                left += ' ';
-            }
-            return '[' + taken + left + '] ' + percent + '%';
-        }
+        
+        try {
 
-        function loading () {
-            var i = 0, size = 30;
-            prompt = term.get_prompt();
-            string = progress(0, size);
-            term.set_prompt(progress);
-            animation = true;
-            (function loop() {
-                string = progress(i++, size);
-                term.set_prompt(string);
-                if (i < 100) {
-                    timer = setTimeout(loop, 10);
+            var useLess = false;
+            
+
+            function echoArray(array) {
+                if (useLess) {
+                    term.less(array, {
+                        onExit: function () {
+                            term.set_command('');
+                            term.scroll_to_bottom();
+                        },
+                    });
                 } else {
-                    term.echo(progress(i, size) + ' [[b;green;]OK]').set_prompt(prompt);
-                    animation = false
+                    for (i = 0; i < array.length; i += 1) {
+                        term.echo(array[i]);
+                    }
                 }
-            })();
-        }
+            }
+            
+            
+            function progress(percent, width) {
+                var size = Math.round(width*percent/100);
+                var left = '', taken = '', i;
+                for (i=size; i--;) {
+                    taken += '=';
+                }
+                if (taken.length > 0) {
+                    taken = taken.replace(/=$/, '>');
+                }
+                for (i=width-size; i--;) {
+                    left += ' ';
+                }
+                return '[' + taken + left + '] ' + percent + '%';
+            }
 
-        commands = command.split(/[ ]+/);
-        if (commands[0] == 'less') {
-            useLess = true;
-            commands.shift();
-        } 
+            
+            function loading () {
+                var i = 0, size = 30;
+                var old_prompt = term.get_prompt(); 
+                var string = progress(0, size);
+                term.set_prompt(progress);
+                animation = true;
+                (function loop() {
+                    string = progress(i++, size);
+                    term.set_prompt(string);
+                    if (i < 100) {
+                        timer = setTimeout(loop, 10);
+                    } else {
+                        term.echo(progress(i, size) + ' [[b;green;]OK]').set_prompt(old_prompt); 
+                        animation = false
+                    }
+                })();
+            }
+
+            
+
+            
+            function echo_ls_al(term, path, files, force_type) {
+                var owner = 'user'.padEnd(8);
+                var group = 'user'.padEnd(8);
+                var perms_dir = 'drwxr-xr-x';
+                var perms_file = '-rw-r--r--';
+                var date = 'Nov 09 21:45'; 
+                
+                
+                function lsal_format(name, file_type) {
                     
-        switch(commands[0]) {
-            case 'whois':
-                
-                echoArray(whois);
-                break;
-            case 'social':
-                
-                echoArray(social());
-                break;
-            case 'work':
-                
-                echoArray(work);
-                break;
-            case 'education':
-                
-                echoArray(education);
-                break;
-            case 'skills':
-                
-                useLess = true;
-                
-                echoArray(skills);
-                break;
-            case 'softskills':
-                
-                echoArray(softSkills);
-                break;
-            case 'languages':
-                
-                echoArray(languages);
-                break;
-            case 'projects':
-                
-                echoArray(projects);
-                break;
-            case 'certifications':
-                
-                echoArray(certifications);
-                break;
-            case 'newcommand':
-                
-                echoArray(misc);
-                break;
-            case 'help':
-            case '?':
-                term.echo(help);
-                break;
-            case 'all':
-                
-                echoArray(all.flat(1));
-                break;
-            
-            case ':(){:|:&};:':
-                term.echo("nice try");
-                break;
-            case 'source':
-                
-                term.echo(source);
-                break;
-            case 'exit':
-            
-                term.echo("Terminating session, thanks for visiting");
-                loading();
-                setTimeout(function() {
-                  term.pause();
-                  term.clear();
-                  term.echo("[Session completed, the browserwindow can be safely closed]");
-                }, 2000);
-                break;
-            
-            
-            case 'version':
-                term.echo("2.0.0");
-                break;
-            
-            
-            case 'cat':
-                if (commands.length < 2) {
-                    term.echo("Usage: cat <filename>");
-                } else {
-                    var  postdir = commands[1];
-                    catPost(term, postdir);
+                    if (force_type === 'd' && name !== 'about') {
+                        file_type = 'd';
+                    }
+                    
+                    var perms = (file_type === 'd') ? perms_dir : perms_file;
+                    var size = String((file_type === 'd') ? 4096 : 1024).padStart(6);
+                    
+                    
+                    var filename = (file_type === 'd') ? `[[b;blue;]${name}/]` : name;
+                    
+                    
+                    
+                    
+                    
+                    
+                    return `${perms}  1 ${owner} ${group} ${size} ${date} ${filename}`;
                 }
-                break;
-            case 'posts':
-            case 'ls':
-                posts(term);
-                break;
-            
-            case '':
-                break;
-            default:
-                term.echo("\nunknown command: " + command + "\n" +
-                          "please type 'help' or '?' for a list of available commands\n");
-        }
-    }, {
 
+                term.echo(`total ${files.length + 2}`); 
+                term.echo(lsal_format('.', 'd'));
+                term.echo(lsal_format('..', 'd'));
+
+                
+                files.forEach(function(filename) {
+                    filename = filename.trim(); 
+                    
+                    
+                    var file_type = (filename === 'about') ? 'f' : 'd';
+                    
+                    term.echo(lsal_format(filename, file_type));
+                });
+            }
+
+
+            
+            var commands_list = command.split(/[ ]+/); 
+            if (commands_list[0] == 'less') {
+                useLess = true;
+                commands_list.shift();
+            } 
+                        
+            switch(commands_list[0]) {
+                
+                case 'cd':
+                    if (commands_list.length < 2 || commands_list[1] === '~' || commands_list[1] === '~/') {
+                        cwd = "~"; 
+                    } else if (commands_list[1] === '..') {
+                        
+                        if (cwd === "~") {
+                            
+                        } else {
+                            var parts = cwd.split('/');
+                            parts.pop(); 
+                            cwd = parts.join('/') || "~";
+                        }
+                    } else {
+                        
+                        var dir = commands_list[1].replace(/\/+$/, ''); 
+                        
+                        if (dir.startsWith('~/')) {
+                            cwd = dir; 
+                        } else {
+                            
+                            cwd = (cwd === "~" ? "~" : cwd) + "/" + dir;
+                        }
+                    }
+                    
+                    term.set_prompt(term.option('prompt'));
+                    break;
+                
+                
+                case 'ls':
+                case 'posts':
+                    var is_al = commands_list.includes('-al');
+                    var ls_path_arg = commands_list.find(function(arg) {
+                        return arg !== 'ls' && arg !== 'posts' && arg !== '-al';
+                    });
+                    var ls_path = ls_path_arg || cwd;
+                    
+                    ls_path = ls_path.replace(/\/+$/, '');
+                    
+                    if (ls_path.startsWith('~/')) {
+                        ls_path = ls_path.substring(2);
+                    } else if (cwd !== "~" && !ls_path_arg) {
+                        ls_path = cwd.substring(2);
+                    } else if (cwd !== "~" && ls_path_arg) {
+                        ls_path = cwd.substring(2) + "/" + ls_path;
+                    }
+
+                    if (ls_path === '~' || ls_path === '') { 
+                        if (is_al) {
+                            echo_ls_al(term, ls_path, root_ls); 
+                        } else {
+                            term.echo("\n[[b;white;]Categories:]\n");
+                            echoArray(root_ls); 
+                        }
+                    } else if (ls_path.match(/^untitled_cs$/)) {
+                        if (is_al) {
+                            echo_ls_al(term, ls_path, untitled_cs.slice(1));
+                        } else {
+                            echoArray(untitled_cs);
+                        }
+                    } else if (ls_path.match(/^untitled_life$/)) {
+                        if (is_al) {
+                            echo_ls_al(term, ls_path, untitled_life.slice(1));
+                        } else {
+                            echoArray(untitled_life);
+                        }
+                    } else if (ls_path.match(/^projects$/)) {
+                         if (is_al) {
+                            echo_ls_al(term, ls_path, projects_list.slice(1));
+                        } else {
+                            echoArray(projects_list);
+                        }
+                    } else {
+                        if (ls_path.match(/^about$/)) {
+                             if (is_al) {
+                                 echo_ls_al(term, ls_path, ['about']);
+                             } else {
+                                 echoArray(about);
+                             }
+                        } else {
+                            
+                            posts(term, ls_path, is_al); 
+                        }
+                    }
+                    break;
+
+                
+                case 'cat':
+                    if (commands_list.length < 2) {
+                        term.error("Usage: cat <path/to/post>");
+                    } else {
+                        var postdir = commands_list.slice(1).join('/');
+                        var fullpath;
+                        if (postdir.startsWith('~/')) {
+                            fullpath = postdir.substring(2);
+                        } else if (cwd === "~") {
+                            fullpath = postdir;
+                        } else {
+                            fullpath = cwd.substring(2) + "/" + postdir;
+                        }
+                        
+                        if (fullpath === 'about') {
+                            echoArray(about);
+                        } else {
+                            catPost(term, fullpath);
+                        }
+                    }
+                    break;
+                
+                
+                case 'about':
+                    echoArray(about);
+                    break;
+                case 'untitled_cs':
+                    echoArray(untitled_cs);
+                    break;
+                case 'untitled_life':
+                    echoArray(untitled_life);
+                    break;
+                case 'projects':
+                    echoArray(projects_list);
+                    break;
+                case 'help':
+                case '?':
+                    term.echo(help);
+                    break;
+                case 'exit':
+                
+                    term.echo("Terminating session, thanks for visiting");
+                    loading();
+                    setTimeout(function() {
+                      term.pause();
+                      term.clear();
+                      term.echo("[Session completed, the browserwindow can be safely closed]");
+                    }, 2000);
+                    break;
+                
+                case '':
+                    break;
+                default:
+                    term.echo("\nunknown command: " + command + "\n" +
+                              "please type 'help' or '?' for a list of available commands\n");
+            }
+        
+        
+        } catch (err) {
+            
+            term.echo("[[;red;]JavaScript Error: " + err.message + "]");
+        }
+        
+
+    }, {
+        
          
           greetings: false,
           onInit: function(term) {
@@ -545,24 +707,48 @@ jQuery(document).ready(function($) {
           term.resume();
           },
         
-
-        prompt: '[[;red;][][[;pink;]user@DraktharrLab][[;red;]\\]][[;grey;]-][[;red;][][[;blue;]~\/home][[;red;]\\]][[;orange;]: ]',
-
+        prompt: function(callback) {
+            var core_before = "\[";
+            var core_before_color = "red";
+            var core_text = "user@DraktharrLab";
+            var core_color = "pink";
+            var core_after = "\]";
+            var core_after_color = "red";
+            var sep_text = "-";
+            var sep_color = "grey";
+            var path_before = "\[";
+            var path_before_color = "red";
+            var path_color = "blue";
+            var path_after = "\]";
+            var path_after_color = "red";
+            var extra_text = ": ";
+            var extra_color = "orange";
+            var p = "";
+            p += '[[;' + core_before_color + ';]' + core_before + ']';
+            p += '[[;' + core_color + ';]' + core_text + ']';
+            p += '[[;' + core_after_color + ';]' + core_after + ']';
+            p += '[[;' + sep_color + ';]' + sep_text + ']';
+            p += '[[;' + path_before_color + ';]' + path_before + ']';
+            p += '[[;' + path_color + ';]' + cwd + ']';
+            p += '[[;' + path_after_color + ';]' + path_after + ']';
+            p += '[[;' + extra_color + ';]' + extra_text + ']';
+            callback(p);
+        },
         keydown: function(e, term) {
             if (animation) {
-                if (e.which == 68 && e.ctrlKey) { 
+                if (e.which == 68 && e.ctrlKey) {
                     clearTimeout(timer);
                     animation = false;
                     term.echo(string + ' [[b;red;]FAIL]')
-                    .set_prompt(prompt);
+                    .set_prompt(term.option('prompt'));
                 }
                 return false;
             }
         },
         autocompleteMenu: true,
-        completion: Object.keys(commands)
-        
+        completion: Object.keys(commands) 
     });
+    
 });
 </script>
 

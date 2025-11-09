@@ -1,45 +1,18 @@
 {{ define "body" }}
 <script> 
 jQuery(document).ready(function($) {
+    var cwd = "~"; // <-- 1. "현재 작업 디렉터리" 변수 추가
     var animation = false;
 
     var commands = {
         help: "shows help",
-        less: "Use less as output method",
-        whois: "list basic details",
-        social: "list social networks",
-        work: "list work experience",
-        education: "list education",
-        skills: "list core skills",
-        softskills: "list soft skills",
-        languages: "list spoken languages",
-        projects: "list projects",
-        {{ if .Site.Params.certifications }} 
-            certifications: "list certifications",
-        {{ end }}
-        {{ if .Site.Params.startxLocation }}
-            startx: "starts graphical environment",
-        {{ end }}
-        {{ if .Site.Params.misc }}
-            {{ .Site.Params.misc.commandName | default "other" }}: "{{.Site.Params.misc.title }}",
-        {{ end }}
-        {{ if not .Site.Params.Source }}
-            source: "shows details about template powering this website",
-        {{ end }}
-        {{ if .Site.Params.version }}
-            version: "Current version",
-        {{ end }}
-        {{ if .Site.Params.exitLocation }}
-            exit: "exit the terminal",
-        {{ end }}
-        {{ if .Site.Params.blog }}
-        posts: "List all posts",
-        {{ if .Site.Params.listLS }}
-        ls: "List all posts",
-        {{ end }}
-        cat: "Open a post",
-        {{ end }}
-        all: "Show all details about me",
+        about: "shows details about me",
+        ls: "list categories or posts (e.g., 'ls untitled_cs')",
+        cd: "change directory (e.g., 'cd untitled_cs')", // <-- 2. 'cd' 추가
+        cat: "open a post (e.g., 'cat untitled_cs/os/post-name')",
+        less: "use less as output method",
+        clear: "clear the screen",
+        exit: "exit the terminal"
     };
 
     function progressBar(number) {
@@ -73,191 +46,313 @@ jQuery(document).ready(function($) {
                 '\n[[b;white;]Available commands:]\n' + 
                commandsHelp();
 
-    var whois = [
-    {{ with .Site.Params.whois.details }} 
-        '[[b;grey;]Name:]\t\t\t{{ .name }}\n' + 
-        '[[b;grey;]Profession:]\t\t{{ .profession }}\n' +
-        '[[b;grey;]Location:]\t\t{{ .location }}\n' +
-        {{ if .email }}
-        '[[b;grey;]Email:]\t\t\t{{ .email }}\n' +
-        {{ end }}
-        {{ if .homelink }}
-        '[[b;grey;]Homepage:]\t\t{{ .homelink }}\n' +
-        {{ end }}
-        {{ if .description }}
-        '{{ .description }}' +
-        {{ end }}
-        '\r',
-    {{ end }}
+
+
+
+     // --- (새로운 블로그 구조 정의) ---
+
+    // 1. About (파일처럼 작동)
+    var about = [
+        '\n[[b;white;]About Me]\n',
+        'ColdBurgundy\'s Blog.',
+        'Contact: kkkk@cau.ac.kr', // (이메일은 예시입니다)
+        'CV: <a href="/my-cv.pdf" target="_blank">my-cv.pdf</a>' // (PDF 파일을 static/my-cv.pdf 에 넣어주세요)
     ];
 
-    function social() { 
-        var hideName = false;
-        let sMap = { 
-            {{ with .Site.Params.social.details }} 
-                {{ range. }}
-                {{ .name }}: "{{ .url }}",
-                {{ end }}
-            {{ end }}
-        };
+    // 2. "ls ~" (home)에 표시될 최상위 디렉터리 목록
+    var root_ls = [
+        ' about',
+        ' untitled_cs',
+        ' untitled_life',
+        ' projects'
+    ];
+    
+    // 3. "ls untitled_cs"에 표시될 하위 디렉터리 목록
+    var untitled_cs = [
+        '\n[[b;white;]Categories in untitled_cs:]\n',
+        ' os',
+        ' csapp',
+        ' clrs',
+        ' boj'
+    ];
 
-        {{ if .Site.Params.social.settings.hideName }}
-        hideName = true
-        {{ end }}
-        socialText = []
-        for (let key in sMap) {
-            if (sMap.hasOwnProperty(key)) {
-                if (hideName) {
-                    socialText.push(sMap[key]);
-                } else { 
-                    let longestKeyLength = Math.max(...Object.keys(sMap).map(key => key.length));
-                    socialText.push(`${padKey(key, longestKeyLength)}\t${sMap[key]}`)
-                };
-            }
+    // 4. "ls untitled_life"
+    var untitled_life = [
+        '\n[[b;white;]Categories in untitled_life:]\n',
+        ' (아직 게시물이 없습니다.)'
+    ];
+    
+    // 5. "ls projects"
+    var projects_list = [
+        '\n[[b;white;]Projects:]\n',
+        ' (아직 게시물이 없습니다.)'
+    ];    
+
+    
+
+
+    {{/* --- [이 함수 전체를 덮어쓰세요] --- */}}
+
+    function posts(term, path, is_al) { // 'is_al' 인자 (ls -al 여부)
+        var url = "/posts/"; 
+        
+        if (path) {
+            path = path.replace(/^\/+|\/+$/g, '');
+            url = "/posts/" + path + "/"; // 예: /posts/untitled_cs/boj/
         }
 
-        return socialText
-    };
-
-    function posts(term) {
         $.ajax({
-            url: "posts/",
+            url: url,
             type: 'GET',
             success: function(data) {
-                term.echo(data, {raw: true}); 
+                
+                // --- [핵심 수정] ---
+                // 'ls'와 'ls -al' 모두 AJAX로 가져온 HTML(data)을 "파싱"해야 합니다.
+                
+                var files = [];
+                try {
+                    // 1. 반환된 HTML(data)을 임시 <div>에 넣어 파싱
+                    var $html = $('<div/>').html(data);
+                    
+                    // 2. Hugo 목록 페이지의 링크를 찾습니다. 
+                    //    (페이지 본문('article') 안의 링크만 찾도록 한정합니다.)
+                    var $links = $html.find('article a, main a');
+                    
+                    if ($links.length === 0) {
+                        // article/main이 없으면, Hugo 기본 <li><a>를 찾습니다.
+                        $links = $html.find('li a'); 
+                    }
+
+                    $links.each(function() {
+                        var text = $(this).text().trim();
+                        // 중복이나 빈 텍스트 방지
+                        if (text && files.indexOf(text) === -1) {
+                            files.push(text);
+                        }
+                    });
+                } catch(e) {
+                    term.error("Error parsing post list HTML.");
+                }
+
+                // 3. 파싱된 목록(files)을 기반으로 출력
+                if (is_al) {
+                    // 'ls -al' 로직: echo_ls_al 함수로 포맷팅
+                    echo_ls_al(term, path, files, 'd'); // 'd'는 post/directory라는 뜻
+                } else {
+                    // 'ls' 로직: (term.echo(data, {raw: true}); 대신)
+                    if (files.length > 0) {
+                        var output = files.map(function(file) {
+                            // 'ls -al'과 동일하게 파란색 디렉터리(포스트)로 표시
+                            return `[[b;blue;]${file}/]`; 
+                        });
+                        echoArray(output);
+                    } else {
+                        term.echo(""); // 빈 디렉터리
+                    }
+                }
+                // --- [수정 끝] ---
+
             },
             error: function() {
-                term.echo("Error: Could not load posts data");
+                term.echo(""); // 오류 대신 빈 줄 출력
             }
         });
     };
 
 
     function catPost(term, postdir) {
-        url = "/posts/" + postdir + "/";
+        // postdir (예: "untitled_cs/os/my-post")를 
+        // URL (예: "/posts/untitled_cs/os/my-post/")로 만듭니다.
+        
+        // 1. 앞뒤 / 정리
+        postdir = postdir.replace(/^\/+|\/+$/g, ''); 
+        
+        // 2. (핵심) /posts/ 접두사 추가
+        var url = "/posts/" + postdir + "/"; 
+
         $.ajax({
             url: url,
             type: 'GET',
             success: function(data) {
-                term.echo(data, {raw: true});
+                // "Word for Mac" 뷰어 함수 호출 (이 부분은 이미 완성됨)
+                showMacWindow(data, postdir);
             },
             error: function() {
                 term.echo("Error: Could not load post " + postdir);
             }
         });
     }
-    var certifications = [
-    {{ with .Site.Params.certifications.details }}
-        {{ range . }}
-            '---\n' +
-            '[[b;{{ .color | default "grey" }};]{{ .certName }}]\n' +
-            '{{ .date }}\n' +
-            {{ if .company }}
-            '{{ .company }}\n' +
-            {{ end }}
-            {{ if .description }}
-            '{{ .description }}\n' +
-            {{ end }}
-            {{ if .badge }}
-            'Badge: \t{{ .badge }}\n' +
-            {{ end }}
-            '\r',
-        {{ end }}
-    {{ end }}
-    ];
+
+
+    // --- 4. "Word for Mac" 뷰어 생성 함수 (h1, h2, h3 지원 버전) ---
+    var postViewActive = false;
+    var keyBuffer = [];
+    var terminalInstance = null;
+
+    // --- 4. "Word for Mac" 뷰어 생성 함수 (h2, h3 전용) ---
+    var postViewActive = false;
+    var keyBuffer = [];
+    var terminalInstance = null;
+
+    async function showMacWindow(html, postTitle) {
+        if (!terminalInstance) {
+            terminalInstance = $('.terminal').data('terminal');
+        }
+
+        try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const postContentElement = doc.querySelector('article') || doc.querySelector('main') || doc.body;
+
+            // --- [수정된 부분] ---
+            // 1. 스캔 대상을 'h2, h3'로 되돌립니다.
+            let tocHTML = '<ul>';
+            const headers = postContentElement.querySelectorAll('h2, h3'); // <-- h1 제거
+            let currentH2List = false; // h3 목록이 열려있는지 확인
+
+            headers.forEach((header, index) => {
+              // 2. 각 헤더에 고유 ID 부여
+              const id = 'toc-header-' + index;
+              header.setAttribute('id', id);
+              
+              const level = header.tagName.toLowerCase();
+              const text = header.textContent || "Untitled Section";
+              
+              if (level === 'h2') {
+                if (currentH2List) {
+                  tocHTML += '</ul></li>'; // 이전 h3 목록 닫기
+                }
+                tocHTML += `<li><a href="#${id}">${text}</a>`;
+                currentH2List = true; // h3 목록 시작 준비
+                tocHTML += '<ul>'; // h3 목록 열기
+              } else if (level === 'h3') {
+                 // h2가 없으면 h2를 생성한 것처럼 처리
+                if (!currentH2List) {
+                    tocHTML += '<li><ul>'; // h2 목록 생성 (h1이 없다고 가정)
+                    currentH2List = true;
+                }
+                // h2 다음에 오는 h3만 추가
+                tocHTML += `<li><a href="#${id}">${text}</a></li>`;
+              }
+            });
+
+            if (currentH2List) {
+              tocHTML += '</ul></li>'; // 마지막 h3 목록 닫기
+            }
+            tocHTML += '</ul>'; // 전체 목록 닫기
+            // --- [수정 끝] ---
+
+
+            const postOverlay = document.createElement('div');
+            postOverlay.className = 'vim-post-overlay';
+            // ... (스타일 코드는 동일) ...
+            postOverlay.style.position = 'fixed';
+            postOverlay.style.top = '0';
+            postOverlay.style.left = '0';
+            postOverlay.style.width = '100vw';
+            postOverlay.style.height = '100vh';
+            postOverlay.style.zIndex = '9998';
+            postOverlay.style.background = '#ccc'; 
+
+            postOverlay.innerHTML = `
+                <div class="window active" style="width: 100%; height: 100%; margin: 0; border-radius: 0;">
+                    
+                    <div class="title-bar">
+                        <button aria-label="Close" class="close"></button>
+                        <h1 class="title">${postTitle}.md (Read Only)</h1>
+                        <button aria-label="Resize" disabled class="hidden"></button>
+                    </div>
+
+                    <div class="window-body window-body-with-toc" style="height: calc(100% - 28px); padding: 0; display: flex; flex-direction: row;">
+                        
+                        <nav class="toc">
+                            ${tocHTML}
+                            <svg class="toc-marker" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke="#444" stroke-width="3" fill="transparent" stroke-dasharray="0, 0, 0, 1000" stroke-linecap="round" stroke-linejoin="round" transform="translate(-0.5, -0.5)" />
+                            </svg>
+                        </nav>
+                        
+                        <article class="contents">
+                            <div class="paper">
+                                ${postContentElement.innerHTML}
+                            </div>
+                        </article>
+
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(postOverlay);
+            postViewActive = true; 
+
+            // 닫기 버튼(X)에 클릭 이벤트 추가
+            postOverlay.querySelector('.close').addEventListener('click', () => {
+                closePostView();
+            });
+
+            // TOC와 Contents 요소를 JS 스크립트에 전달하여 애니메이션 실행
+            const tocElement = postOverlay.querySelector('.toc');
+            const contentElement = postOverlay.querySelector('.contents');
+
+            if (typeof initTocSidebar === 'function') {
+                initTocSidebar(tocElement, contentElement);
+            }
+
+            // KaTeX 수학 수식 렌더링
+            if (window.renderMathInElement) {
+                window.renderMathInElement(contentElement, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
+                });
+            }
+        } catch (error) {
+            if (terminalInstance) {
+                terminalInstance.error(`Failed to display post viewer: ${error.message}`);
+            }
+        }
+    }
+
+    // --- 5. ':q' 키보드 리스너 설정 ---
+    function setupKeyListeners() {
+        document.addEventListener('keydown', (e) => {
+            if (!postViewActive) return;
+            if (e.key === 'Shift') return;
+            if (e.key === ':') {
+                keyBuffer = [':'];
+                e.preventDefault(); 
+                return;
+            }
+            if (e.key.toLowerCase() === 'q' && keyBuffer[0] === ':') {
+                keyBuffer.push('q');
+                if (keyBuffer.join('') === ':q') {
+                    closePostView();
+                    e.preventDefault();
+                }
+                return;
+            }
+            keyBuffer = [];
+        });
+    }
+
+    // --- 6. 뷰 닫기 헬퍼 함수 ---
+    function closePostView() {
+        const postOverlay = document.querySelector('.vim-post-overlay');
+        if (postOverlay) postOverlay.remove();
+        postViewActive = false;
+        keyBuffer = [];
+        if (terminalInstance) terminalInstance.focus();
+    }
+
+    // --- 7. :q 리스너 실행 ---
+    // (이 코드는 헬퍼 함수들 밖에, document.ready 스코프 안에 있어야 합니다)
+    setupKeyListeners();
+
+
+
     
-    var work = [
-    {{ with .Site.Params.work.details }}
-        {{ range .}}
-            '---\n' +
-            '[[b;{{ .color | default "grey" }};]{{ .jobTitle }}]\n' +
-            '{{ .company }}\n' +
-            '{{ .location}}\n' +
-            '{{ .date }}\n' +
-            '\n' +
-            '{{ .description }}' +
-            '\r',
-        {{ end }}
-    {{ end }}
-    ];
 
-    var education = [
-    {{ with .Site.Params.education.details }}
-        {{ range . }}
-            '---\n' +
-            '[[b;{{ .color | default "grey" }};]{{ .courseName }}]\n' +
-            '{{ .date }}\n' +
-            {{ if .description }}
-                "{{ .description }}\n" +
-            {{ end }}
-            "\r",
-        {{ end }}
-    {{ end }}
-    ];
-
-    var projects = [
-    {{ with .Site.Params.projects.details }}
-        {{ range .}}
-            '---\n' +
-            '[[b;{{ .color | default "grey" }};]{{ .title }}]\n' +
-            '{{ .date }}\n' +
-            '{{ .link }}\n' +
-            {{ if .description }}
-            '{{ .description }}\n' +
-            {{ end }}
-            "\r",
-      {{ end }}
-    {{ end }}
-    ];
-
-    var skills = [
-    {{ with .Site.Params.skills.details }}
-        {{ range . }}
-            '[[b;{{ .color | default "grey" }};]{{ .name }}:]\n' +
-            progressBar({{ .percentage }}) +
-            '{{ .percentage }}' + '%\n' +
-            {{ if .description }}
-            '{{ .description }}\n' +
-            {{ end }}
-            '\r',
-        {{ end }}
-    {{ end }}
-    ];
-
-    var softSkills = [
-    {{ with .Site.Params.softSkills.details }}
-        {{ range . }}
-            '[[b;{{ .color | default "grey" }};]{{ .name }}:]\n' +
-            progressBar({{ .percentage }}) +
-            '{{ .percentage }}' + '%\n' + 
-            {{ if .description }}
-            '{{ .description }}\n' +
-            {{ end }}
-            '\r',
-        {{ end }}
-    {{ end }}
-    ];
-  
-    var languages = [
-    {{ with .Site.Params.languages.details }}
-        {{ range . }}
-            '[[b;{{ .color | default "grey" }};]{{ .name }}:]\n' +
-            progressBar({{ .percentage }})+ 
-            '{{ .percentage }}' + '%\n' +
-            {{ if .description }}
-            '{{ .description }}\n' +
-            {{ end }}
-            '\r',
-        {{ end }}
-    {{ end }}
-    ];
-
-    var misc = [
-         {{ with .Site.Params.misc }}
-        '[[b;{{ .titleColor }};]{{ .title }}]\n' +
-        '[[;{{ .contentColor }};]{{ .content }}]\n',
-         {{ end }}
-    ];
 
     var source =  '        _______            \n' +
                   '       |       |           \n' +
@@ -272,215 +367,284 @@ jQuery(document).ready(function($) {
                   '[[;red;]May the source be with you]\n' +
                   '[[;grey;]https://github.com/coolapso/hugo-theme-terminalcv\n';
 
-    var all = [ 
-        whois,
-        social(),
-        work,
-        education,
-        skills,
-        softSkills,
-        languages,
-        projects,
-        certifications,
-        misc,
-        {{ if .Site.Params.misc }}
-        {{ end }}
-        {{ if .Site.Params.source }}
-        source,
-        {{ end }}
-    ]
+   
 
+    {{/* --- [이 함수 전체를 덮어쓰세요] --- */}}
     $('body').terminal(function(command, term) {
 
-        var useLess = false;
-        {{if .Site.Params.useLess }}
-        useLess = true;
-        {{ end }}
+        // --- [수정 1] ---
+        // 모든 명령어 로직을 try...catch로 감싸서
+        // 오류가 발생해도 [ERR]]> 프롬프트로 바뀌지 않게 합니다.
+        try {
 
-        function echoArray(array) {
-            if (useLess) {
-                term.less(array, {
-                    onExit: function () {
-                        term.set_command('');
-                        term.scroll_to_bottom();
-                    },
-                });
-            } else {
-                for (i = 0; i < array.length; i += 1) {
-                    term.echo(array[i]);
-                }
-            }
-        }
-        //Function used by StartX to draw the progressBar
-        function progress(percent, width) {
-            var size = Math.round(width*percent/100);
-            var left = '', taken = '', i;
-            for (i=size; i--;) {
-                taken += '=';
-            }
-            if (taken.length > 0) {
-                taken = taken.replace(/=$/, '>');
-            }
-            for (i=width-size; i--;) {
-                left += ' ';
-            }
-            return '[' + taken + left + '] ' + percent + '%';
-        }
-
-        function loading () {
-            var i = 0, size = 30;
-            prompt = term.get_prompt();
-            string = progress(0, size);
-            term.set_prompt(progress);
-            animation = true;
-            (function loop() {
-                string = progress(i++, size);
-                term.set_prompt(string);
-                if (i < 100) {
-                    timer = setTimeout(loop, 10);
-                } else {
-                    term.echo(progress(i, size) + ' [[b;green;]OK]').set_prompt(prompt);
-                    animation = false
-                }
-            })();
-        }
-
-        commands = command.split(/[ ]+/);
-        if (commands[0] == 'less') {
+            var useLess = false;
+            {{if .Site.Params.useLess }}
             useLess = true;
-            commands.shift();
-        } 
-                    
-        switch(commands[0]) {
-            case 'whois':
-                {{ if .Site.Params.whois.settings.useLess }}
-                useLess = true;
-                {{ end }}
-                echoArray(whois);
-                break;
-            case 'social':
-                {{ if .Site.Params.social.settings.useLess }}
-                useLess = true;
-                {{ end }}
-                echoArray(social());
-                break;
-            case 'work':
-                {{ if .Site.Params.work.settings.useLess }}
-                useLess = true;
-                {{ end }}
-                echoArray(work);
-                break;
-            case 'education':
-                {{ if .Site.Params.education.settings.useLess }}
-                useLess = true;
-                {{ end }}
-                echoArray(education);
-                break;
-            case 'skills':
-                {{ if .Site.Params.skills.settings.useLess }}
-                useLess = true;
-                {{ end }}
-                echoArray(skills);
-                break;
-            case 'softskills':
-                {{ if .Site.Params.softskills.settings.useLess }}
-                useLess = true;
-                {{ end }}
-                echoArray(softSkills);
-                break;
-            case 'languages':
-                {{ if .Site.Params.languages.settings.useLess }}
-                useLess = true;
-                {{ end }}
-                echoArray(languages);
-                break;
-            case 'projects':
-                {{ if .Site.Params.projects.settings.useLess }}
-                useLess = true;
-                {{ end }}
-                echoArray(projects);
-                break;
-            case 'certifications':
-                {{ if .Site.Params.certifications.settings.useLess }}
-                useLess = true;
-                {{ end }}
-                echoArray(certifications);
-                break;
-            case '{{ .Site.Params.misc.commandName | default "misc"}}':
-                {{ if .Site.Params.misc.settings.useLess }}
-                useLess = true;
-                {{ end }}
-                echoArray(misc);
-                break;
-            case 'help':
-            case '?':
-                term.echo(help);
-                break;
-            case 'all':
-                {{ if .Site.Params.all.settings.useLess }}
-                useLess = true;
-                {{ end }}
-                echoArray(all.flat(1));
-                break;
-            {{ if .Site.Params.startxLocation }}
-            case 'startx':
-                term.echo("loading ...");
-                loading();
-                setTimeout(function(){window.location = "{{ .Site.Params.startxLocation }}"}, 2000);
-                break;
             {{ end }}
-            case ':(){:|:&};:':
-                term.echo("nice try");
-                break;
-            case 'source':
-                {{ if .Site.Params.misc.settings.useLess }}
-                useLess = true;
-                {{ end }}
-                term.echo(source);
-                break;
-            case 'exit':
-            {{ if .Site.Params.exitLocation }}
-                term.echo("terminating ... ");
-                loading();
-                setTimeout(function(){window.location = '{{ .Site.Params.exitLocation }}'}, 2000);
-                break;
-            {{ else }}
-                term.echo("Terminating session, thanks for visiting");
-                loading();
-                setTimeout(function() {
-                  term.pause();
-                  term.clear();
-                  term.echo("{{ .Site.Params.exitMessage }}");
-                }, 2000);
-                break;
-            {{ end }}
-            {{ if .Site.Params.version }}
-            case 'version':
-                term.echo("{{ .Site.Params.version }}");
-                break;
-            {{ end }}
-            {{ if .Site.Params.blog }}
-            case 'cat':
-                if (commands.length < 2) {
-                    term.echo("Usage: cat <filename>");
-                } else {
-                    var  postdir = commands[1];
-                    catPost(term, postdir);
-                }
-                break;
-            case 'posts':
-            case 'ls':
-                posts(term);
-                break;
-            {{ end }}
-            case '':
-                break;
-            default:
-                term.echo("\nunknown command: " + command + "\n" +
-                          "please type 'help' or '?' for a list of available commands\n");
-        }
-    }, {
 
+            function echoArray(array) {
+                if (useLess) {
+                    term.less(array, {
+                        onExit: function () {
+                            term.set_command('');
+                            term.scroll_to_bottom();
+                        },
+                    });
+                } else {
+                    for (i = 0; i < array.length; i += 1) {
+                        term.echo(array[i]);
+                    }
+                }
+            }
+            
+            // (progressBar 함수는 원본과 동일하게 유지)
+            function progress(percent, width) {
+                var size = Math.round(width*percent/100);
+                var left = '', taken = '', i;
+                for (i=size; i--;) {
+                    taken += '=';
+                }
+                if (taken.length > 0) {
+                    taken = taken.replace(/=$/, '>');
+                }
+                for (i=width-size; i--;) {
+                    left += ' ';
+                }
+                return '[' + taken + left + '] ' + percent + '%';
+            }
+
+            // (loading 함수는 'old_prompt' 변수를 사용하도록 수정됨)
+            function loading () {
+                var i = 0, size = 30;
+                var old_prompt = term.get_prompt(); // <-- 'prompt' -> 'old_prompt'로 변경
+                var string = progress(0, size);
+                term.set_prompt(progress);
+                animation = true;
+                (function loop() {
+                    string = progress(i++, size);
+                    term.set_prompt(string);
+                    if (i < 100) {
+                        timer = setTimeout(loop, 10);
+                    } else {
+                        term.echo(progress(i, size) + ' [[b;green;]OK]').set_prompt(old_prompt); // <-- 'prompt' -> 'old_prompt'로 변경
+                        animation = false
+                    }
+                })();
+            }
+
+            {{/* --- [이 함수 전체를 덮어쓰세요] --- */}}
+
+            // 'ls -al' 포맷을 출력하기 위한 새 헬퍼 함수
+            function echo_ls_al(term, path, files, force_type) {
+                var owner = 'user'.padEnd(8);
+                var group = 'user'.padEnd(8);
+                var perms_dir = 'drwxr-xr-x';
+                var perms_file = '-rw-r--r--';
+                var date = 'Nov 09 21:45'; // 날짜는 고정값으로 사용
+                
+                // 가상 파일/디렉터리 포맷팅 함수
+                function lsal_format(name, file_type) {
+                    // 'force_type'이 'd'로 오면(동적 목록), 'about'을 제외한 모든 것을 디렉터리(포스트)로 처리
+                    if (force_type === 'd' && name !== 'about') {
+                        file_type = 'd';
+                    }
+                    
+                    var perms = (file_type === 'd') ? perms_dir : perms_file;
+                    var size = String((file_type === 'd') ? 4096 : 1024).padStart(6);
+                    
+                    // 디렉터리(포스트)는 파란색과 /로 표시
+                    var filename = (file_type === 'd') ? `[[b;blue;]${name}/]` : name;
+                    
+                    // --- [수정] 'test'가 포스트임을 알 수 있게 함 ---
+                    // 'boj' 폴더 안의 'test'를 'test (post)'로 표시하고 싶지만,
+                    // 'ls -al'은 파일명만 표시하는 것이 표준입니다. 
+                    // 'test/' (파란색 + 슬래시)로 디렉터리(포스트)임을 충분히 알 수 있습니다.
+                    
+                    return `${perms}  1 ${owner} ${group} ${size} ${date} ${filename}`;
+                }
+
+                term.echo(`total ${files.length + 2}`); // . 와 .. 를 포함
+                term.echo(lsal_format('.', 'd'));
+                term.echo(lsal_format('..', 'd'));
+
+                // 파일 및 디렉터리 목록 출력
+                files.forEach(function(filename) {
+                    filename = filename.trim(); // 변수 앞의 공백 제거
+                    
+                    // 'about'만 파일이고 나머지는 디렉터리라고 가정 (정적 목록용)
+                    var file_type = (filename === 'about') ? 'f' : 'd';
+                    
+                    term.echo(lsal_format(filename, file_type));
+                });
+            }
+
+
+            // (변수 이름을 'commands'에서 'commands_list'로 변경하여 명확하게 함)
+            var commands_list = command.split(/[ ]+/); 
+            if (commands_list[0] == 'less') {
+                useLess = true;
+                commands_list.shift();
+            } 
+                        
+            switch(commands_list[0]) {
+                // --- [수정 2] 'cd' 명령어 로직 ---
+                case 'cd':
+                    if (commands_list.length < 2 || commands_list[1] === '~' || commands_list[1] === '~/') {
+                        cwd = "~"; // 루트로 이동
+                    } else if (commands_list[1] === '..') {
+                        // 상위 폴더로 이동
+                        if (cwd === "~") {
+                            // 루트 디렉터리입니다. 아무것도 하지 않습니다.
+                        } else {
+                            var parts = cwd.split('/');
+                            parts.pop(); // 마지막 부분 제거
+                            cwd = parts.join('/') || "~";
+                        }
+                    } else {
+                        // 하위 폴더로 이동
+                        var dir = commands_list[1].replace(/\/+$/, ''); // 끝의 / 제거
+                        
+                        if (dir.startsWith('~/')) {
+                            cwd = dir; // 절대 경로
+                        } else {
+                            // 상대 경로
+                            cwd = (cwd === "~" ? "~" : cwd) + "/" + dir;
+                        }
+                    }
+                    // 프롬프트를 즉시 업데이트 (안전한 호출 방식)
+                    term.set_prompt(term.option('prompt'));
+                    break;
+                
+                // --- [수정 3] 'ls' 명령어 로직: '-al' 플래그 전달 ---
+                case 'ls':
+                case 'posts':
+                    var is_al = commands_list.includes('-al');
+                    var ls_path_arg = commands_list.find(function(arg) {
+                        return arg !== 'ls' && arg !== 'posts' && arg !== '-al';
+                    });
+                    var ls_path = ls_path_arg || cwd;
+                    
+                    ls_path = ls_path.replace(/\/+$/, '');
+                    
+                    if (ls_path.startsWith('~/')) {
+                        ls_path = ls_path.substring(2);
+                    } else if (cwd !== "~" && !ls_path_arg) {
+                        ls_path = cwd.substring(2);
+                    } else if (cwd !== "~" && ls_path_arg) {
+                        ls_path = cwd.substring(2) + "/" + ls_path;
+                    }
+
+                    if (ls_path === '~' || ls_path === '') { 
+                        if (is_al) {
+                            echo_ls_al(term, ls_path, root_ls); // 'ls -al'
+                        } else {
+                            term.echo("\n[[b;white;]Categories:]\n");
+                            echoArray(root_ls); // 'ls'
+                        }
+                    } else if (ls_path.match(/^untitled_cs$/)) {
+                        if (is_al) {
+                            echo_ls_al(term, ls_path, untitled_cs.slice(1));
+                        } else {
+                            echoArray(untitled_cs);
+                        }
+                    } else if (ls_path.match(/^untitled_life$/)) {
+                        if (is_al) {
+                            echo_ls_al(term, ls_path, untitled_life.slice(1));
+                        } else {
+                            echoArray(untitled_life);
+                        }
+                    } else if (ls_path.match(/^projects$/)) {
+                         if (is_al) {
+                            echo_ls_al(term, ls_path, projects_list.slice(1));
+                        } else {
+                            echoArray(projects_list);
+                        }
+                    } else {
+                        if (ls_path.match(/^about$/)) {
+                             if (is_al) {
+                                 echo_ls_al(term, ls_path, ['about']);
+                             } else {
+                                 echoArray(about);
+                             }
+                        } else {
+                            // "ls -al is not supported" 오류를 제거하고 'is_al' 플래그 전달
+                            posts(term, ls_path, is_al); 
+                        }
+                    }
+                    break;
+
+                // --- [수정 4] 'cat' 명령어 로직 (CWD 인식) ---
+                case 'cat':
+                    if (commands_list.length < 2) {
+                        term.error("Usage: cat <path/to/post>");
+                    } else {
+                        var postdir = commands_list.slice(1).join('/');
+                        var fullpath;
+                        if (postdir.startsWith('~/')) {
+                            fullpath = postdir.substring(2);
+                        } else if (cwd === "~") {
+                            fullpath = postdir;
+                        } else {
+                            fullpath = cwd.substring(2) + "/" + postdir;
+                        }
+                        
+                        if (fullpath === 'about') {
+                            echoArray(about);
+                        } else {
+                            catPost(term, fullpath);
+                        }
+                    }
+                    break;
+                
+                // (나머지 명령어들은 그대로)
+                case 'about':
+                    echoArray(about);
+                    break;
+                case 'untitled_cs':
+                    echoArray(untitled_cs);
+                    break;
+                case 'untitled_life':
+                    echoArray(untitled_life);
+                    break;
+                case 'projects':
+                    echoArray(projects_list);
+                    break;
+                case 'help':
+                case '?':
+                    term.echo(help);
+                    break;
+                case 'exit':
+                {{ if .Site.Params.exitLocation }}
+                    term.echo("terminating ... ");
+                    loading();
+                    setTimeout(function(){window.location = '{{ .Site.Params.exitLocation }}'}, 2000);
+                    break;
+                {{ else }}
+                    term.echo("Terminating session, thanks for visiting");
+                    loading();
+                    setTimeout(function() {
+                      term.pause();
+                      term.clear();
+                      term.echo("{{ .Site.Params.exitMessage }}");
+                    }, 2000);
+                    break;
+                {{ end }}
+                case '':
+                    break;
+                default:
+                    term.echo("\nunknown command: " + command + "\n" +
+                              "please type 'help' or '?' for a list of available commands\n");
+            }
+        
+        // --- [수정 1] try 블록의 끝 ---
+        } catch (err) {
+            // 오류가 발생해도 프롬프트가 바뀌지 않고, 에러 메시지만 출력합니다.
+            term.echo("[[;red;]JavaScript Error: " + err.message + "]");
+        }
+        // --- [수정 끝] ---
+
+    }, {
+        // (greetings, prompt 함수 등 나머지 옵션은 그대로)
         {{ if .Site.Params.bootsequence }} 
           greetings: false,
           onInit: function(term) {
@@ -494,24 +658,48 @@ jQuery(document).ready(function($) {
         {{ else }} 
           greetings: "[[b;{{ .Site.Params.greetingColor | default "white" }};]{{ .Site.Params.greeting }}]",
         {{ end }}
-
-        prompt: '{{ with .Site.Params.prompt }}{{ with .core }}[[;{{ .beforeColor | default "grey" }};]{{ .before }}][[;{{ .color | default "grey" }};]{{ .text }}][[;{{ .afterColor | default "gey" }};]{{ .after }}]{{ end }}{{ with .separator }}[[;{{ .separatorColor | default "grey" }};]{{ .text }}]{{ end }}{{ with .path }}[[;{{ .beforeColor | default "grey" }};]{{ .before }}][[;{{ .color | default "grey" }};]{{ .text | default ":~$" }}][[;{{ .afterColor | default "grey" }};]{{ .after }}]{{ end }}{{ with .extra }}[[;{{ .color | default "grey" }};]{{ .text }}]{{ end }}{{ end }}',
-
+        prompt: function(callback) {
+            var core_before = "\[";
+            var core_before_color = "red";
+            var core_text = "user@DraktharrLab";
+            var core_color = "pink";
+            var core_after = "\]";
+            var core_after_color = "red";
+            var sep_text = "-";
+            var sep_color = "grey";
+            var path_before = "\[";
+            var path_before_color = "red";
+            var path_color = "blue";
+            var path_after = "\]";
+            var path_after_color = "red";
+            var extra_text = ": ";
+            var extra_color = "orange";
+            var p = "";
+            p += '[[;' + core_before_color + ';]' + core_before + ']';
+            p += '[[;' + core_color + ';]' + core_text + ']';
+            p += '[[;' + core_after_color + ';]' + core_after + ']';
+            p += '[[;' + sep_color + ';]' + sep_text + ']';
+            p += '[[;' + path_before_color + ';]' + path_before + ']';
+            p += '[[;' + path_color + ';]' + cwd + ']';
+            p += '[[;' + path_after_color + ';]' + path_after + ']';
+            p += '[[;' + extra_color + ';]' + extra_text + ']';
+            callback(p);
+        },
         keydown: function(e, term) {
             if (animation) {
-                if (e.which == 68 && e.ctrlKey) { // CTRL+D
+                if (e.which == 68 && e.ctrlKey) {
                     clearTimeout(timer);
                     animation = false;
                     term.echo(string + ' [[b;red;]FAIL]')
-                    .set_prompt(prompt);
+                    .set_prompt(term.option('prompt'));
                 }
                 return false;
             }
         },
         autocompleteMenu: true,
-        completion: Object.keys(commands)
-        
+        completion: Object.keys(commands) 
     });
+    {{/* --- [덮어쓰기 끝] --- */}}
 });
 </script>
 {{ end }}

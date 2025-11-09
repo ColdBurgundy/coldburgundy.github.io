@@ -236,3 +236,17 @@ params:
       Auto completion will know it too! :D
 
     contentColor: orange
+
+# (1) 코드 하이라이팅 설정 (Chroma)
+markup:
+  highlight:
+    style: "dracula"  # (dracula는 터미널과 어울리는 어두운 테마입니다)
+    lineNos: true     # (줄 번호 표시)
+
+# (2) 수학 수식 렌더링 설정 (KaTeX)
+  goldmark:
+    renderer:
+      unsafe: true # (HTML 렌더링을 허용해야 KaTeX가 작동합니다)
+outputs:
+  home: [ "HTML", "RSS" ]
+  page: [ "HTML" ]

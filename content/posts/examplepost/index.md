@@ -6,7 +6,7 @@ author = "coolapso"
 description = "Hello world, welcome to your temrinal cv with blogging skills!"
 +++
 
-# Creating posts!
+## Creating posts!
 
 This hugo theme supports posts, you can write your posts in markdown then they will be rendered in markdown and shown by the `cat <postname>`  command
 
