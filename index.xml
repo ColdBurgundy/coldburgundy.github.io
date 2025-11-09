@@ -1,6 +1,77 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Draktharr Lab</title><link>https://coldburgundy.github.io/</link><description>Recent content on Draktharr Lab</description><generator>Hugo</generator><language>en</language><lastBuildDate>Thu, 19 Jun 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://coldburgundy.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>Your terminal blog</title><link>https://coldburgundy.github.io/posts/yourterminalblog/</link><pubDate>Thu, 19 Jun 2025 00:00:00 +0000</pubDate><guid>https://coldburgundy.github.io/posts/yourterminalblog/</guid><description>&lt;p&gt;Your terminal CV is now also a blog!&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Draktharr Lab</title><link>https://coldburgundy.github.io/</link><description>Recent content on Draktharr Lab</description><generator>Hugo</generator><language>en</language><lastBuildDate>Sun, 09 Nov 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://coldburgundy.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>$12. [BOJ] 31095 등수</title><link>https://coldburgundy.github.io/posts/untitled_cs/boj/test/</link><pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate><guid>https://coldburgundy.github.io/posts/untitled_cs/boj/test/</guid><description>&lt;figure&gt;&lt;img src="posts/test/images/31095.png"
+ alt="terminal"&gt;
+&lt;/figure&gt;
+
+&lt;h3 id="prob--등수"&gt;Prob : &lt;a href="https://www.acmicpc.net/problem/31095"&gt;등수&lt;/a&gt;&lt;/h3&gt;
+&lt;h3 id="sol"&gt;Sol&lt;/h3&gt;
+&lt;p&gt;N과 K에 따라 금성이의 대회 결과 경우를 알아보자. 아래에서 설명할 때 부등호는 학생들의 점수의 크기를 비교하는 용도로 쓰겠다. 금성이를 A로 표현하겠다.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;N = 1일 때
+&lt;ol&gt;
+&lt;li&gt;K = 1 : 1가지&lt;br&gt;
+1명 중에서 1등을 하는 경우는 당연히 1개밖에 없다.
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;A&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;N = 2일 때
+&lt;ol&gt;
+&lt;li&gt;K = 1 : 2가지
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;A&lt;/strong&gt; = B&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;A&lt;/strong&gt; &amp;gt; B&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;K = 2 : 1
+&lt;ul&gt;
+&lt;li&gt;B &amp;gt; &lt;strong&gt;A&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;N = 3일 때
+&lt;ol&gt;
+&lt;li&gt;K = 1 : 6가지
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;A&lt;/strong&gt; = B = C&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;A&lt;/strong&gt; = B &amp;gt; C&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;A&lt;/strong&gt; = C &amp;gt; B&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;A&lt;/strong&gt; &amp;gt; B = C&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;A&lt;/strong&gt; &amp;gt; B &amp;gt; C&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;A&lt;/strong&gt; &amp;gt; C &amp;gt; B&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;K = 2 : 4가지
+&lt;ul&gt;
+&lt;li&gt;B &amp;gt; &lt;strong&gt;A&lt;/strong&gt; = C&lt;/li&gt;
+&lt;li&gt;C &amp;gt; &lt;strong&gt;A&lt;/strong&gt; = B&lt;/li&gt;
+&lt;li&gt;B &amp;gt; &lt;strong&gt;A&lt;/strong&gt; &amp;gt; C&lt;/li&gt;
+&lt;li&gt;C &amp;gt; &lt;strong&gt;A&lt;/strong&gt; &amp;gt; B&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;K = 3 : 3가지
+&lt;ul&gt;
+&lt;li&gt;B = C &amp;gt; &lt;strong&gt;A&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;B &amp;gt; C &amp;gt; &lt;strong&gt;A&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;C &amp;gt; B &amp;gt; &lt;strong&gt;A&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;N = 4일 때(예제입력1을 통해 가짓수만 적어두겠다.)
+&lt;ol&gt;
+&lt;li&gt;K = 1 : 26가지&lt;/li&gt;
+&lt;li&gt;K = 2 : 18가지&lt;/li&gt;
+&lt;li&gt;K = 3 : 18가지&lt;/li&gt;
+&lt;li&gt;k = 4 : 13가지&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;N과 K에 대해 (N, K)라고 했을 때, dp(N, K)를 N명 중 금성이가 K등을 할 수 있는 경우의 수를 저장하는 테이블로 설정해보자. 열을 N, 행을 K로 표현하겠다.&lt;/p&gt;</description></item><item><title>Your terminal blog</title><link>https://coldburgundy.github.io/posts/yourterminalblog/</link><pubDate>Thu, 19 Jun 2025 00:00:00 +0000</pubDate><guid>https://coldburgundy.github.io/posts/yourterminalblog/</guid><description>&lt;p&gt;Your terminal CV is now also a blog!&lt;/p&gt;
 &lt;p&gt;To start blogging with it please be sure to read the docs and the &amp;ldquo;Hello World&amp;rdquo; post.&lt;/p&gt;
-&lt;p&gt;do &lt;strong&gt;cat examplepost&lt;/strong&gt; to read it&lt;/p&gt;</description></item><item><title>Hello World</title><link>https://coldburgundy.github.io/posts/examplepost/</link><pubDate>Wed, 18 Jun 2025 00:00:00 +0000</pubDate><guid>https://coldburgundy.github.io/posts/examplepost/</guid><description>&lt;h1 id="creating-posts"&gt;Creating posts!&lt;/h1&gt;
+&lt;p&gt;do &lt;strong&gt;cat examplepost&lt;/strong&gt; to read it&lt;/p&gt;</description></item><item><title>Hello World</title><link>https://coldburgundy.github.io/posts/examplepost/</link><pubDate>Wed, 18 Jun 2025 00:00:00 +0000</pubDate><guid>https://coldburgundy.github.io/posts/examplepost/</guid><description>&lt;h2 id="creating-posts"&gt;Creating posts!&lt;/h2&gt;
 &lt;p&gt;This hugo theme supports posts, you can write your posts in markdown then they will be rendered in markdown and shown by the &lt;code&gt;cat &amp;lt;postname&amp;gt;&lt;/code&gt; command&lt;/p&gt;
 &lt;h2 id="markdown-elements"&gt;markdown elements&lt;/h2&gt;
 &lt;p&gt;All markdown elements will be rendered to html by hugo&lt;/p&gt;

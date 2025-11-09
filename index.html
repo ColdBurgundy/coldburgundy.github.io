@@ -1,5 +1,5 @@
-<!doctype html><html xmlns=http://www.w2.org/1999/xhtml><html lang=en><head><meta name=generator content="Hugo 0.152.2"><meta charset=utf-8><title>Draktharr Lab</title><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="My terminal cv"><meta property="og:title" content="Draktharr Lab"><meta property="og:type" content="website"><meta property="og:url" content="https://coldburgundy.github.io/"><link rel=sitemap type=application/xml title=Sitemap href><link rel=canonical href=https://coldburgundy.github.io/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/site.webmanifest><link rel=mask-icon href=/safari-pinned-tab.svg color><link rel="shortcut icon" href=/favicon.ico><meta name=msapplication-TileColor content><script src=https://cdn.jsdelivr.net/npm/jquery></script><script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.42.2/js/jquery.terminal.min.js></script><script src=https://cdn.jsdelivr.net/npm/jquery.terminal/js/less.min.js></script><script src=https://unpkg.com/jquery.terminal/js/autocomplete_menu.js></script><link href=/css/terminal.local.css rel=stylesheet><style>body{width:100%;font-size:18px}</style></head><body><script>jQuery(document).ready(function(e){var o,a,r,c,l,d,u,h,m,f,v,b,s=!1,t={help:"shows help",less:"Use less as output method",whois:"list basic details",social:"list social networks",work:"list work experience",education:"list education",skills:"list core skills",softskills:"list soft skills",languages:"list spoken languages",projects:"list projects",certifications:"list certifications",newcommand:"This Section can have a different command name",version:"Current version",posts:"List all posts",ls:"List all posts",cat:"Open a post",all:"Show all details about me"};function n(e){var t=Math.round(e/10),n=Array(t+1).join("&#9611;"),s=Array(11-t).join("&#9617;");return n+s}function p(e,t){return e+" ".repeat(t-e.length)}function _(){let n=Math.max(...Object.keys(t).map(e=>e.length)),e="";for(let s in t)t.hasOwnProperty(s)&&(e+=` ${p(s,n)}	${t[s]}
-`);return e}v=`
+<!doctype html><html xmlns=http://www.w2.org/1999/xhtml><html lang=en><head><meta name=generator content="Hugo 0.152.2"><meta charset=utf-8><title>Draktharr Lab</title><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="My terminal cv"><meta property="og:title" content="Draktharr Lab"><meta property="og:type" content="website"><meta property="og:url" content="https://coldburgundy.github.io/"><link rel=sitemap type=application/xml title=Sitemap href><link rel=canonical href=https://coldburgundy.github.io/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/site.webmanifest><link rel=mask-icon href=/safari-pinned-tab.svg color><link rel="shortcut icon" href=/favicon.ico><meta name=msapplication-TileColor content><script src=https://cdn.jsdelivr.net/npm/jquery></script><script src=https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.42.2/js/jquery.terminal.min.js></script><script src=https://cdn.jsdelivr.net/npm/jquery.terminal/js/less.min.js></script><script src=https://unpkg.com/jquery.terminal/js/autocomplete_menu.js></script><link href=/css/terminal.local.css rel=stylesheet><style>body{width:100%;font-size:18px}</style><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js onload='renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}]})'></script><link rel=stylesheet href=https://unpkg.com/@sakun/system.css><link rel=stylesheet href=/css/system.local.css><script defer src=/js/custom-modal.js></script><link rel=stylesheet href=/css/toc-sidebar.css><script defer src=/js/toc-sidebar.js></script></head><body><script>jQuery(document).ready(function(e){var n,s,a,r,l,d,u,h,f,_,t="~",c=!1,o={help:"shows help",about:"shows details about me",ls:"list categories or posts (e.g., 'ls untitled_cs')",cd:"change directory (e.g., 'cd untitled_cs')",cat:"open a post (e.g., 'cat untitled_cs/os/post-name')",less:"use less as output method",clear:"clear the screen",exit:"exit the terminal"};function w(e){var t=Math.round(e/10),n=Array(t+1).join("&#9611;"),s=Array(11-t).join("&#9617;");return n+s}function g(e,t){return e+" ".repeat(t-e.length)}function y(){let t=Math.max(...Object.keys(o).map(e=>e.length)),e="";for(let n in o)o.hasOwnProperty(n)&&(e+=` ${g(n,t)}	${o[n]}
+`);return e}f=`
 [[b;white;]usage:]
 
  <command> - execute the command
@@ -7,82 +7,41 @@
 
 
 [[b;white;]Available commands:]
-`+_(),c=[`[[b;grey;]Name:]			Kim
-[[b;grey;]Profession:]		Unknown
-[[b;grey;]Location:]		Somewhere
-[[b;grey;]Email:]			kkkk@cau.ac.kr
-[[b;grey;]Homepage:]		Null
-Just student
-\r`];function g(){var t=!1;let e={github:"https://github.com",instagram:"https://instagram.com"};socialText=[];for(let n in e)if(e.hasOwnProperty(n))if(t)socialText.push(e[n]);else{let t=Math.max(...Object.keys(e).map(e=>e.length));socialText.push(`${p(n,t)}	${e[n]}`)}return socialText}function y(t){e.ajax({url:"posts/",type:"GET",success:function(e){t.echo(e,{raw:!0})},error:function(){t.echo("Error: Could not load posts data")}})}function j(t,n){url="/posts/"+n+"/",e.ajax({url,type:"GET",success:function(e){t.echo(e,{raw:!0})},error:function(){t.echo("Error: Could not load post "+n)}})}h=[`---
-[[b;grey;]Example Cert]
-Date of Completion
-Example Certifying Company
-Badge: 	https://www.link.to.badge
-\r`],m=[`---
-[[b;red;]Job With Red Title]
--
-somewhere
-August 2010 - Present
+`+y(),l=[`
+[[b;white;]About Me]
+`,"ColdBurgundy's Blog.","Contact: kkkk@cau.ac.kr",'CV: <a href="/my-cv.pdf" target="_blank">my-cv.pdf</a>'],h=[" about"," untitled_cs"," untitled_life"," projects"],d=[`
+[[b;white;]Categories in untitled_cs:]
+`," os"," csapp"," clrs"," boj"],r=[`
+[[b;white;]Categories in untitled_life:]
+`," (아직 게시물이 없습니다.)"],u=[`
+[[b;white;]Projects:]
+`," (아직 게시물이 없습니다.)"];function p(t,n,s){var o="/posts/";n&&(n=n.replace(/^\/+|\/+$/g,""),o="/posts/"+n+"/"),e.ajax({url:o,type:"GET",success:function(o){var a,r,c,i=[];try{r=e("<div/>").html(o),a=r.find("article a, main a"),a.length===0&&(a=r.find("li a")),a.each(function(){var t=e(this).text().trim();t&&i.indexOf(t)===-1&&i.push(t)})}catch{t.error("Error parsing post list HTML.")}s?echo_ls_al(t,n,i,"d"):i.length>0?(c=i.map(function(e){return`[[b;blue;]${e}/]`}),echoArray(c)):t.echo("")},error:function(){t.echo("")}})}function v(t,n){n=n.replace(/^\/+|\/+$/g,"");var s="/posts/"+n+"/";e.ajax({url:s,type:"GET",success:function(e){b(e,n)},error:function(){t.echo("Error: Could not load post "+n)}})}a=!1,s=[],n=null,a=!1,s=[],n=null;async function b(t,s){n||(n=e(".terminal").data("terminal"));try{const l=new DOMParser,i=l.parseFromString(t,"text/html"),r=i.querySelector("article")||i.querySelector("main")||i.body;let n="<ul>";const d=r.querySelectorAll("h2, h3");let o=!1;d.forEach((e,t)=>{const s="toc-header-"+t;e.setAttribute("id",s);const i=e.tagName.toLowerCase(),a=e.textContent||"Untitled Section";i==="h2"?(o&&(n+="</ul></li>"),n+=`<li><a href="#${s}">${a}</a>`,o=!0,n+="<ul>"):i==="h3"&&(o||(n+="<li><ul>",o=!0),n+=`<li><a href="#${s}">${a}</a></li>`)}),o&&(n+="</ul></li>"),n+="</ul>";const e=document.createElement("div");e.className="vim-post-overlay",e.style.position="fixed",e.style.top="0",e.style.left="0",e.style.width="100vw",e.style.height="100vh",e.style.zIndex="9998",e.style.background="#ccc",e.innerHTML=`
+                <div class="window active" style="width: 100%; height: 100%; margin: 0; border-radius: 0;">
+                    
+                    <div class="title-bar">
+                        <button aria-label="Close" class="close"></button>
+                        <h1 class="title">${s}.md (Read Only)</h1>
+                        <button aria-label="Resize" disabled class="hidden"></button>
+                    </div>
 
-Some description about this red title job\r`,`---
-[[b;purple;]Job with purple title]
--
-somewhere elese
-July 2000  - July 2010
+                    <div class="window-body window-body-with-toc" style="height: calc(100% - 28px); padding: 0; display: flex; flex-direction: row;">
+                        
+                        <nav class="toc">
+                            ${n}
+                            <svg class="toc-marker" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke="#444" stroke-width="3" fill="transparent" stroke-dasharray="0, 0, 0, 1000" stroke-linecap="round" stroke-linejoin="round" transform="translate(-0.5, -0.5)" />
+                            </svg>
+                        </nav>
+                        
+                        <article class="contents">
+                            <div class="paper">
+                                ${r.innerHTML}
+                            </div>
+                        </article>
 
-Some description about this purple job\r`],f=[`---
-[[b;red;]Red Color training]
-June 2019 - July 2019
-Descrption about red color trianing
-\r`,`---
-[[b;grey;]Default color training]
-Sept 2004 - Jun 2008
-\r`],u=[`---
-[[b;red;]Project Red]
-since 2019
-https://example.com
-Describing red stuff
-\r`,`---
-[[b;blue;]Project Blue]
-since 2016
-https://example.com/blue
-\r`,`---
-[[b;grey;]Project Default]
-Since 2017
-https://example.com/default
-\r`],d=[`[[b;grey;]Skill 1:]
-`+n(90)+`90%
-\r`,`[[b;grey;]Skill 2:]
-`+n(30)+`30%
-\r`,`[[b;blue;]Skill 3:]
-`+n(50)+`50%
-Skill names can have colors too
-\r`],o=[`[[b;red;]SoftSkill 1:]
-`+n(80)+`80%
-\r`,`[[b;grey;]SoftSkill 2:]
-`+n(90)+`90%
-Description
-\r`],a=[`[[b;Blue;]English:]
-`+n(50)+`50%
-\r`,`[[b;grey;]Gibberish:]
-`+n(100)+`100%
-pasghettipigglywiggly
-\r`],l=[`[[b;teal;]This Section can have a different command name]
-[[;orange;]Here the title and the content can have different colors
-The content can be multi
-
-line
-
-And spaces       will be respected as well
-This section will have the default command: misc
-but you can name it something else with the property
-commandName: <String>
-Give it a shot and try and uncomment the line 
-commandName: newcommand
-now instead of misc you can execute the newcommand for this section
-Auto completion will know it too! :D
-]
-`],r=`        _______            
+                    </div>
+                </div>
+            `,document.body.appendChild(e),a=!0,e.querySelector(".close").addEventListener("click",()=>{m()});const u=e.querySelector(".toc"),c=e.querySelector(".contents");typeof initTocSidebar=="function"&&initTocSidebar(u,c),window.renderMathInElement&&window.renderMathInElement(c,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}]})}catch(e){n&&n.error(`Failed to display post viewer: ${e.message}`)}}function j(){document.addEventListener("keydown",e=>{if(!a)return;if(e.key==="Shift")return;if(e.key===":"){s=[":"],e.preventDefault();return}if(e.key.toLowerCase()==="q"&&s[0]===":"){s.push("q"),s.join("")===":q"&&(m(),e.preventDefault());return}s=[]})}function m(){const e=document.querySelector(".vim-post-overlay");e&&e.remove(),a=!1,s=[],n&&n.focus()}j(),_=`        _______            
        |       |           
        |       |           
        |_______|_______    
@@ -94,10 +53,12 @@ Auto completion will know it too! :D
 |______|_______|_______|   
 [[;red;]May the source be with you]
 [[;grey;]https://github.com/coolapso/hugo-theme-terminalcv
-`,b=[c,g(),m,f,d,o,a,u,h,l,r],e("body").terminal(function(e,n){var O,w=!1;function p(e){if(w)n.less(e,{onExit:function(){n.set_command(""),n.scroll_to_bottom()}});else for(i=0;i<e.length;i+=1)n.echo(e[i])}function _(e,t){var s,o=Math.round(t*e/100),i="",n="";for(s=o;s--;)n+="=";n.length>0&&(n=n.replace(/=$/,">"));for(s=t-o;s--;)i+=" ";return"["+n+i+"] "+e+"%"}function x(){var e=0,t=30;prompt=n.get_prompt(),string=_(0,t),n.set_prompt(_),s=!0,function o(){string=_(e++,t),n.set_prompt(string),e<100?timer=setTimeout(o,10):(n.echo(_(e,t)+" [[b;green;]OK]").set_prompt(prompt),s=!1)}()}switch(t=e.split(/[ ]+/),t[0]=="less"&&(w=!0,t.shift()),t[0]){case"whois":p(c);break;case"social":p(g());break;case"work":p(m);break;case"education":p(f);break;case"skills":w=!0,p(d);break;case"softskills":p(o);break;case"languages":p(a);break;case"projects":p(u);break;case"certifications":p(h);break;case"newcommand":p(l);break;case"help":case"?":n.echo(v);break;case"all":p(b.flat(1));break;case":(){:|:&};:":n.echo("nice try");break;case"source":n.echo(r);break;case"exit":n.echo("Terminating session, thanks for visiting"),x(),setTimeout(function(){n.pause(),n.clear(),n.echo("[Session completed, the browserwindow can be safely closed]")},2e3);break;case"version":n.echo("2.0.0");break;case"cat":t.length<2?n.echo("Usage: cat <filename>"):(O=t[1],j(n,O));break;case"posts":case"ls":y(n);break;case"":break;default:n.echo(`
+`,e("body").terminal(function(e,n){try{var s,o,m,g,j,_,w,O,x=!1;function a(e){if(x)n.less(e,{onExit:function(){n.set_command(""),n.scroll_to_bottom()}});else for(i=0;i<e.length;i+=1)n.echo(e[i])}function y(e,t){var s,o=Math.round(t*e/100),i="",n="";for(s=o;s--;)n+="=";n.length>0&&(n=n.replace(/=$/,">"));for(s=t-o;s--;)i+=" ";return"["+n+i+"] "+e+"%"}function C(){var e=0,t=30,o=n.get_prompt(),s=y(0,t);n.set_prompt(y),c=!0,function i(){s=y(e++,t),n.set_prompt(s),e<100?timer=setTimeout(i,10):(n.echo(y(e,t)+" [[b;green;]OK]").set_prompt(o),c=!1)}()}function b(e,t,n,s){var i="user".padEnd(8),a="user".padEnd(8),r="drwxr-xr-x",c="-rw-r--r--",l="Nov 09 21:45";function o(e,t){s==="d"&&e!=="about"&&(t="d");var n=t==="d"?r:c,o=String(t==="d"?4096:1024).padStart(6),d=t==="d"?`[[b;blue;]${e}/]`:e;return`${n}  1 ${i} ${a} ${o} ${l} ${d}`}e.echo(`total ${n.length+2}`),e.echo(o(".","d")),e.echo(o("..","d")),n.forEach(function(t){t=t.trim();var n=t==="about"?"f":"d";e.echo(o(t,n))})}switch(o=e.split(/[ ]+/),o[0]=="less"&&(x=!0,o.shift()),o[0]){case"cd":o.length<2||o[1]==="~"||o[1]==="~/"?t="~":o[1]===".."?t==="~"||(O=t.split("/"),O.pop(),t=O.join("/")||"~"):(_=o[1].replace(/\/+$/,""),_.startsWith("~/")?t=_:t=(t==="~"?"~":t)+"/"+_),n.set_prompt(n.option("prompt"));break;case"ls":case"posts":m=o.includes("-al"),w=o.find(function(e){return e!=="ls"&&e!=="posts"&&e!=="-al"}),s=w||t,s=s.replace(/\/+$/,""),s.startsWith("~/")?s=s.substring(2):t!=="~"&&!w?s=t.substring(2):t!=="~"&&w&&(s=t.substring(2)+"/"+s),s==="~"||s===""?m?b(n,s,h):(n.echo(`
+[[b;white;]Categories:]
+`),a(h)):s.match(/^untitled_cs$/)?m?b(n,s,d.slice(1)):a(d):s.match(/^untitled_life$/)?m?b(n,s,r.slice(1)):a(r):s.match(/^projects$/)?m?b(n,s,u.slice(1)):a(u):s.match(/^about$/)?m?b(n,s,["about"]):a(l):p(n,s,m);break;case"cat":o.length<2?n.error("Usage: cat <path/to/post>"):(j=o.slice(1).join("/"),j.startsWith("~/")?g=j.substring(2):t==="~"?g=j:g=t.substring(2)+"/"+j,g==="about"?a(l):v(n,g));break;case"about":a(l);break;case"untitled_cs":a(d);break;case"untitled_life":a(r);break;case"projects":a(u);break;case"help":case"?":n.echo(f);break;case"exit":n.echo("Terminating session, thanks for visiting"),C(),setTimeout(function(){n.pause(),n.clear(),n.echo("[Session completed, the browserwindow can be safely closed]")},2e3);break;case"":break;default:n.echo(`
 unknown command: `+e+`
 please type 'help' or '?' for a list of available commands
-`)}},{greetings:!1,onInit:function(e){e.pause(),e.typing("echo",1,`User request detected
+`)}}catch(e){n.echo("[[;red;]JavaScript Error: "+e.message+"]")}},{greetings:!1,onInit:function(e){e.pause(),e.typing("echo",1,`User request detected
 Reserving Cloud Resources
 ............................
 Cloud Network ready
@@ -140,4 +101,4 @@ Boot Complete, accepting user input.
 Welcome to my online resume
 
 Type 'help' for a list of available commands
-]`)}),e.resume()},prompt:"[[;red;][][[;pink;]user@DraktharrLab][[;red;]\\]][[;grey;]-][[;red;][][[;blue;]~/home][[;red;]\\]][[;orange;]: ]",keydown:function(e,t){if(s)return e.which==68&&e.ctrlKey&&(clearTimeout(timer),s=!1,t.echo(string+" [[b;red;]FAIL]").set_prompt(prompt)),!1},autocompleteMenu:!0,completion:Object.keys(t)})})</script></body></html>
+]`)}),e.resume()},prompt:function(e){var m="[",v="red",l="user@DraktharrLab",i="pink",a="]",r="red",c="-",u="grey",s="[",d="red",h="blue",o="]",f="red",p=": ",g="orange",n="";n+="[[;"+v+";]"+m+"]",n+="[[;"+i+";]"+l+"]",n+="[[;"+r+";]"+a+"]",n+="[[;"+u+";]"+c+"]",n+="[[;"+d+";]"+s+"]",n+="[[;"+h+";]"+t+"]",n+="[[;"+f+";]"+o+"]",n+="[[;"+g+";]"+p+"]",e(n)},keydown:function(e,t){if(c)return e.which==68&&e.ctrlKey&&(clearTimeout(timer),c=!1,t.echo(string+" [[b;red;]FAIL]").set_prompt(t.option("prompt"))),!1},autocompleteMenu:!0,completion:Object.keys(o)})})</script></body></html>

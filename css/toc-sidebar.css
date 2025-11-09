@@ -1,0 +1,154 @@
+/* static/css/toc-sidebar.css (수정본) */
+
+:root {
+  --menuWidth: 14em;
+  --menuPaddingLeft: 1em;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.window-body-with-toc {
+  display: flex;
+  flex-direction: row;
+  background: white;
+  padding: 0;
+  height: 100%;
+}
+
+.toc {
+  position: relative; /* z-index가 작동하도록 relative 설정 */
+  flex-shrink: 0; 
+  top: 0;
+  left: 0;
+  padding: 1em;
+  width: var(--menuWidth);
+  margin-left: var(--menuPaddingLeft);
+  line-height: 2;
+  overflow-y: auto;
+
+  font-size: 0.8em;
+}
+
+.toc ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  
+  /* --- [수정 1] ---
+     링크(ul)가 마커(svg)보다 위에 오도록 z-index를 추가합니다. */
+  position: relative;
+  z-index: 2;
+  /* --- [수정 끝] --- */
+}
+
+.toc ul ul {
+  padding-left: 2em;
+}
+
+.toc li a {
+  display: inline-block;
+  color: #aaa;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.toc li.visible > a {
+  color: #111;
+  transform: translate(5px);
+}
+
+.toc-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  /* --- [수정 1] ---
+     z-index를 -1 (배경 뒤)에서 1 (배경 앞)로 변경합니다. */
+  z-index: 1;
+  /* --- [수정 끝] --- */
+}
+
+.toc-marker path {
+  transition: all 0.3s ease;
+  
+  /* --- [추가] ---
+     HTML에서 가져온 SVG 속성을 CSS에도 명시해줍니다. */
+  stroke: #444;
+  stroke-width: 3;
+  fill: transparent;
+  /* --- [추가 끝] --- */
+}
+
+.contents {
+  flex-grow: 1;
+  overflow-y: auto;
+  height: 100%;
+  padding: 1em;
+  font-size: 1.0em;
+  font-family: 'ChicagoFLF', sans-serif;
+  color: black;
+  
+
+  padding: 1em 0em; /* "종이" 주변의 여백 */
+}
+
+.contents img {
+  max-width: 100%;
+}
+
+.contents .code-block {
+  white-space: pre;
+  overflow: auto;
+  max-width: 100%;
+}
+
+.contents .code-block code {
+  display: block;
+  background-color: #f9f9f9;
+  padding: 10px;
+}
+
+.contents .code-inline {
+  background-color: #f9f9f9;
+  padding: 4px;
+}
+
+.contents h2,
+.contents h3 {
+  padding-top: 1em;
+  color: black;
+}
+
+@media screen and (max-width: 1200px) {
+  .contents {
+    font-size: 1.1em;
+  }
+}
+
+
+.paper {
+  background: white;
+  border: 1px solid #000000; /* 테두리 유지 */
+
+  /* --- [수정] --- */
+  /* 4px 오른쪽, 4px 아래쪽, 12px 흐림, 20% 농도의 그림자 */
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1); 
+
+  padding: 3em; 
+  font-size: 17px;
+  margin: 0 auto; /* 좌우 중앙 정렬 */
+
+}
+.paper h1 {
+    font-size: 2em; /* 원하는 크기로 조절 */
+}
+.paper h2 {
+    font-size: 1.5em; /* 원하는 크기로 조절 */
+}
+.paper h3 {
+    font-size: 1.2em; /* 원하는 크기로 조절 */
+}
