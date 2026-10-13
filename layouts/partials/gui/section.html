@@ -1,0 +1,38 @@
+{{- /* 카테고리(섹션) 페이지 */ -}}
+{{- $color := partial "gui/cat-color.html" . -}}
+{{- $all := .RegularPagesRecursive.ByDate.Reverse -}}
+{{- $subs := .Sections.ByWeight -}}
+{{- partial "gui/page-hero.html" (dict
+    "page" .
+    "eyebrow" (partial "gui/badge.html" .)
+    "title" .Title
+    "desc" .Description
+    "color" $color
+    "stats" (slice (dict "label" "Posts" "value" (len $all)) (dict "label" "Sub-categories" "value" (len $subs)))
+) -}}
+
+<div class="container section-page">
+  {{- with $subs }}
+  <nav class="subcats" aria-label="하위 카테고리">
+    {{- range . }}
+    <a class="subcat" href="{{ .RelPermalink }}" style="--cat: {{ partial "gui/cat-color.html" . | safeCSS }}">
+      <span class="subcat__badge">{{ partial "gui/badge.html" . }}</span>
+      <span class="subcat__name">{{ .Title }}</span>
+      <span class="subcat__count">{{ len .RegularPagesRecursive }}</span>
+    </a>
+    {{- end }}
+  </nav>
+  {{- end }}
+
+  {{- $pager := .Paginate $all }}
+  {{- if $pager.Pages }}
+  <div class="post-list">
+    {{- range $pager.Pages }}
+    {{ partial "gui/card.html" (dict "page" . "variant" "row" "level" 2) }}
+    {{- end }}
+  </div>
+  {{ partial "gui/pagination.html" $pager }}
+  {{- else }}
+  {{ partial "gui/empty.html" "이 카테고리에는 아직 게시물이 없습니다." }}
+  {{- end }}
+</div>

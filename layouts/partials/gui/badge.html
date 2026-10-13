@@ -1,0 +1,13 @@
+{{- /* 카테고리 배지: front matter 의 badge, 없으면 제목에서 만듭니다.
+       한글 제목은 낱말 중간에서 자르지 않도록 첫 낱말이 4글자 이하면 그대로, 영문은 앞 3글자를 대문자로. 입력: 섹션 페이지 */ -}}
+{{- $t := .Title -}}
+{{- $b := .Params.badge -}}
+{{- if not $b -}}
+  {{- if findRE `\p{Hangul}` $t 1 -}}
+    {{- $word := index (split (trim $t " ") " ") 0 -}}
+    {{- $b = cond (le (strings.RuneCount $word) 4) $word (substr $word 0 2) -}}
+  {{- else -}}
+    {{- $b = upper (substr $t 0 3) -}}
+  {{- end -}}
+{{- end -}}
+{{- return $b -}}

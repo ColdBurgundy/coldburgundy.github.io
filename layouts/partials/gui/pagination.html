@@ -1,0 +1,22 @@
+{{- $p := . -}}
+{{- if gt $p.TotalPages 1 -}}
+{{- $cur := $p.PageNumber -}}
+{{- $last := $p.TotalPages -}}
+<nav class="pager" aria-label="페이지">
+  {{- with $p.Prev }}<a class="pager__btn" href="{{ .URL }}" rel="prev">← Prev</a>{{ else }}<span class="pager__btn is-disabled">← Prev</span>{{ end }}
+  <ol class="pager__pages">
+    {{- $gap := false -}}
+    {{- range $p.Pagers }}
+      {{- $n := .PageNumber -}}
+      {{- if or (eq $n 1) (eq $n $last) (le (math.Abs (sub $n $cur)) 1) }}
+        {{- $gap = false }}
+    <li><a href="{{ .URL }}"{{ if eq $n $cur }} aria-current="page" class="is-current"{{ end }}>{{ printf "%02d" $n }}</a></li>
+      {{- else if not $gap }}
+        {{- $gap = true }}
+    <li class="pager__gap" aria-hidden="true">…</li>
+      {{- end }}
+    {{- end }}
+  </ol>
+  {{- with $p.Next }}<a class="pager__btn" href="{{ .URL }}" rel="next">Next →</a>{{ else }}<span class="pager__btn is-disabled">Next →</span>{{ end }}
+</nav>
+{{- end -}}

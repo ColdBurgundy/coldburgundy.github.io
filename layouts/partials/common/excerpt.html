@@ -1,0 +1,61 @@
+{{- /*
+  글 요약 (평문): description 이 있으면 그것, 없으면 Markdown 원문에서 본문 문장만 뽑아 만듭니다.
+  카드 · <meta description> · og/JSON-LD · index.json(CLI 와 GUI 검색)이 모두 이 결과를 씁니다.
+  1) Markdown 단계: 코드 블록, shortcode(영어 번역 details 는 통째로), 주석, 수식, 이미지, 각주 표시를 걷어내고
+     링크는 글자만 남깁니다. (상대 경로 링크·이미지를 목록 페이지 기준으로 풀다가 경고가 나지 않도록)
+  2) markdownify 로 HTML 을 만든 뒤 소제목 · 표 · 들여쓴 코드 · <details> 를 걷어냅니다. (setext 제목, 파이프 없는 표도 함께)
+  3) 블록 사이에 공백을 넣고 태그를 지워 평문으로 만듭니다.
+  - \$ (달러 기호)와 인라인 코드 속 $ 는 수식으로 오인하지 않도록 잠시 U+E000 으로 바꿔 두었다가 마지막에 $ 로 되돌립니다.
+  - 짧은 인라인 수식은 common/tex-plain.html 로 다듬어 글자로 남기고($O(n^2)$ → O(n²), $\alpha$ → α),
+    긴 수식 · 블록 수식은 뺍니다. 뺀 자리는 U+E004 로 표시해 두었다가 문장부호에 붙입니다('내용 $…$.' → '내용.').
+*/ -}}
+{{- $s := .Description -}}
+{{- if not $s -}}
+  {{- $dollar := "\uE000" -}}
+  {{- $c := .RawContent -}}
+
+  {{- /* 1) Markdown 단계 */ -}}
+  {{- $c = replaceRE "(?ms)^[ \t>]*````.*?^[ \t>]*````" " " $c -}}
+  {{- $c = replaceRE "(?ms)^[ \t>]*```.*?^[ \t>]*```" " " $c -}}
+  {{- $c = replaceRE "(?ms)^[ \t>]*~~~.*?^[ \t>]*~~~" " " $c -}}
+  {{- $c = replaceRE `(?s)\{\{[<%]\s*details\b.*?\{\{[<%]\s*/\s*details\s*[>%]\}\}` " " $c -}}
+  {{- $c = replaceRE `(?s)\{\{[<%].*?[>%]\}\}` " " $c -}}
+  {{- $c = replaceRE `(?s)<!--.*?-->` " " $c -}}
+  {{- range findRE "`[^`\n]+`" $c -}}
+    {{- $c = replace $c . (replace . "$" $dollar) -}}
+  {{- end -}}
+  {{- $c = replace $c `\$` $dollar -}}
+  {{- $drop := "\uE004" -}}
+  {{- $c = replaceRE `(?s)\$\$.*?\$\$` (print " " $drop " ") $c -}}
+  {{- $c = replaceRE `(?s)\\\[.*?\\\]` (print " " $drop " ") $c -}}
+  {{- range findRE `(?s)\\\(.*?\\\)|\$(?:[^$\n]|\n[^$\n])+\$` $c -}}
+    {{- $tex := replaceRE `^(?:\$|\\\()|(?:\$|\\\))$` "" . -}}
+    {{- $plain := "" -}}
+    {{- if not (findRE `\\begin|\n` $tex 1) }}{{ $plain = partial "common/tex-plain.html" $tex }}{{ end -}}
+    {{- if gt (strings.RuneCount $plain) 32 }}{{ $plain = "" }}{{ end -}}
+    {{- $c = replace $c . (or $plain (print " " $drop " ")) -}}
+  {{- end -}}
+  {{- $c = replaceRE `(?m)^[ \t]*>[ \t]*\[![A-Za-z]+\][^\n]*` " " $c -}}
+  {{- $c = replaceRE `!\[[^\]]*\](?:\([^)]*\)|\[[^\]]*\])` " " $c -}}
+  {{- $c = replaceRE `(?m)^[ \t]{0,3}\[[^\]]+\]:.*$` " " $c -}}
+  {{- $c = replaceRE `\[\^[^\]]+\]` "" $c -}}
+  {{- $c = replaceRE `\[([^\]]+)\](?:\([^)]*\)|\[[^\]]*\])` "$1" $c -}}
+
+  {{- /* 2) HTML 단계 */ -}}
+  {{- $c = $c | markdownify | string -}}
+  {{- range slice "details" "figure" "table" "pre" "script" "style" -}}
+    {{- $c = replaceRE (printf `(?s)<%s\b.*?</%s>` . .) " " $c -}}
+  {{- end -}}
+  {{- $c = replaceRE `(?s)<h[1-6]\b.*?</h[1-6]>` " " $c -}}
+
+  {{- /* 3) 평문 */ -}}
+  {{- $c = replaceRE `</(?:p|li|t[dh]|tr|blockquote|div|summary|figcaption|dd|dt)>|<br\s*/?>` "$0 " $c -}}
+  {{- $c = $c | plainify | htmlUnescape -}}
+  {{- $c = replace $c $dollar "$" -}}
+  {{- /* 뺀 수식 자리: 빈 괄호는 지우고, 바로 뒤 문장부호에 붙인 뒤, 남은 자리는 공백으로 */ -}}
+  {{- $c = replaceRE (printf `[(\[][\s%s]*%s[\s%s]*[)\]]` $drop $drop $drop) "" $c -}}
+  {{- $c = replaceRE (printf `\s*%s[\s%s]*([.,!?;:])` $drop $drop) "$1" $c -}}
+  {{- $c = replace $c $drop " " -}}
+  {{- $s = replaceRE `[\s\x{00a0}]+` " " $c | replaceRE `^[\s.,!?;:]+` "" | strings.TrimSpace -}}
+{{- end -}}
+{{- return (truncate 160 $s | htmlUnescape) -}}

@@ -1,0 +1,69 @@
+{{- /*
+  본문 링크 주소를 글 기준 루트 경로로 풉니다. (CLI Mac 창 · RSS 처럼 다른 주소에서 보여도 깨지지 않게)
+  입력: dict "page" .PageInner "dest" "images/a.pdf"
+  반환: href 문자열
+  - 글 폴더(번들) 파일      images/a.pdf      → /posts/…/글/images/a.pdf  (RelPermalink 를 쓰므로 파일도 배포됨)
+  - 다른 글 폴더의 파일      ../다른-글/a.pdf  → /posts/…/다른-글/a.pdf   (마찬가지로 배포됨)
+  - 다른 글의 Markdown 파일  ../plain/index.md → /posts/…/plain/  (.MD 도 같음)
+  - 그 밖의 상대 경로        ../other/         → /posts/…/other/
+  - ?쿼리만 있는 링크        ?q=1#x            → /posts/…/글/?q=1#x
+  - #앵커만 있는 링크, 절대 URL, / 로 시작하는 경로는 그대로 둡니다. (/…/x.md 는 글 주소로 바꿈)
+  못 찾은 글 · 글 폴더 파일은 경고 → CI 빌드(--panicOnWarning) 실패. (그대로 두면 배포 뒤 404)
+*/ -}}
+{{- $page := .page -}}
+{{- $href := .dest -}}
+{{- $u := urls.Parse .dest -}}
+{{- if not $u.IsAbs -}}
+  {{- $base := "" -}}
+  {{- if hasSuffix (lower $u.Path) ".md" -}}
+    {{- with $page.GetPage $u.Path -}}
+      {{- $base = .RelPermalink -}}
+    {{- else -}}
+      {{- warnf "%s: 링크한 글 %q 를 찾지 못했습니다" $page.Path $u.Path -}}
+    {{- end -}}
+  {{- else if and $u.Path (not (hasPrefix $u.Path "/")) -}}
+    {{- with $page.Resources.Get (path.Clean $u.Path) -}}
+      {{- $base = .RelPermalink -}}
+    {{- else -}}
+      {{- /* 파일(확장자 있음)이면 어느 글 폴더의 것인지 찾아봅니다: 이 글 폴더, 또는 ../다른-글/… 의 앞부분이 가리키는 글 */ -}}
+      {{- $owner := "" -}}
+      {{- $file := "" -}}
+      {{- if and (path.Ext $u.Path) (not (hasSuffix $u.Path "/")) -}}
+        {{- if not (hasPrefix (path.Clean $u.Path) "../") -}}
+          {{- $owner = $page.Path -}}
+        {{- else -}}
+          {{- $dir := path.Dir (path.Clean $u.Path) -}}
+          {{- $rest := path.Base $u.Path -}}
+          {{- range seq 8 -}}
+            {{- if or (eq $dir ".") (eq $dir "..") (hasSuffix $dir "/..") }}{{ break }}{{ end -}}
+            {{- /* GetPage 는 상대 경로가 폴더(../글)일 때는 못 찾고 파일(../글/index.md)이어야 찾습니다 */ -}}
+            {{- with or ($page.GetPage (path.Join $dir "index.md")) ($page.GetPage (path.Join $dir "_index.md")) -}}
+              {{- $owner = .Path -}}
+              {{- with .Resources.Get $rest }}{{ $file = .RelPermalink }}{{ end -}}
+              {{- break -}}
+            {{- end -}}
+            {{- $rest = path.Join (path.Base $dir) $rest -}}
+            {{- $dir = path.Dir $dir -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if $file -}}
+        {{- $base = $file -}}
+      {{- else -}}
+        {{- $base = urls.JoinPath $page.RelPermalink $u.Path -}}
+        {{- if hasSuffix $u.Path "/" }}{{ $base = printf "%s/" (strings.TrimSuffix "/" $base) }}{{ end -}}
+        {{- with $owner -}}
+          {{- warnf "%s: 링크한 파일 %q 를 글 폴더(%s)에서 찾지 못했습니다" $page.Path $u.Path . -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- else if and (not $u.Path) $u.RawQuery -}}
+    {{- $base = $page.RelPermalink -}}
+  {{- end -}}
+  {{- with $base -}}
+    {{- $href = . -}}
+    {{- with $u.RawQuery }}{{ $href = printf "%s?%s" $href . }}{{ end -}}
+    {{- with $u.Fragment }}{{ $href = printf "%s#%s" $href . }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $href -}}

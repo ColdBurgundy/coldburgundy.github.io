@@ -1,0 +1,18 @@
+{{- /*
+  $...$ / $$...$$ ( \(...\) / \[...\] ) 를 빌드 때 KaTeX HTML 로 렌더링 (클라이언트 JS 불필요). \$ 로 쓰면 그냥 달러 기호.
+  - strict "ignore": $N명$ 처럼 수식 안에 섞인 한글도 글자로 렌더링 (KaTeX 기본값 "error" 는 빨간 오류 글씨가 됨)
+  - throwOnError true: 문법이 틀린 수식은 warnf 경고 → CI 빌드(--panicOnWarning)가 실패해서 배포되지 않음
+*/ -}}
+{{- $opts := dict "displayMode" (eq .Type "block") "output" "htmlAndMathml" "throwOnError" true "strict" "ignore" -}}
+{{- with try (transform.ToMath .Inner $opts) -}}
+  {{- with .Err -}}
+    {{- /* 템플릿 호출 경로는 걷어내고 KaTeX 메시지만 남깁니다. 위치는 "파일:줄:칸". */ -}}
+    {{- $msg := replaceRE `(?s)^.*?(KaTeX parse error)` "$1" (printf "%v" .) -}}
+    {{- $where := trim (printf "%v" $.Position) `"` | default $.Page.Path -}}
+    {{- warnf "%s: 수식을 렌더링하지 못했습니다: %s (수식: %s)" $where $msg $.Inner -}}
+    <code class="math-error">{{ $.Inner }}</code>
+  {{- else -}}
+    {{- .Value -}}
+    {{- $.Page.Store.Set "hasMath" true -}}
+  {{- end -}}
+{{- end -}}

@@ -1,0 +1,6 @@
+{{- /* 카테고리 칩. 입력: 섹션 페이지 */ -}}
+{{- if and . .IsSection (ne .RelPermalink (site.GetPage "/posts").RelPermalink) -}}
+<a class="chip" href="{{ .RelPermalink }}" style="--cat: {{ partial "gui/cat-color.html" . | safeCSS }}">
+  <span class="chip__bar" aria-hidden="true"></span>{{ .Title }}
+</a>
+{{- end -}}

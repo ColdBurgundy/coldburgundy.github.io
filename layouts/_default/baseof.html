@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w2.org/1999/xhtml">
-<html lang="{{ .Site.Language }}">
-    <head>
-        {{ partial "head.html" . }}
-    </head>
-        <body>
-        {{ block "body" . }}
-        {{ end }}
-        </body>
+<html lang="ko" class="gui{{ if site.Params.gui.formula1Font }} f1{{ end }}">
+<head>
+{{- partial "gui/head.html" . }}
+</head>
+<body class="gui kind-{{ .Kind }}{{ with .Section }} sec-{{ . }}{{ end }}">
+{{ partial "gui/header.html" . }}
+<main id="main" class="site-main" tabindex="-1">
+{{ block "main" . }}{{ end }}
+</main>
+{{ partial "gui/footer.html" . }}
+{{ partial "gui/scripts.html" . }}
+</body>
 </html>

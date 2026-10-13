@@ -1,58 +1,81 @@
-## Example Config file
 baseURL: "https://coldburgundy.github.io/"
-theme: "terminalcv"
 title: "Draktharr Lab"
+# CLI 는 hugo-theme-terminalcv(MIT, coolapso)를 바탕으로 재작성했습니다. 테마 레이아웃은 모두 이 저장소에 있으므로 테마 의존성은 없습니다.
+
+# 한국어 사이트 설정
+languageCode: "ko-KR"
+defaultContentLanguage: "ko"
+hasCJKLanguage: true     # 한글 글자 수/읽기 시간 계산
+timeZone: "Asia/Seoul"   # 날짜만 적은 글이 KST 자정 기준으로 발행되도록
+summaryLength: 40
+capitalizeListTitles: false   # 태그 이름을 적은 그대로 표시 (BOJ, DP …)
+enableRobotsTXT: true
+
+# 카테고리는 content/posts/ 아래 폴더 구조로 표현하므로 태그만 사용합니다.
+taxonomies:
+  tag: tags
+
+pagination:
+  pagerSize: 8
+
+outputs:
+  home: ["HTML", "RSS", "JSON"]   # JSON = /index.json (CLI 파일 트리 + GUI 검색 인덱스)
+  section: ["HTML", "RSS"]
+  page: ["HTML"]
 
 params:
-  version: "2.0.0"
-  description: "My terminal cv"
-  blog: true
+  description: "공부한 것과 좋아하는 것을 적어 두는 개인 기록이다."
+  mainSections: ["posts"]
 
+  author:
+    name: "ColdBurgundy"
+    bio: "Just student"
+    email: ""                         # 공개할 연락처가 생기면 적으세요. 비어 있으면 메일 링크를 표시하지 않습니다.
+    github: "https://github.com/ColdBurgundy"
+    cv: ""                            # static/ 에 PDF를 넣고 "/my-cv.pdf" 처럼 적으면 CLI about 에 링크가 나타납니다.
+
+  # ---------------------------------------------------------------
+  # CLI 모드 ( / )
+  # ---------------------------------------------------------------
   prompt:
     core:
       text: "user@DraktharrLab"
       color: "pink"
       before: "["
       beforeColor: "red"
-      after: '\]'
+      after: "]"
       afterColor: "red"
-      # separator: '-'
     separator:
       text: "-"
-      # color:
+      color: "grey"
     path:
       before: "["
       beforeColor: "red"
-      text: "~/home"
-      color: "blue"
-      after: '\]'
+      color: "#6ea8ff"
+      after: "]"
       afterColor: "red"
     extra:
       text: ": "
       color: "orange"
 
-  # promptColor: grey
-  # promptSimbols: ":~$"
-  # promptSimbolsColor: grey
-  # startxLocation: https://example.com
-  # useLess: true
-  listLS: true
-  #exitLocation: "about:blank"
-  exitMessage: "[Session completed, the browserwindow can be safely closed]"
-  source: true
-  #use a (blank character) if your first character of the ascii art is a whitespace
+  useLess: false
+  # exitLocation: "https://example.com"
+  exitMessage: "[Session completed, the browser window can be safely closed]"
+
+  # 첫 줄이 공백으로 시작하면 YAML이 들여쓰기로 인식하므로, 첫 줄은 공백 없이 시작해야 합니다.
   greeting: |
-    ________                __      __  .__                          .____          ___.    
-    ╲______ ╲____________  │  │ ___╱  │_│  │__ _____ ______________  │    │   _____ ╲_ │__  
-    │    │  ╲_  __ ╲__  ╲ │  │╱ ╱╲   __╲  │  ╲╲__  ╲╲_  __ ╲_  __ ╲ │    │   ╲__  ╲ │ __ ╲ 
-    │    `   ╲  │ ╲╱╱ __ ╲│    <  │  │ │   Y  ╲╱ __ ╲│  │ ╲╱│  │ ╲╱ │    │___ ╱ __ ╲│ ╲_╲ ╲
+    ________                __      __  .__                          .____          ___.
+    ╲______ ╲____________  │  │ ___╱  │_│  │__ _____ ______________  │    │   _____ ╲_ │__
+     │    │  ╲_  __ ╲__  ╲ │  │╱ ╱╲   __╲  │  ╲╲__  ╲╲_  __ ╲_  __ ╲ │    │   ╲__  ╲ │ __ ╲
+     │    `   ╲  │ ╲╱╱ __ ╲│    <  │  │ │   Y  ╲╱ __ ╲│  │ ╲╱│  │ ╲╱ │    │___ ╱ __ ╲│ ╲_╲ ╲
     ╱_______  ╱__│  (____  ╱__│_ ╲ │__│ │___│  (____  ╱__│   │__│    │_______ (____  ╱___  ╱
-            ╲╱           ╲╱     ╲╱           ╲╱     ╲╱                       ╲╱    ╲╱    ╲╱ 
+            ╲╱           ╲╱     ╲╱           ╲╱     ╲╱                       ╲╱    ╲╱    ╲╱
 
 
-    Welcome to my online resume
+    Draktharr Lab — 제목을 정하기엔 아직 이르다.
 
     Type 'help' for a list of available commands
+    Type 'gui' to switch to the graphical blog
 
   bootsequence: |
     User request detected
@@ -62,7 +85,7 @@ params:
     ........
     Cloud Instance ready
     .......................
-    Internet Breakout Ready, but Pong is preferred 
+    Internet Breakout Ready, but Pong is preferred
 
     Inititating CloudOS
     CloudOS Kernel Version 1.4.2: Sat February 29 23:21:41 CEST 2025; root:xnu-1699.22.73~1/RELEASE_ARM_64
@@ -82,171 +105,47 @@ params:
 
     [CloudOSBoot1]: ready
     [CloudOSBoot2]: ready
-    [Webserver]: ready 
+    [Webserver]: ready
     [HUGO]: ready
     [TerminalCV]: ready
 
     Boot Complete, accepting user input.
 
-  whois:
-    # settings:
-    #   useLess: true
-    details:
-      name: "Kim"
-      profession: "Unknown"
-      location: "Somewhere"
-      email: "kkkk@cau.ac.kr"
-      homelink: "Null"
-      description: |
-        Just student
+  # ---------------------------------------------------------------
+  # GUI 모드 ( /posts/ )
+  # ---------------------------------------------------------------
+  gui:
+    # Formula1 Display 글꼴 (선택): true 로 바꾸면 이 컴퓨터에 "설치된" Formula1 Display 글꼴
+    # (Regular / Bold / Black / Italic / Wide)을 local() 로 찾아 씁니다. 글꼴 파일은 저장소에 넣지도, 배포하지도 않습니다.
+    # 그래서 글꼴이 설치된 컴퓨터에서만 F1 글꼴로 보이고, 다른 방문자에게는 기본 글꼴이 보입니다.
+    # (F1 공식 글꼴은 Formula One 의 저작물이라 글꼴 파일을 static/ 등에 올려 배포하지 마세요.)
+    # false 면 무료 글꼴(Saira · Michroma · Chakra Petch · DSEG7)만 씁니다.
+    formula1Font: false
+    heroBadge: ""              # 히어로 위 작은 문구 (비우면 표시하지 않음)
+    heroTitle: "Hello World!"
+    heroPrefix: "Notes on"
+    heroWords: ["C++", "Algorithms", "Operating Systems", "CS:APP", "Problem Solving"]
+    heroSubtitle: "지금도 써 내려가고 있는 이야기의 제목을 정하기엔 아직 이르다."
+    welcomeTitle: "나중의 나를 위해 남기는 기록이다"
+    welcomeText: "알고리즘, 운영체제, 시스템 프로그래밍을 공부하며 정리한 것과 논문, 구현, 그리고 영화와 모터스포츠, 한 달의 끝을 적는다. 터미널로 보려면 오른쪽 위 Terminal 버튼을 누른다."
 
-  social:
-    # settings:
-    #   useLess: true
-    #   hideName: true
-    details:
-      - name: "github"
-        url: "https://github.com"
-      - name: "instagram"
-        url: "https://instagram.com"
-
-  work:
-    # settings:
-    #   useLess: true
-    details:
-      - jobTitle: Job With Red Title
-        color: red
-        company: "-"
-        location: somewhere
-        date: August 2010 - Present
-        description: Some description about this red title job
-
-      - jobTitle: Job with purple title
-        color: purple
-        company: "-"
-        location: somewhere elese
-        date: July 2000  - July 2010
-        description: Some description about this purple job
-
-  education:
-    details:
-      - courseName: Red Color training
-        color: red
-        date: June 2019 - July 2019
-        description: Descrption about red color trianing
-
-      - courseName: Default color training
-        date: Sept 2004 - Jun 2008
-        #description: There is no need for description
-
-  skills:
-    settings:
-      useLess: true
-    details:
-      - name: Skill 1
-        percentage: 90
-        Description: you can add a description
-
-      - name: Skill 2
-        percentage: 30
-        #description: or you can leave it comented
-
-      - name: Skill 3
-        color: blue
-        percentage: 50
-        description: Skill names can have colors too
-
-  softskills:
-    # settings:
-    #   useLess: true
-    details:
-      - name: SoftSkill 1
-        color: red
-        percentage: 80
-        #description:
-
-      - name: SoftSkill 2
-        #color:
-        percentage: 90
-        description: Description
-
-  languages:
-    # settings:
-    #   useLess: true
-    details:
-      - name: English
-        color: Blue
-        percentage: 50
-        #description:
-
-      - name: Gibberish
-        percentage: 100
-        description: pasghettipigglywiggly
-
-  projects:
-    # settings:
-    #   useLess: true
-    details:
-      - title: Project Red
-        color: red
-        date: since 2019
-        link: https://example.com
-        description: Describing red stuff
-
-      - title: Project Blue
-        color: blue
-        date: since 2016
-        link: https://example.com/blue
-        #description: nothing to describe
-
-      - title: Project Default
-        date: Since 2017
-        link: https://example.com/default
-        #description: not there either
-
-  certifications:
-    # settings:
-    #   useLess: true
-    details:
-      - certName: Example Cert
-        company: Example Certifying Company
-        date: Date of Completion
-        badge: https://www.link.to.badge
-        #description: Lorem Ipsum
-
-  misc:
-    # settings:
-    #   useLess: true
-    commandName: newcommand
-    title: "This Section can have a different command name"
-    titleColor: teal
-    content: |
-      Here the title and the content can have different colors
-      The content can be multi
-
-      line
-
-      And spaces       will be respected as well
-      This section will have the default command: misc
-      but you can name it something else with the property
-      commandName: <String>
-      Give it a shot and try and uncomment the line 
-      commandName: newcommand
-      now instead of misc you can execute the newcommand for this section
-      Auto completion will know it too! :D
-
-    contentColor: orange
-
-# (1) 코드 하이라이팅 설정 (Chroma)
 markup:
   highlight:
-    style: "dracula"  # (dracula는 터미널과 어울리는 어두운 테마입니다)
-    lineNos: true     # (줄 번호 표시)
-
-# (2) 수학 수식 렌더링 설정 (KaTeX)
+    noClasses: false          # 색은 CSS(GUI: 다크 텔레메트리 / Mac 창: 1-bit 흑백)에서 지정
+    lineNos: true
+    lineNumbersInTable: false
+    tabWidth: 4
   goldmark:
     renderer:
-      unsafe: true # (HTML 렌더링을 허용해야 KaTeX가 작동합니다)
-outputs:
-  home: [ "HTML", "RSS" ]
-  page: [ "HTML" ]
+      unsafe: true            # 본문에 HTML을 직접 쓸 수 있도록 허용 (KaTeX와는 무관)
+    extensions:
+      typographer:            # 한국어 조사 앞 따옴표 짝 깨짐, 본문 속 코드의 -- << >> 변환을 막기 위해 끔
+        disable: true
+      passthrough:            # $...$ / $$...$$ 안의 *, _ 를 Markdown이 건드리지 않게 보존 → KaTeX가 렌더
+        enable: true
+        delimiters:
+          block: [["$$", "$$"], ["\\[", "\\]"]]
+          inline: [["$", "$"], ["\\(", "\\)"]]
+  tableOfContents:
+    startLevel: 2
+    endLevel: 4

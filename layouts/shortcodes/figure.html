@@ -1,0 +1,30 @@
+{{- /*
+  Hugo 내장 figure 와 같은 인자를 받되, 번들 이미지를 루트 기준 URL 로 바꾸고 큰 이미지는 줄입니다.
+  link= · attrlink= 도 본문 링크와 같은 규칙(common/link-href.html)으로 풀어서, link="images/big.png" 처럼
+  글 폴더의 원본을 가리키면 그 원본도 배포됩니다.
+*/ -}}
+{{- $i := partial "common/image-src.html" (dict "page" .Page "src" (.Get "src")) -}}
+{{- $w := .Get "width" | default (cond (gt $i.width 0) $i.width "") -}}
+{{- $h := .Get "height" | default (cond (and (gt $i.height 0) (not (.Get "width"))) $i.height "") -}}
+{{- $alt := .Get "alt" | default (.Get "caption" | markdownify | plainify) -}}
+{{- $link := "" -}}
+{{- with .Get "link" }}{{ $link = partial "common/link-href.html" (dict "page" $.Page "dest" .) }}{{ end -}}
+{{- $attrlink := "" -}}
+{{- with .Get "attrlink" }}{{ $attrlink = partial "common/link-href.html" (dict "page" $.Page "dest" .) }}{{ end -}}
+<figure{{ with .Get "class" }} class="{{ . }}"{{ end }}>
+  {{- with $link }}<a href="{{ . }}"{{ with $.Get "target" }} target="{{ . }}"{{ end }}{{ with $.Get "rel" }} rel="{{ . }}"{{ end }}>{{ end -}}
+  <img src="{{ $i.src }}" alt="{{ $alt }}"{{ with $w }} width="{{ . }}"{{ end }}{{ with $h }} height="{{ . }}"{{ end }} loading="{{ .Get "loading" | default "lazy" }}" decoding="async">
+  {{- if $link }}</a>{{ end -}}
+  {{- if or (.Get "title") (.Get "caption") (.Get "attr") -}}
+  <figcaption>
+    {{- /* 제목 · 설명 · 출처 사이는 공백과 가운뎃점으로 나눕니다 ("큰 그림 · 출처") */ -}}
+    {{- with .Get "title" }}<strong>{{ . }}</strong>{{ end -}}
+    {{- with .Get "caption" }}{{ if $.Get "title" }} {{ end }}{{ . | markdownify }}{{ end -}}
+    {{- with .Get "attr" -}}
+      {{- if or ($.Get "title") ($.Get "caption") }} · {{ end -}}
+      {{- with $attrlink }}<a href="{{ . }}">{{ end }}{{ . | markdownify }}{{ if $attrlink }}</a>{{ end -}}
+    {{- end -}}
+  </figcaption>
+  {{- end }}
+</figure>
+{{- /**/ -}}

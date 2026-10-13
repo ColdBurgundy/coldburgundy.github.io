@@ -1,0 +1,22 @@
+{{- /* 미니 트랙 맵 — 섹터 = 소제목, 읽은 만큼 차가 한 바퀴 돕니다 (gui.js).
+     서킷은 assets/data/circuits.json 에서 페이지를 열 때마다 무작위로 하나 고릅니다. gui.js 가 맵이 실제로 보일 때만
+     (지문 붙은 주소라 캐시가 잘 듣는) 이 파일을 불러와 경로 · 이름 · 위치를 바꿔 끼웁니다.
+     스키마: { source, license, circuits: [{ id, name, location, country, viewBox: "0 0 W H", d }] }
+     — d 는 그 viewBox 안의 닫힌 경로 하나, 출발선(S/F)에서 시작해 레이스 방향으로.
+     아래에 그려 둔 레드불 링(직접 그린 단순화 그림)은 내장 기본값: 파일을 못 불러오거나 서킷이 하나도 없으면 이것을 씁니다.
+     진행률은 텔레메트리 % 가 이미 읽어 주므로 그림은 낭독기에서 숨깁니다. */ -}}
+{{- $d := "M110 128.3 L46 119 C26.2 116.1 18 94.6 30 90 L208 22 C221 17 233.3 33.6 220 38 L98 88 C85.5 93.1 81 107 94 107 C112 107 122 95 140 98 C157 101 157 115 173 115 C189 115 191 99 205 101 C221 103 226 120 216 130 C208 140 189.8 139.9 170 137 Z" -}}
+{{- $src := "" -}}
+{{- with resources.Get "data/circuits.json" }}{{ $src = (. | minify | fingerprint).RelPermalink }}{{ end -}}
+<div class="trackmap is-loading" data-trackmap{{ with $src }} data-circuits="{{ . }}"{{ end }} aria-hidden="true">
+  <p class="trackmap__name"><span class="trackmap__circuit" data-track-name>Red Bull Ring</span><span class="trackmap__loc"><span data-track-loc>Spielberg</span><span class="trackmap__country" data-track-country> · Austria</span></span></p>
+  <svg class="trackmap__svg" viewBox="16 13 218 134" preserveAspectRatio="xMidYMid meet" focusable="false" data-track-svg>
+    <path class="trackmap__bed" d="{{ $d }}" data-track-bed/>
+    <path class="trackmap__line" d="{{ $d }}" data-track-line/>
+    <path class="trackmap__halo" d="{{ $d }}" data-track-halo/>
+    <g data-track-sectors></g>
+    <g class="trackmap__ticks" data-track-ticks></g>
+    <line class="trackmap__sf" x1="110.9" y1="121.9" x2="109.1" y2="134.7" data-track-sf/>
+    <circle class="trackmap__car" cx="110" cy="128.3" r="3.6" data-track-car/>
+  </svg>
+</div>

@@ -1,0 +1,42 @@
+{{ define "main" }}
+{{- if eq .Kind "term" -}}
+  {{- /* 태그 하나: 해당 글 목록 */ -}}
+  {{- $pages := .Pages.ByDate.Reverse -}}
+  {{- partial "gui/page-hero.html" (dict
+      "page" .
+      "eyebrow" "Tag"
+      "title" (printf "#%s" .Title)
+      "desc" (printf "'%s' 태그가 붙은 글" .Title)
+      "color" "#ffc906"
+      "stats" (slice (dict "label" "Posts" "value" (len $pages)))
+  ) -}}
+  <div class="container section-page">
+    {{- $pager := .Paginate $pages }}
+    <div class="post-list">
+      {{- range $pager.Pages }}{{ partial "gui/card.html" (dict "page" . "variant" "row" "level" 2) }}{{ end }}
+    </div>
+    {{ partial "gui/pagination.html" $pager }}
+    <p class="back-link"><a href="{{ "tags/" | relURL }}">← 모든 태그</a></p>
+  </div>
+{{- else -}}
+  {{- /* 태그 전체 */ -}}
+  {{- $terms := .Data.Terms.ByCount -}}
+  {{- partial "gui/page-hero.html" (dict
+      "page" .
+      "eyebrow" "Index"
+      "title" "Tags"
+      "desc" "태그별로 글을 모아 봅니다."
+      "color" "#ffc906"
+      "stats" (slice (dict "label" "Tags" "value" (len $terms)) (dict "label" "Posts" "value" (len (where site.RegularPages "Section" "posts"))))
+  ) -}}
+  <div class="container section-page">
+    {{- if $terms }}
+    <div class="tyres tyres--lg">
+      {{- range $terms }}{{ partial "gui/tyre.html" (dict "page" .Page "count" .Count) }}{{ end }}
+    </div>
+    {{- else }}
+    {{ partial "gui/empty.html" "아직 태그가 없습니다." }}
+    {{- end }}
+  </div>
+{{- end -}}
+{{ end }}

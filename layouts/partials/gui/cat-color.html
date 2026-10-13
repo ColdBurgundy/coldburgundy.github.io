@@ -1,0 +1,11 @@
+{{- /* 섹션(카테고리)의 대표 색: 자신 → 부모 순으로 front matter 의 color 를 찾습니다. */ -}}
+{{- $c := "" -}}
+{{- $s := . -}}
+{{- if and $s (not $s.IsSection) -}}{{- $s = $s.Parent -}}{{- end -}}
+{{- range seq 6 -}}
+  {{- if and (not $c) $s -}}
+    {{- with $s.Params.color }}{{ $c = . }}{{ end -}}
+    {{- $s = $s.Parent -}}
+  {{- end -}}
+{{- end -}}
+{{- return ($c | default "#db0a40") -}}

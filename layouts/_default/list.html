@@ -1,0 +1,14 @@
+{{ define "main" }}
+{{- partial "gui/page-hero.html" (dict "page" . "eyebrow" "List" "title" .Title "desc" .Description) -}}
+<div class="container section-page">
+  {{- $pager := .Paginate .RegularPagesRecursive.ByDate.Reverse }}
+  {{- if $pager.Pages }}
+  <div class="post-list">
+    {{- range $pager.Pages }}{{ partial "gui/card.html" (dict "page" . "variant" "row" "level" 2) }}{{ end }}
+  </div>
+  {{ partial "gui/pagination.html" $pager }}
+  {{- else }}
+  {{ partial "gui/empty.html" "아직 게시물이 없습니다." }}
+  {{- end }}
+</div>
+{{ end }}

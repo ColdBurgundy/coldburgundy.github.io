@@ -1,0 +1,19 @@
+{{- /* 목록 페이지 상단 배너. 입력: dict "page" "eyebrow" "title" "desc" "color" "stats"(slice of dict label/value) */ -}}
+{{- $p := .page -}}
+<section class="page-hero" style="--cat: {{ .color | default "#db0a40" | safeCSS }}">
+  <div class="page-hero__bg" aria-hidden="true"><div class="hero__grid"></div></div>
+  <div class="container page-hero__inner">
+    {{ partial "gui/breadcrumbs.html" $p }}
+    {{- with .eyebrow }}
+    <p class="eyebrow">{{ . }}</p>
+    {{- end }}
+    <h1 class="page-hero__title">{{ .title }}</h1>
+    {{ with .desc }}<p class="page-hero__desc">{{ . }}</p>{{ end }}
+    {{- with .stats }}
+    <dl class="page-hero__stats">
+      {{- range . }}<div><dt>{{ .label }}</dt><dd>{{ .value }}</dd></div>{{ end }}
+    </dl>
+    {{- end }}
+  </div>
+  {{ partial "gui/trace.html" "thin" }}
+</section>

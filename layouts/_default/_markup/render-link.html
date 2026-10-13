@@ -1,0 +1,4 @@
+{{- /* 본문의 상대 링크를 글 기준 절대 경로로 바꿔서 CLI(Mac 창)·RSS 에서도 깨지지 않게 합니다. 규칙은 common/link-href.html */ -}}
+{{- $href := partial "common/link-href.html" (dict "page" .PageInner "dest" .Destination) -}}
+<a href="{{ $href }}"{{ with .Title }} title="{{ . }}"{{ end }}{{ if (urls.Parse .Destination).IsAbs }} rel="noopener"{{ end }}>{{ .Text }}</a>
+{{- /**/ -}}

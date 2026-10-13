@@ -1,0 +1,12 @@
+{{- if eq .Type "alert" -}}
+  {{- $t := lower .AlertType -}}
+  <div class="callout callout--{{ $t }}" role="note">
+    <div class="callout__head">
+      <span class="callout__flag" aria-hidden="true"></span>
+      <span class="callout__label{{ with .AlertTitle }} callout__label--custom{{ end }}">{{ with .AlertTitle }}{{ . }}{{ else }}{{ upper $t }}{{ end }}</span>
+    </div>
+    <div class="callout__body">{{ .Text }}</div>
+  </div>
+{{- else -}}
+  <blockquote>{{ .Text }}</blockquote>
+{{- end -}}

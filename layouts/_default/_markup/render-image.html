@@ -1,0 +1,5 @@
+{{- $i := partial "common/image-src.html" (dict "page" .PageInner "src" .Destination) -}}
+<img src="{{ $i.src }}" alt="{{ .PlainText }}"
+  {{- with .Title }} title="{{ . }}"{{ end }}
+  {{- if $i.width }} width="{{ $i.width }}" height="{{ $i.height }}"{{ end }} loading="lazy" decoding="async">
+{{- /**/ -}}

@@ -1,0 +1,31 @@
+{{- /* 글 카드. 입력: dict "page" 글 "variant" (feature | row | grid) "level" 제목 레벨(기본 3) */ -}}
+{{- $p := .page -}}
+{{- $v := .variant | default "row" -}}
+{{- $lvl := .level | default 3 -}}
+{{- $color := partial "gui/cat-color.html" $p -}}
+{{- $thumb := partial "gui/thumb.html" $p -}}
+{{- $sizes := dict "feature" "960x540" "row" "480x360" "grid" "720x405" -}}
+<article class="card card--{{ $v }}" style="--cat: {{ $color | safeCSS }}">
+  <a class="card__media" href="{{ $p.RelPermalink }}" tabindex="-1" aria-hidden="true">
+    {{- with $thumb }}
+    {{- $t := .Fill (printf "%s Center webp q78" (index $sizes $v)) }}
+    <img src="{{ $t.RelPermalink }}" width="{{ $t.Width }}" height="{{ $t.Height }}" alt="" loading="lazy" decoding="async">
+    {{- else }}
+    {{- partial "gui/livery.html" $p }}
+    {{- end }}
+    <span class="card__scan" aria-hidden="true"></span>
+  </a>
+  <div class="card__body">
+    <div class="card__top">{{ partial "gui/chip.html" $p.Parent }}</div>
+    <h{{ $lvl }} class="card__title"><a href="{{ $p.RelPermalink }}">{{ $p.Title }}</a></h{{ $lvl }}>
+    <p class="card__excerpt">{{ partial "common/excerpt.html" $p }}</p>
+    <div class="card__foot">
+      <time datetime="{{ $p.Date.Format "2006-01-02" }}">{{ $p.Date.Format "2006.01.02" }}</time>
+      <span class="card__sep" aria-hidden="true">/</span>
+      <span>{{ $p.ReadingTime }} min</span>
+      {{- with $p.GetTerms "tags" }}
+      <span class="card__tags">{{ range first 2 . }}<span>#{{ .LinkTitle }}</span>{{ end }}</span>
+      {{- end }}
+    </div>
+  </div>
+</article>

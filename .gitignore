@@ -5,3 +5,6 @@
 
 # OS generated files
 .DS_Store
+
+# Claude Code 로컬 설정 (데모 서버 실행 정보)
+/.claude/

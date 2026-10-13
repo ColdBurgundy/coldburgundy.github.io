@@ -1,0 +1,62 @@
+{{- /* 같은 카테고리 타이밍 타워 — F1 타이밍 타워처럼 순위 · 카테고리 LED · 짧은 제목 · 날짜, 지금 글은 강조.
+     입력: dict "page" 글 "id" 제목 요소 id "class" 추가 class(선택)
+     · 순서는 최신순(다른 목록과 같음), 순위 = 그 카테고리 안의 순서
+     · 같은 카테고리 글이 이 글 하나뿐이면 한 단계 위 카테고리로 넓힙니다 (글 목록 맨 위 /posts 는 제외)
+     · 최대 7줄 — 글이 많으면 지금 글이 가운데 오도록 앞뒤 3편씩. 낮은 창의 레일에선 목차 자리를 위해 gui.js(fitRail)가
+       가운데 5줄(is-extra 숨김) → 3줄(is-far 도 숨김) → 레일에서 빼고 글 끝 사본으로 순서대로 줄입니다
+     · 제목 앞의 번호 · [분류] 머리(예: '$12. [BOJ] ')는 레일에서 접어 짧은 제목만 — 글 끝 사본은 전체 제목 */ -}}
+{{- $p := .page -}}
+{{- $root := site.GetPage "/posts" -}}
+{{- $cat := $p.Parent -}}
+{{- if and $cat (lt (len $cat.RegularPagesRecursive) 2) $cat.Parent (ne $cat.Parent $root) (not $cat.Parent.IsHome) }}{{ $cat = $cat.Parent }}{{ end -}}
+{{- $list := $cat.RegularPagesRecursive.ByDate.Reverse -}}
+{{- $n := len $list -}}
+{{- $max := 7 -}}
+{{- $idx := 0 -}}
+{{- range $i, $q := $list }}{{ if eq $q.RelPermalink $p.RelPermalink }}{{ $idx = $i }}{{ end }}{{ end -}}
+{{- $start := 0 -}}
+{{- if gt $n $max -}}
+  {{- $start = sub $idx 3 -}}
+  {{- if lt $start 0 }}{{ $start = 0 }}{{ end -}}
+  {{- if gt (add $start $max) $n }}{{ $start = sub $n $max }}{{ end -}}
+{{- end -}}
+{{- $start5 := 0 -}}
+{{- if gt $n 5 -}}
+  {{- $start5 = sub $idx 2 -}}
+  {{- if lt $start5 0 }}{{ $start5 = 0 }}{{ end -}}
+  {{- if gt (add $start5 5) $n }}{{ $start5 = sub $n 5 }}{{ end -}}
+{{- end -}}
+{{- /* 가장 낮은 레일: 앞 글 · 이 글 · 뒤 글 세 줄만 (is-far 도 숨김) */ -}}
+{{- $start3 := 0 -}}
+{{- if gt $n 3 -}}
+  {{- $start3 = sub $idx 1 -}}
+  {{- if lt $start3 0 }}{{ $start3 = 0 }}{{ end -}}
+  {{- if gt (add $start3 3) $n }}{{ $start3 = sub $n 3 }}{{ end -}}
+{{- end -}}
+<section class="tower{{ with .class }} {{ . }}{{ end }}" aria-labelledby="{{ .id }}" style="--cat: {{ partial "gui/cat-color.html" $cat | safeCSS }}">
+  <header class="tower__head">
+    <h2 class="tower__title" id="{{ .id }}">같은 카테고리</h2>
+    {{- if ne $cat $root }}
+    <a class="tower__cat" href="{{ $cat.RelPermalink }}"><span class="tower__cat-name">{{ $cat.Title }}</span><span class="tower__count">{{ $n }}</span></a>
+    {{- end }}
+  </header>
+  <ol class="tower__list" start="{{ add $start 1 }}">
+    {{- range $i, $q := after $start (first (add $start $max) $list) }}
+    {{- $k := add $start $i }}
+    {{- $cur := eq $q.RelPermalink $p.RelPermalink }}
+    {{- $pre := index (findRE `^\s*(?:\$\d+\.\s*)?(?:\[[^\]]+\]\s*)?` $q.LinkTitle 1 | default (slice "")) 0 }}
+    {{- if eq $pre $q.LinkTitle }}{{ $pre = "" }}{{ end }}
+    {{- $cls := slice }}
+    {{- if or (lt $k $start5) (ge $k (add $start5 5)) }}{{ $cls = $cls | append "is-extra" }}{{ end }}
+    {{- if or (lt $k $start3) (ge $k (add $start3 3)) }}{{ $cls = $cls | append "is-far" }}{{ end }}
+    <li{{ with $cls }} class="{{ delimit . " " }}"{{ end }}>
+      <a class="tower__row" href="{{ $q.RelPermalink }}" title="{{ $q.LinkTitle }}"{{ if $cur }} aria-current="page"{{ end }} style="--cat: {{ partial "gui/cat-color.html" $q | safeCSS }}">
+        <span class="tower__pos" aria-hidden="true">{{ add $k 1 }}</span>
+        <i class="tower__led" aria-hidden="true"></i>
+        <span class="tower__name">{{ with $pre }}<span class="tower__pre">{{ . }}</span>{{ end }}{{ strings.TrimPrefix $pre $q.LinkTitle }}</span>
+        <time class="tower__date" datetime="{{ $q.Date.Format "2006-01-02" }}"><span class="tower__yr">{{ $q.Date.Format "2006." }}</span>{{ $q.Date.Format "01.02" }}</time>
+      </a>
+    </li>
+    {{- end }}
+  </ol>
+</section>

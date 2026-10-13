@@ -1,0 +1,12 @@
+{{- /* 연석 대신: 텔레메트리 속도 트레이스. 마우스를 올리면 그 지점의 섹터/속도를 보여줍니다. 입력: "hero" | "thin" */ -}}
+{{- $d := "M0 22 L130 14 L210 12 C228 12 232 46 252 48 L268 48 C292 48 300 16 330 14 L470 10 C486 10 492 38 508 40 C526 42 532 20 556 18 L700 13 C716 13 720 50 738 52 L752 52 C776 52 786 18 812 16 L960 11 C978 11 984 34 1000 36 C1020 38 1028 18 1050 17 L1200 14" -}}
+<div class="trace{{ with . }} trace--{{ . }}{{ end }}" aria-hidden="true" data-trace>
+  <svg class="trace__svg" viewBox="0 0 1200 60" preserveAspectRatio="none">
+    <path class="trace__ghost" d="{{ $d }}" pathLength="1000"/>
+    <path class="trace__line" d="{{ $d }}" pathLength="1000"/>
+    <path class="trace__pulse" d="{{ $d }}" pathLength="1000"/>
+  </svg>
+  <span class="trace__base"></span>
+  <span class="trace__sectors"><i>S1</i><i>S2</i><i>S3</i></span>
+  <span class="trace__cursor"><span class="trace__dot"></span><span class="trace__read"></span></span>
+</div>

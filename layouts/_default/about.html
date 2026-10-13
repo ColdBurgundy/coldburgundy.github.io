@@ -1,0 +1,30 @@
+{{ define "main" }}
+{{- $a := site.Params.author | default dict -}}
+{{- $posts := where site.RegularPages "Section" "posts" -}}
+{{- $name := $a.name | default site.Title -}}
+{{- /* 이니셜: author.initials 가 있으면 그대로, 없으면 이름의 대문자 두 개 (ColdBurgundy → CB), 그것도 없으면 앞 두 글자 */ -}}
+{{- $initials := $a.initials | default (delimit (first 2 (findRE `\p{Lu}` $name)) "") -}}
+{{- if lt (strings.RuneCount $initials) 2 }}{{ $initials = upper (substr $name 0 2) }}{{ end -}}
+{{- partial "gui/page-hero.html" (dict "page" . "eyebrow" ($a.name | default site.Title) "title" .Title "desc" .Description "color" "#db0a40") -}}
+<div class="container about">
+  <div class="driver-card">
+    <div class="driver-card__num" aria-hidden="true">{{ add (mod (hash.FNV32a ($a.name | default site.Title)) 98) 1 }}</div>
+    <div class="driver-card__avatar" aria-hidden="true">{{ $initials }}</div>
+    <div class="driver-card__body">
+      <p class="eyebrow">Draktharr Lab</p>
+      <h2 class="driver-card__name">{{ $a.name | default site.Title }}</h2>
+      {{ with $a.bio }}<p class="driver-card__bio">{{ . }}</p>{{ end }}
+      <dl class="driver-card__stats">
+        <div><dt>Posts</dt><dd>{{ len $posts }}</dd></div>
+        <div><dt>Tags</dt><dd>{{ len site.Taxonomies.tags }}</dd></div>
+      </dl>
+      <div class="driver-card__links">
+        {{- with $a.github }}<a class="btn btn--ghost btn--sm" href="{{ . }}" rel="noopener">GitHub</a>{{ end }}
+        {{- with $a.email }}<a class="btn btn--ghost btn--sm" href="mailto:{{ . }}">Email</a>{{ end }}
+        {{- with $a.cv }}<a class="btn btn--ghost btn--sm" href="{{ . | relURL }}">CV</a>{{ end }}
+      </div>
+    </div>
+  </div>
+  <div class="prose about__body">{{ .Content }}</div>
+</div>
+{{ end }}

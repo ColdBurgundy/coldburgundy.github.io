@@ -1,0 +1,10 @@
+{{- /* 태그 = 타이어 컴파운드 색. 입력: 태그 term 페이지, 또는 dict "page" term "count" n */ -}}
+{{- $p := . -}}
+{{- $count := 0 -}}
+{{- if reflect.IsMap . }}{{ $p = .page }}{{ $count = .count }}{{ end -}}
+{{- $compounds := slice "soft" "medium" "hard" "inter" "wet" -}}
+{{- $c := index $compounds (mod (hash.FNV32a (lower $p.LinkTitle)) 5) -}}
+<a class="tyre tyre--{{ $c }}" href="{{ $p.RelPermalink }}">
+  <span class="tyre__ring" aria-hidden="true"></span><span class="tyre__name">{{ $p.LinkTitle }}</span>
+  {{- if $count }}<span class="tyre__count">{{ $count }}</span>{{ end -}}
+</a>

@@ -1,0 +1,40 @@
+{{- $root := site.GetPage "/posts" -}}
+{{- $recent := first 5 (where site.RegularPages "Section" "posts").ByDate.Reverse -}}
+<footer class="footer">
+  <div class="footer__bull" aria-hidden="true">{{ partial "gui/bull.html" "" }}</div>
+  <div class="footer__finish" aria-hidden="true"><span class="footer__line"></span><span class="footer__flag"></span><span class="footer__line"></span></div>
+  <div class="container footer__grid">
+    <div class="footer__brand">
+      <a class="brand brand--footer" href="{{ $root.RelPermalink }}">
+        <span class="brand__text">Draktharr<b>Lab</b></span>
+      </a>
+      <p class="footer__desc">{{ site.Params.description }}</p>
+      <div class="footer__links">
+        {{- with site.Params.author.github }}<a href="{{ . }}" rel="noopener">GitHub</a>{{ end }}
+        <a href="{{ "index.xml" | relURL }}">RSS</a>
+        <a href="{{ "/" | relURL }}" data-mode-switch="cli">&gt;_ Terminal</a>
+      </div>
+    </div>
+    <div class="footer__col">
+      <p class="eyebrow">Recent posts</p>
+      <ul class="footer__list">
+        {{- range $recent }}
+        <li><a href="{{ .RelPermalink }}"><span>{{ .Title }}</span><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time></a></li>
+        {{- else }}
+        <li class="muted">아직 게시물이 없습니다.</li>
+        {{- end }}
+      </ul>
+    </div>
+    <div class="footer__col">
+      <p class="eyebrow">Categories</p>
+      {{ partial "gui/category-tree.html" (dict "section" $root "current" . "depth" 0) }}
+    </div>
+  </div>
+  <div class="container footer__bottom">
+    <span>© {{ now.Year }} {{ site.Params.author.name | default site.Title }}. Built with Hugo.</span>
+    <span class="footer__credits">CLI based on <a href="https://github.com/coolapso/hugo-theme-terminalcv" rel="noopener">terminalcv</a> · Mac UI by <a href="https://github.com/sakofchit/system.css" rel="noopener">system.css</a> (MIT) · Circuit data by <a href="https://github.com/bacinger/f1-circuits" rel="noopener">f1-circuits</a> (MIT)</span>
+  </div>
+</footer>
+<button type="button" class="to-top" data-to-top aria-label="맨 위로">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>
+</button>

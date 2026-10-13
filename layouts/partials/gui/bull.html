@@ -1,0 +1,6 @@
+{{- /* 기하학적 라인 황소 (assets/images/bull.svg) 를 인라인으로. 입력: 추가 class 문자열(선택) */ -}}
+{{- with resources.Get "images/bull.svg" -}}
+  {{- $svg := .Content -}}
+  {{- with $ }}{{ $svg = replace $svg `class="bull"` (printf `class="bull %s"` .) }}{{ end -}}
+  {{- $svg | replaceRE `(?s)<!--.*?-->\s*` "" | safeHTML -}}
+{{- end -}}

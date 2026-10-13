@@ -1,0 +1,49 @@
++++
+title = "$3. [BOJ] 11650 좌표 정렬하기"
+date = "2024-01-03"
+description = "2차원 점들을 x좌표 오름차순, x가 같으면 y좌표 오름차순으로 정렬하도록 비교 함수를 만들어 sort에 넘기는 풀이"
+tags = ["BOJ", "Silver5", "정렬"]
+thumbnail = "images/cover.jpg"
++++
+
+![BOJ 11650 좌표 정렬하기 문제 대표 이미지](images/cover.jpg)
+
+## Prob : [좌표 정렬하기](https://www.acmicpc.net/problem/11650)
+2차원 평면 위의 점 N개가 주어진다. 좌표를 x좌표가 증가하는 순으로, x좌표가 같으면 y좌표가 증가하는 순서로 정렬한 다음 출력하는 프로그램을 작성하시오.
+
+## INPUT
+첫째 줄에 점의 개수 N (1 ≤ N ≤ 100,000)이 주어진다. 둘째 줄부터 N개의 줄에는 i번점의 위치 xi와 yi가 주어진다. (-100,000 ≤ xi, yi ≤ 100,000) 좌표는 항상 정수이고, 위치가 같은 두 점은 없다.
+
+## OUTPUT
+첫째 줄부터 N개의 줄에 점을 정렬한 결과를 출력한다.
+
+## Sol
+따로 깊게 설명할 내용이 없다. 여러 데이터가 묶여있는 것들에 대해 정렬을 할 때 어떤 기준을 두며 생기는 우선순위로 정렬하는 것을 어떻게 코딩하는지를 배우는 문제이다.
+나는 sort함수를 썼기에 sort함수를 사용하는 방법은 "Untitled 『Studying CS』-Language-C++"에 적어둘 예정이다.(게시글을 작성하면 이 곳에 링크를 걸어두겠다.)
+
+## Code
+```c
+#define _CRT_SECURE_NO_WARNINGS
+#define MAX_N 100000
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+struct point{ int x, y; }p[MAX_N];
+bool cmp(const point& p1, const point& p2)
+{
+	if (p1.x == p2.x)
+		return p1.y < p2.y;
+	return p1.x < p2.x;
+}
+int main()
+{
+	int N, i;
+	scanf("%d", &N);
+	for (i = 0; i < N; i++)
+		scanf("%d %d", &p[i].x, &p[i].y);
+	sort(p, p + N, cmp);
+	for (i = 0; i < N; i++)
+		printf("%d %d\n", p[i].x, p[i].y);
+	return 0;
+}
+```

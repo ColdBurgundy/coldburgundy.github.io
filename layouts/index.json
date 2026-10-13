@@ -1,0 +1,52 @@
+{{- /*
+  /index.json — CLI 가상 파일시스템과 GUI 검색이 함께 쓰는 데이터.
+  path 는 /posts/ 기준 상대 경로입니다. (예: untitled_cs/boj/test)
+*/ -}}
+{{- $root := site.GetPage "/posts" -}}
+{{- $prefix := $root.RelPermalink -}}
+{{- $dirs := slice -}}
+{{- range where site.Pages "Kind" "section" -}}
+  {{- if and (eq .Section "posts") (ne .RelPermalink $prefix) -}}
+    {{- $path := strings.TrimSuffix "/" (strings.TrimPrefix $prefix .RelPermalink) -}}
+    {{- $color := partial "gui/cat-color.html" . -}}
+    {{- $dirs = $dirs | append (dict
+        "path" $path
+        "title" .Title
+        "description" (.Description | default "")
+        "count" (len .RegularPagesRecursive)
+        "weight" .Weight
+        "color" $color
+        "badge" (.Params.badge | default "")
+        "url" .RelPermalink
+      ) -}}
+  {{- end -}}
+{{- end -}}
+{{- $posts := slice -}}
+{{- range (where site.RegularPages "Section" "posts").ByDate.Reverse -}}
+  {{- $path := strings.TrimSuffix "/" (strings.TrimPrefix $prefix .RelPermalink) -}}
+  {{- /* 태그는 용어(term) 기준: tags = ["DP", "dp"] 처럼 대소문자만 다른 태그는 하나로 합쳐지고 이름은 태그 페이지와 같게 */ -}}
+  {{- $tagNames := slice -}}
+  {{- range .GetTerms "tags" }}{{ $tagNames = $tagNames | append .LinkTitle }}{{ end -}}
+  {{- $posts = $posts | append (dict
+      "path" $path
+      "title" .Title
+      "url" .RelPermalink
+      "date" (.Date.Format "2006-01-02")
+      "tags" $tagNames
+      "summary" (partial "common/excerpt.html" .)
+      "words" .WordCount
+      "readingTime" .ReadingTime
+      "category" .Parent.Title
+    ) -}}
+{{- end -}}
+{{- $tags := slice -}}
+{{- range site.Taxonomies.tags.ByCount -}}
+  {{- $tags = $tags | append (dict "name" .Page.Title "count" .Count "url" .Page.RelPermalink) -}}
+{{- end -}}
+{{- dict
+    "site" (dict "title" site.Title "description" site.Params.description)
+    "author" (site.Params.author | default dict)
+    "dirs" $dirs
+    "posts" $posts
+    "tags" $tags
+  | jsonify -}}

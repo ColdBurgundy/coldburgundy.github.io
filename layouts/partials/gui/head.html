@@ -1,0 +1,123 @@
+{{- $postsRoot := site.GetPage "/posts" -}}
+{{- $isGuiHome := eq . $postsRoot -}}
+{{- $isPost := and .IsPage (eq .Section "posts") -}}
+{{- $pageTitle := cond (eq .Kind "taxonomy") (title .Title) .Title -}}
+{{- $title := cond $isGuiHome site.Title (printf "%s · %s" $pageTitle site.Title) -}}
+{{- $canon := .Permalink -}}
+
+{{- /* 설명문 */ -}}
+{{- $desc := site.Params.description -}}
+{{- if .Description }}{{ $desc = .Description }}
+{{- else if .IsPage }}{{ with partial "common/excerpt.html" . }}{{ $desc = . }}{{ end }}
+{{- else if eq .Kind "term" }}{{ $desc = printf "'%s' 태그가 붙은 글 %d편 — %s" .Title (len .Pages) site.Title }}
+{{- else if eq .Kind "taxonomy" }}{{ $desc = printf "태그별 글 모음 — %s" site.Title }}
+{{- end -}}
+
+{{- /* 페이지네이션: 2페이지 이후는 자기 URL 을 canonical 로 (본문과 같은 컬렉션으로 호출해야 캐시가 맞습니다) */ -}}
+{{- if and (or (eq .Kind "section") (eq .Kind "term")) (not $isGuiHome) -}}
+  {{- $pg := .Paginate (cond (eq .Kind "term") .Pages.ByDate.Reverse .RegularPagesRecursive.ByDate.Reverse) -}}
+  {{- if gt $pg.PageNumber 1 -}}
+    {{- $canon = $pg.URL | absURL -}}
+    {{- $title = printf "%s (%d페이지) · %s" .Title $pg.PageNumber site.Title -}}
+  {{- end -}}
+{{- end -}}
+{{- $emptySection := and .IsSection (not $isGuiHome) (not .RegularPagesRecursive) -}}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+{{- if $isGuiHome }}
+<script>try{if(sessionStorage.getItem('dl-lights')!=='1'&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('dl-intro')}catch(e){}</script>
+{{- end }}
+{{- if and .IsPage (eq .Section "posts") }}
+{{- /* 글 페이지: 첫 그림 전에 — 스크립트가 도는 환경 표시(트랙 맵은 서킷을 고를 때까지 숨김) + 텔레메트리 접힘 상태(gui.js 와 같은 키) */}}
+<script>(function(c){c.add('dl-js');try{if(localStorage.getItem('dl-telemetry')==='folded')c.add('tel-folded')}catch(e){}})(document.documentElement.classList)</script>
+{{- end }}
+<title>{{ $title }}</title>
+<meta name="description" content="{{ $desc }}">
+<link rel="canonical" href="{{ $canon }}">
+{{- if or $emptySection (eq .Kind "404") }}
+<meta name="robots" content="noindex,follow">
+{{- end }}
+<meta name="theme-color" content="#070b18">
+<meta property="og:site_name" content="{{ site.Title }}">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:title" content="{{ cond $isGuiHome site.Title $pageTitle }}">
+<meta property="og:description" content="{{ $desc }}">
+<meta property="og:url" content="{{ $canon }}">
+<meta property="og:type" content="{{ if $isPost }}article{{ else }}website{{ end }}">
+{{- if and $isPost (not .Date.IsZero) }}
+<meta property="article:published_time" content="{{ .Date.Format "2006-01-02T15:04:05-07:00" }}">
+<meta property="article:modified_time" content="{{ .Lastmod.Format "2006-01-02T15:04:05-07:00" }}">
+{{- range .GetTerms "tags" }}
+<meta property="article:tag" content="{{ .LinkTitle }}">
+{{- end }}
+{{- end }}
+{{- $ogImage := "" -}}
+{{- with partial "gui/thumb.html" . }}
+{{- $og := .Fill "1200x630 Center webp q80" }}
+{{- $ogImage = $og.Permalink }}
+<meta property="og:image" content="{{ $og.Permalink }}">
+<meta property="og:image:width" content="{{ $og.Width }}">
+<meta property="og:image:height" content="{{ $og.Height }}">
+<meta property="og:image:alt" content="{{ $.Title }}">
+<meta name="twitter:card" content="summary_large_image">
+{{- else }}
+{{- /* 대표 이미지가 없는 페이지: 공용 공유 카드 (static/images/og-default.png, 1200×630) */}}
+<meta property="og:image" content="{{ "images/og-default.png" | absURL }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ site.Title }}">
+<meta name="twitter:card" content="summary_large_image">
+{{- end }}
+{{- if and $isPost (not .Date.IsZero) }}
+{{- $ld := dict
+    "@context" "https://schema.org"
+    "@type" "BlogPosting"
+    "headline" .Title
+    "description" $desc
+    "datePublished" (.Date.Format "2006-01-02T15:04:05Z07:00")
+    "dateModified" (.Lastmod.Format "2006-01-02T15:04:05Z07:00")
+    "author" (dict "@type" "Person" "name" (site.Params.author.name | default site.Title))
+    "mainEntityOfPage" .Permalink
+    "inLanguage" "ko-KR"
+}}
+{{- with $ogImage }}{{ $ld = merge $ld (dict "image" .) }}{{ end }}
+<script type="application/ld+json">{{ $ld }}</script>
+{{- end }}
+<link rel="alternate" type="application/rss+xml" href="{{ "index.xml" | relURL }}" title="{{ site.Title }}">
+<link rel="sitemap" type="application/xml" href="{{ "sitemap.xml" | relURL }}">
+{{ partial "common/favicon.html" . }}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:ital,wdth,wght@0,100..125,400..900;1,100..125,400..900&family=Michroma&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+{{- if site.Params.gui.formula1Font }}
+{{- /* Formula1 Display: 이 컴퓨터에 설치된 글꼴만 local() 로 찾습니다. 글꼴 파일은 저장소에 넣지도, 배포하지도 않으므로
+       url() 대체 경로도 만들지 않습니다. 설치되지 않은 방문자에게는 기본 글꼴(Saira · Michroma)이 그대로 보입니다. */}}
+{{- $faces := slice
+    (dict "family" "Formula1 Display" "weight" "400" "style" "normal" "local" (slice "Formula1 Display Regular" "Formula1-Display-Regular" "Formula1 Display-Regular"))
+    (dict "family" "Formula1 Display" "weight" "700" "style" "normal" "local" (slice "Formula1 Display Bold" "Formula1-Display-Bold" "Formula1 Display Bold Bold"))
+    (dict "family" "Formula1 Display" "weight" "800 900" "style" "normal" "local" (slice "Formula1 Display Black" "Formula1-Display-Black"))
+    (dict "family" "Formula1 Display" "weight" "400 900" "style" "italic" "local" (slice "Formula1 Display Italic" "Formula1-Display-Italic"))
+    (dict "family" "Formula1 Display Wide" "weight" "400" "style" "normal" "local" (slice "Formula1 Display Wide" "Formula1-Display-Wide"))
+}}
+<style>
+{{- range $faces }}
+  {{- $src := slice }}
+  {{- range .local }}{{ $src = $src | append (printf "local(%q)" .) }}{{ end }}
+  @font-face { font-family: "{{ .family }}"; font-style: {{ .style }}; font-weight: {{ .weight }}; font-display: swap; src: {{ delimit $src ", " | safeCSS }}; }
+{{- end }}
+  html:root { --f-wide: "Formula1 Display Wide", "Michroma", "Pretendard Variable", Pretendard, sans-serif; --f-display: "Formula1 Display", "Saira", "Pretendard Variable", Pretendard, sans-serif; }
+</style>
+{{- end }}
+{{- $css := resources.Get "css/gui.css" | minify | fingerprint }}
+<link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
+{{- if .IsPage }}
+{{- $_ := .Content }}
+{{- if or .Params.math (.Store.Get "hasMath") }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+{{- end }}
+{{- end }}
+{{ with site.Params.customHeadCode }}{{ . | safeHTML }}{{ end }}

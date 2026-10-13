@@ -4,7 +4,18 @@ on:
   push:
     branches:
       - main  # 'main' 브랜치에 푸시될 때마다 실행
+  schedule:
+    # 매일 00:05 KST(15:05 UTC)에 다시 빌드 → 날짜를 미래로 적어 둔 예약 글이 그날 자동으로 발행됩니다.
+    # (GitHub 은 60일 동안 저장소 활동이 없으면 예약 실행을 멈춥니다. 그때는 Actions 탭에서 다시 켜 주세요)
+    - cron: '5 15 * * *'
   workflow_dispatch:
+
+permissions:
+  contents: write  # gh-pages 브랜치에 푸시하기 위해 필요
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -12,20 +23,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'  # 테마(submodule)도 함께 가져옵니다
 
       - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v2
+        uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: 'latest'
+          hugo-version: '0.152.2'  # 로컬에서 검증한 버전으로 고정 (올릴 때는 로컬에서 먼저 빌드 확인)
           extended: true
 
       - name: Build
-        run: hugo --minify
+        run: hugo --minify --panicOnWarning  # 깨진 이미지 경로 · 문법이 틀린 수식 · 없는 글(.md) 링크 같은 경고가 있으면 배포하지 않음
 
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public

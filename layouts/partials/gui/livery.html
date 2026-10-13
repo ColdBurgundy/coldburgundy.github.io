@@ -1,0 +1,9 @@
+{{- /* 썸네일이 없는 글/카테고리용 레이싱 리버리 플레이스홀더 */ -}}
+{{- $sec := cond .IsSection . .Parent -}}
+{{- $badge := partial "gui/badge.html" $sec -}}
+{{- $num := add (mod (hash.FNV32a .Title) 98) 1 -}}
+<span class="livery" aria-hidden="true">
+  <span class="livery__stripes"></span>
+  <span class="livery__num">{{ $num }}</span>
+  <span class="livery__badge">{{ $badge }}</span>
+</span>

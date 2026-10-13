@@ -1,0 +1,17 @@
+{{ define "main" }}
+<section class="dnf">
+  <div class="hero__grid" aria-hidden="true"></div>
+  <div class="dnf__bull" aria-hidden="true">{{ partial "gui/bull.html" "" }}</div>
+  <div class="container dnf__inner">
+    <p class="eyebrow">404</p>
+    <h1 class="dnf__title">DNF</h1>
+    <p class="dnf__sub">요청한 페이지를 찾을 수 없습니다. 주소를 확인하거나 검색해 보세요.</p>
+    <div class="dnf__actions">
+      <a class="btn btn--red" href="{{ (site.GetPage "/posts").RelPermalink }}">홈으로</a>
+      <button type="button" class="btn btn--ghost" data-search-open>글 검색</button>
+      <a class="btn btn--ghost" href="{{ "/" | relURL }}" data-mode-switch="cli">&gt;_ 터미널</a>
+    </div>
+  </div>
+  {{ partial "gui/trace.html" "hero" }}
+</section>
+{{ end }}

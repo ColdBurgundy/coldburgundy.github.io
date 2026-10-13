@@ -1,0 +1,9 @@
+{{- /* 글의 대표 이미지 리소스(없으면 false): front matter thumbnail, cover/thumbnail/featured 로 시작하는 파일, 번들의 첫 이미지 순 */ -}}
+{{- $img := false -}}
+{{- if .IsPage -}}
+  {{- with .Params.thumbnail }}{{ with $.Resources.Get . }}{{ $img = . }}{{ end }}{{ end -}}
+  {{- if not $img }}{{ with .Resources.GetMatch "{cover,thumbnail,featured}*" }}{{ $img = . }}{{ end }}{{ end -}}
+  {{- if not $img }}{{ range .Resources.ByType "image" }}{{ if and (not $img) (not (in (slice "svg" "svg+xml" "gif") .MediaType.SubType)) }}{{ $img = . }}{{ end }}{{ end }}{{ end -}}
+  {{- if $img }}{{ if or (ne $img.ResourceType "image") (in (slice "svg" "svg+xml" "gif") $img.MediaType.SubType) }}{{ $img = false }}{{ end }}{{ end -}}
+{{- end -}}
+{{- return $img -}}

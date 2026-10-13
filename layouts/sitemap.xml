@@ -1,0 +1,31 @@
+{{- /*
+  sitemap.xml — 검색엔진에 알릴 주소만 담습니다.
+  - 글이 하나도 없는 카테고리는 뺍니다. (head.html 이 noindex 로 표시하는 페이지라서, 넣으면 Search Console 경고가 납니다)
+  - 목록 페이지(홈 · 카테고리 · 태그)의 lastmod 는 그 아래 발행된 글 중 가장 최근 수정일입니다.
+    (Hugo 기본값은 아직 발행 전인 예약 글의 날짜까지 끌어와서 미래 날짜가 찍힙니다)
+  - 머리말에 sitemap.disable = true 를 쓴 페이지는 빠집니다.
+*/ -}}
+{{- $postsRoot := site.GetPage "/posts" -}}
+{{- printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{{- range where .Pages "Sitemap.Disable" "ne" true }}
+  {{- $empty := and .IsSection (ne . $postsRoot) (not .RegularPagesRecursive) }}
+  {{- if and .Permalink (not $empty) }}
+    {{- $lm := .Lastmod }}
+    {{- if not .IsPage }}
+      {{- $pages := site.RegularPages }}
+      {{- if .IsSection }}{{ $pages = .RegularPagesRecursive }}
+      {{- else if eq .Kind "term" }}{{ $pages = .Pages }}
+      {{- else if eq .Kind "taxonomy" }}{{ $pages = where site.RegularPages "Params.tags" "!=" nil }}
+      {{- end }}
+      {{- with $pages.ByLastmod.Reverse }}{{ $lm = (index . 0).Lastmod }}{{ end }}
+    {{- end }}
+  <url>
+    <loc>{{ .Permalink }}</loc>
+    {{- if not $lm.IsZero }}
+    <lastmod>{{ $lm.Format "2006-01-02T15:04:05-07:00" | safeHTML }}</lastmod>
+    {{- end }}
+  </url>
+  {{- end }}
+{{- end }}
+</urlset>

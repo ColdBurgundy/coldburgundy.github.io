@@ -1,0 +1,20 @@
+{{- $root := site.GetPage "/posts" -}}
+{{- $chain := slice -}}
+{{- $p := .Parent -}}
+{{- range seq 8 -}}
+  {{- if and $p (not $p.IsHome) (ne $p $root) -}}
+    {{- $chain = $chain | append $p -}}
+    {{- $p = $p.Parent -}}
+  {{- end -}}
+{{- end -}}
+<nav class="crumbs" aria-label="현재 위치">
+  <ol>
+    <li><a href="{{ $root.RelPermalink }}">Home</a></li>
+    {{- range sort $chain "RelPermalink" }}
+    <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+    {{- end }}
+    {{- if ne . $root }}
+    <li aria-current="page"><span>{{ if eq .Kind "taxonomy" }}{{ title .Title }}{{ else }}{{ .Title }}{{ end }}</span></li>
+    {{- end }}
+  </ol>
+</nav>

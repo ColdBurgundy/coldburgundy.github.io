@@ -1,0 +1,56 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  /* 사용자가 GUI 모드를 골라 두었다면 GUI 로 바로 이동 (/?cli 로 오면 CLI 고정) */
+  (function () {
+    try {
+      var force = /[?&]cli(=|&|$)/.test(location.search);
+      if (force) { localStorage.setItem('dl-mode', 'cli'); return; }
+      if (localStorage.getItem('dl-mode') === 'gui') {
+        var h = decodeURIComponent(location.hash.replace(/^#\/?/, '')).replace(/^\/+|\/+$/g, '');
+        location.replace('{{ "posts/" | relURL }}' + (h ? h + '/' : ''));
+      }
+    } catch (e) {}
+  })();
+</script>
+<title>{{ site.Title }} — terminal</title>
+<meta name="description" content="{{ site.Params.description }}">
+<meta property="og:site_name" content="{{ site.Title }}">
+<meta property="og:title" content="{{ site.Title }}">
+<meta property="og:description" content="{{ site.Params.description }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ .Permalink }}">
+<meta property="og:locale" content="ko_KR">
+{{- /* 공용 공유 카드 (GUI 와 같은 파일, static/images/og-default.png). 파일이 있을 때만 넣습니다. */}}
+{{- $ogFile := "static/images/og-default.png" }}
+{{- if fileExists $ogFile }}
+{{- $ogCfg := imageConfig $ogFile }}
+<meta property="og:image" content="{{ "images/og-default.png" | absURL }}">
+<meta property="og:image:width" content="{{ $ogCfg.Width }}">
+<meta property="og:image:height" content="{{ $ogCfg.Height }}">
+<meta property="og:image:alt" content="{{ site.Title }}">
+<meta name="twitter:card" content="summary_large_image">
+{{- else }}
+<meta name="twitter:card" content="summary">
+{{- end }}
+<meta name="theme-color" content="#000000">
+<link rel="canonical" href="{{ .Permalink }}">
+<link rel="sitemap" type="application/xml" title="Sitemap" href="{{ "sitemap.xml" | absURL }}">
+{{ with .OutputFormats.Get "rss" }}<link rel="alternate" type="application/rss+xml" href="{{ .RelPermalink }}" title="{{ site.Title }}">{{ end }}
+{{ partial "common/favicon.html" . }}
+
+{{- /* wcwidth 는 jquery.terminal 보다 먼저 로드되어야 한글(2칸) 폭 계산이 적용됩니다. */}}
+<script defer src="https://cdn.jsdelivr.net/gh/jcubic/static@871ce0d478682cd231ab8ceae672e061661f9755/js/wcwidth.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.42.2/js/jquery.terminal.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.42.2/js/less.min.js"></script>
+
+<link rel="stylesheet" href="{{ "css/terminal.local.css" | relURL }}">
+<link rel="stylesheet" href="{{ "css/system.local.css" | relURL }}">
+{{- /* 한글 픽셀 폰트(Galmuri 서브셋)와 터미널 글꼴은 mac-reader.css / terminal.local.css 의 @font-face 로 받습니다. */}}
+{{- $cliCSS := resources.Get "css/cli.css" | minify | fingerprint }}
+{{- $macCSS := resources.Get "css/mac-reader.css" | minify | fingerprint }}
+<link rel="stylesheet" href="{{ $cliCSS.RelPermalink }}" integrity="{{ $cliCSS.Data.Integrity }}">
+<link rel="stylesheet" href="{{ $macCSS.RelPermalink }}" integrity="{{ $macCSS.Data.Integrity }}">
+
+{{ with site.Params.customHeadCode }}{{ . | safeHTML }}{{ end }}

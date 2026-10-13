@@ -1,0 +1,187 @@
+{{- $g := site.Params.gui | default dict -}}
+{{- $root := . -}}
+{{- $pages := (where site.RegularPages "Section" "posts").ByDate.Reverse -}}
+{{- $sections := slice -}}
+{{- range where site.Pages "Kind" "section" -}}
+  {{- if and (eq .Section "posts") (ne . $root) }}{{ $sections = $sections | append . }}{{ end -}}
+{{- end -}}
+{{- $tags := site.Taxonomies.tags -}}
+{{- $words := $g.heroWords | default (slice "Code") -}}
+{{- $prefix := $g.heroPrefix | default "Notes on" -}}
+{{- $heroTitle := $g.heroTitle | default "Hello World!" -}}
+{{- /* 타이핑 줄은 가장 긴 단어 기준으로 글자 크기를 정합니다 (좁은 화면에서 잘리지 않게) */ -}}
+{{- $longest := 1 -}}
+{{- range $words }}{{ $longest = math.Max $longest (strings.RuneCount .) }}{{ end -}}
+{{- $since := "" -}}
+{{- $days := 0 -}}
+{{- with $pages -}}
+  {{- $oldest := index .ByDate 0 -}}
+  {{- $since = $oldest.Date.Format "2006-01-02" -}}
+  {{- $days = div (sub now.Unix $oldest.Date.Unix) 86400 -}}
+{{- end -}}
+
+{{/* ───────────── HERO ───────────── */}}
+<section class="hero" data-hero>
+  <div class="hero__bg" aria-hidden="true">
+    <div class="hero__cursorglow"></div>
+    <div class="hero__grid"></div>
+    <svg class="hero__track" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice">
+      <path d="M-40 470 C 180 470 230 360 400 350 S 640 470 820 420 1010 180 1240 210" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 10"/>
+      <path class="hero__track-line" d="M-40 470 C 180 470 230 360 400 350 S 640 470 820 420 1010 180 1240 210" fill="none" stroke="currentColor" stroke-width="2"/>
+    </svg>
+    <div class="hero__bull">{{ partial "gui/bull.html" "" }}</div>
+  </div>
+  <div class="hero__inner container">
+    <button type="button" class="start-lights" data-start-lights aria-label="출발 신호 다시 보기">
+      {{- range seq 5 }}<span class="start-lights__unit" aria-hidden="true"><i></i><i></i></span>{{ end -}}
+    </button>
+    {{- with $g.heroBadge }}
+    <p class="hero__badge">{{ . }}</p>
+    {{- end }}
+    <h1 class="hero__title">
+      <span class="hero__line hero__line--lead" style="--n: {{ math.Min (strings.RuneCount $heroTitle) 16 }}">{{ $heroTitle }}</span>
+      <span class="hero__line hero__line--dim" style="--n: {{ strings.RuneCount $prefix }}">{{ $prefix }}</span>
+      <span class="hero__line hero__line--typed" style="--n: {{ $longest }}"><span class="hero__typed" data-typed="{{ $words | jsonify }}">{{ index $words 0 }}</span><span class="hero__caret" aria-hidden="true"></span></span>
+    </h1>
+    {{- with $g.heroSubtitle }}
+    <p class="hero__sub">{{ . }}</p>
+    {{- end }}
+    <a class="hero__scroll" href="#pitwall" aria-label="아래로 스크롤">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+  {{ partial "gui/trace.html" "hero" }}
+</section>
+
+{{/* ───────────── 환영 + 통계 ───────────── */}}
+<section class="section pitwall" id="pitwall">
+  <div class="container pitwall__grid">
+    <div class="pitwall__welcome">
+      <p class="eyebrow">{{ site.Title }}</p>
+      <h2 class="pitwall__title">{{ $g.welcomeTitle | default "나중의 나를 위해 남기는 기록이다" }}</h2>
+      <p class="pitwall__text">{{ $g.welcomeText }}</p>
+      <div class="pitwall__actions">
+        <a class="btn btn--red" href="#latest">최신 글 보기</a>
+        <a class="btn btn--ghost" href="{{ "/" | relURL }}" data-mode-switch="cli"><span class="btn__mono" aria-hidden="true">&gt;_</span> 터미널로 보기</a>
+      </div>
+    </div>
+    <dl class="pitwall__stats">
+      {{- $stats := slice
+          (dict "label" "Posts" "sub" "게시물" "value" (len $pages) "color" "red")
+          (dict "label" "Categories" "sub" "카테고리" "value" (len $sections) "color" "blue")
+          (dict "label" "Tags" "sub" "태그" "value" (len $tags) "color" "yellow")
+          (dict "label" "Days" "sub" "운영일" "value" $days "color" "purple" "since" $since)
+      }}
+      {{- range $s := $stats }}
+      <div class="stat stat--{{ $s.color }}">
+        <dt class="stat__label">{{ $s.label }}<span class="stat__sub">{{ $s.sub }}</span></dt>
+        <dd class="stat__value" data-count="{{ $s.value }}"{{ with $s.since }} data-since="{{ . }}"{{ end }}>{{ $s.value }}</dd>
+      </div>
+      {{- end }}
+    </dl>
+  </div>
+</section>
+
+{{/* ───────────── 카테고리 ───────────── */}}
+<section class="section" id="categories">
+  <div class="container">
+    <header class="section-head">
+      <span class="section-index">01</span>
+      <h2 class="section-title">카테고리</h2>
+      <p class="section-desc">글이 많은 순서로 정렬했습니다.</p>
+    </header>
+    {{- $max := 1 }}
+    {{- $ranked := slice }}
+    {{- range $sections }}
+      {{- $n := len .RegularPagesRecursive }}
+      {{- $max = math.Max $max $n }}
+      {{- $ranked = $ranked | append (dict "s" . "n" $n "key" (add (mul $n 1000) (sub 999 .Weight))) }}
+    {{- end }}
+    <div class="teams">
+      {{- range $i, $r := sort $ranked "key" "desc" }}
+      {{- $s := $r.s }}
+      {{- $n := $r.n }}
+      <a class="team{{ if eq $n 0 }} team--empty{{ end }}" href="{{ $s.RelPermalink }}" style="--cat: {{ partial "gui/cat-color.html" $s | safeCSS }}; --pct: {{ div (mul $n 100.0) $max }}%">
+        <span class="team__top">
+          <span class="team__rank">{{ if $n }}P{{ add $i 1 }}{{ end }}</span>
+          <span class="team__badge">{{ partial "gui/badge.html" $s }}</span>
+        </span>
+        {{- /* 상위 카테고리 줄은 늘 자리를 차지해 한 줄의 제목들이 같은 높이에 섭니다 */}}
+        <span class="team__path">{{ with $s.Parent }}{{ if ne . $root }}{{ .Title }}{{ end }}{{ end }}</span>
+        <span class="team__name">{{ $s.Title }}</span>
+        <span class="team__desc">{{ $s.Description }}</span>
+        <span class="team__foot">
+          <span class="team__count"><b>{{ $n }}</b>편</span>
+          <span class="team__bar" aria-hidden="true"><i></i></span>
+        </span>
+      </a>
+      {{- end }}
+    </div>
+  </div>
+</section>
+
+{{/* ───────────── 최신 글 ───────────── */}}
+<section class="section section--alt" id="latest">
+  <div class="container">
+    <header class="section-head">
+      <span class="section-index">02</span>
+      <h2 class="section-title">최신 글</h2>
+    </header>
+    {{- if $pages }}
+    <div class="latest{{ if eq (len $pages) 1 }} latest--solo{{ end }}">
+      <div class="latest__feature">{{ partial "gui/card.html" (dict "page" (index $pages 0) "variant" "feature") }}</div>
+      {{- if gt (len $pages) 1 }}
+      <div class="latest__list">
+        {{- range after 1 (first 4 $pages) }}
+        {{ partial "gui/card.html" (dict "page" . "variant" "row") }}
+        {{- end }}
+      </div>
+      {{- end }}
+    </div>
+    {{- else }}
+    {{ partial "gui/empty.html" "아직 게시물이 없습니다." }}
+    {{- end }}
+  </div>
+</section>
+
+{{/* ───────────── 카테고리별 ───────────── */}}
+{{- $idx := 2 }}
+{{- range $root.Sections.ByWeight }}
+{{- $list := .RegularPagesRecursive.ByDate.Reverse }}
+{{- if $list }}
+{{- $idx = add $idx 1 }}
+<section class="section">
+  <div class="container">
+    <header class="section-head section-head--row">
+      <div>
+        <span class="section-index">{{ printf "%02d" $idx }}</span>
+        <h2 class="section-title"><span class="section-dot" style="--cat: {{ partial "gui/cat-color.html" . | safeCSS }}" aria-hidden="true"></span>{{ .Title }}</h2>
+        {{ with .Description }}<p class="section-desc">{{ . }}</p>{{ end }}
+      </div>
+      <a class="link-more" href="{{ .RelPermalink }}">전체 보기 <span aria-hidden="true">→</span></a>
+    </header>
+    {{- $v := cond (lt (len $list) 3) "row" "grid" }}
+    <div class="{{ if eq $v "row" }}post-list{{ else }}grid-cards{{ end }}">
+      {{- range first 3 $list }}
+      {{ partial "gui/card.html" (dict "page" . "variant" $v) }}
+      {{- end }}
+    </div>
+  </div>
+</section>
+{{- end }}
+{{- end }}
+
+{{/* ───────────── 태그 ───────────── */}}
+{{- with $tags }}
+<section class="section section--tight">
+  <div class="container">
+    <header class="section-head">
+      <span class="section-index">{{ printf "%02d" (add $idx 1) }}</span>
+      <h2 class="section-title">태그</h2>
+    </header>
+    <div class="tyres">
+      {{- range .ByCount }}{{ partial "gui/tyre.html" (dict "page" .Page "count" .Count) }}{{ end }}
+    </div>
+  </div>
+</section>
+{{- end }}

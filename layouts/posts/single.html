@@ -1,12 +1,194 @@
-<h1>{{ .Title }}</h1>
----<br>
-<strong>Author:</strong> {{ .Params.author }}<br>
-<strong>Date:</strong> {{ .Date.Format "January 2, 2006" }}<br>
----<br>
-<br>
-{{ with .Params.Description }}
-{{ . }}
+{{ define "main" }}
+{{- partial "common/publish-refs.html" . -}}
+{{- $root := site.GetPage "/posts" -}}
+{{- $color := partial "gui/cat-color.html" . -}}
+{{- $thumb := partial "gui/thumb.html" . -}}
+{{- $path := strings.TrimSuffix "/" (strings.TrimPrefix $root.RelPermalink .RelPermalink) -}}
+{{- $tags := .GetTerms "tags" -}}
+{{- /* data-tags 도 index.json 처럼 대소문자만 다른 태그를 하나로 (태그 페이지 이름 그대로) */ -}}
+{{- $tagNames := slice }}{{ range $tags }}{{ $tagNames = $tagNames | append .LinkTitle }}{{ end -}}
+{{- /* 목차: 소제목 속 수식도 글자로 (common/toc.html) */ -}}
+{{- $toc := partial "common/toc.html" . | replaceRE `\s*id="TableOfContents"` "" -}}
+{{- $tocCount := len (findRE `<a ` $toc) -}}
+{{- $cliHref := printf "%s#/%s" ("/" | relURL) $path -}}
+
+<article class="post" data-post data-date="{{ .Date.Format "2006-01-02" }}" data-tags="{{ delimit $tagNames "," }}" data-words="{{ .WordCount }}" data-reading-time="{{ .ReadingTime }}" style="--cat: {{ $color | safeCSS }}">
+  <header class="post-hero">
+    <div class="post-hero__bg" aria-hidden="true">
+      {{- with $thumb }}
+      {{- $bg := .Fill "960x540 Center webp q45" }}
+      <img src="{{ $bg.RelPermalink }}" alt="" width="{{ $bg.Width }}" height="{{ $bg.Height }}" fetchpriority="high">
+      {{- end }}
+      <div class="hero__grid"></div>
+    </div>
+    <div class="post-hero__inner">
+      {{ partial "gui/breadcrumbs.html" . }}
+      <div class="post-hero__chips">{{ partial "gui/chip.html" .Parent }}</div>
+      <h1 class="post-hero__title" data-post-title>{{ .Title }}</h1>
+      <ul class="post-hero__meta">
+        <li>{{ .Params.author | default site.Params.author.name }}</li>
+        <li><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time></li>
+        <li>{{ .ReadingTime }}분 분량</li>
+      </ul>
+      {{- with $tags }}
+      <div class="post-hero__tags">{{ range . }}{{ partial "gui/tyre.html" . }}{{ end }}</div>
+      {{- end }}
+    </div>
+    {{ partial "gui/trace.html" "hero" }}
+  </header>
+
+  {{- /* 세 칸 그리드: 가운데 읽기 열은 언제나 화면 정중앙, 양옆 칸은 같은 너비라 레일이 열을 밀지 않습니다.
+         넓은 화면(≥1280px): 왼쪽 도구 막대 + 오른쪽 콕핏 레일. 그보다 좁으면 레일은 숨고 목차는 서랍(FAB)으로. */}}
+  <div class="post-layout{{ if lt $tocCount 2 }} post-layout--notoc{{ end }}">
+    <div class="post-dock" role="group" aria-label="글 도구">
+      <button type="button" class="dock__btn" data-dock-copy aria-label="링크 복사">
+        <svg class="dock__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <svg class="dock__ok" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="dock__tip" aria-hidden="true">링크 복사</span>
+      </button>
+      <a class="dock__btn" href="{{ $cliHref }}" data-mode-switch="cli" aria-label="터미널에서 읽기">
+        <span class="dock__mono" aria-hidden="true">&gt;_</span>
+        <span class="dock__tip" aria-hidden="true">터미널에서 읽기</span>
+      </a>
+      <span class="dock__sep" aria-hidden="true"></span>
+      <button type="button" class="dock__btn" data-scroll-top aria-label="맨 위로">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14.5 12 8.5l6 6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="dock__tip" aria-hidden="true">맨 위로</span>
+      </button>
+    </div>
+
+    <div class="post-main">
+      {{- with site.Data.quotes }}
+      {{- $q := index . 0 }}
+      <aside class="radio" data-radio aria-label="팀 라디오">
+        <div class="radio__head">
+          <span class="radio__wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="radio__label">Team radio</span>
+          <button type="button" class="radio__next" data-radio-next aria-label="다른 메시지 듣기">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
+        </div>
+        <blockquote class="radio__quote" data-radio-text>{{ $q.text }}</blockquote>
+        <p class="radio__by" data-radio-by>— {{ $q.by }}</p>
+        <script type="application/json" data-radio-data>{{ . }}</script>
+      </aside>
+      {{- end }}
+
+      {{- if ge $tocCount 2 }}
+      <details class="race-plan" open>
+        <summary><span class="race-plan__title">목차</span><span class="race-plan__count">{{ $tocCount }}</span></summary>
+        {{ $toc | replaceRE "^<nav>" `<nav aria-label="레이스 플랜 (목차)">` | safeHTML }}
+      </details>
+      {{- end }}
+
+      <div class="post-body prose" data-post-body>
+        {{ .Content }}
+      </div>
+
+      <footer class="post-foot">
+        {{- with $tags }}
+        <div class="post-foot__tags">{{ range . }}{{ partial "gui/tyre.html" . }}{{ end }}</div>
+        {{- end }}
+        <div class="post-foot__share">
+          <button type="button" class="btn btn--ghost btn--sm" data-copy-link>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            <span>링크 복사</span>
+          </button>
+          <a class="btn btn--ghost btn--sm" href="{{ $cliHref }}" data-mode-switch="cli">
+            <span class="btn__mono" aria-hidden="true">&gt;_</span> 터미널에서 읽기
+          </a>
+        </div>
+      </footer>
+
+      {{- /* 최신순 목록에서 Prev = 더 오래된 글, Next = 더 최근 글 (같은 날짜도 순서대로) */ -}}
+      {{- $pages := (where site.RegularPages "Section" "posts").ByDate.Reverse -}}
+      {{- $older := $pages.Prev . -}}
+      {{- $newer := $pages.Next . -}}
+      {{- if or $older $newer }}
+      <nav class="laps" aria-label="이전/다음 글">
+        {{- with $older }}
+        <a class="lap lap--prev" href="{{ .RelPermalink }}"><span class="lap__dir">이전 글</span><span class="lap__title">{{ .Title }}</span></a>
+        {{- else }}<span class="lap lap--empty"></span>{{ end }}
+        {{- with $newer }}
+        <a class="lap lap--next" href="{{ .RelPermalink }}"><span class="lap__dir">다음 글</span><span class="lap__title">{{ .Title }}</span></a>
+        {{- end }}
+      </nav>
+      {{- end }}
+
+      {{- /* 같은 카테고리 타워의 글 끝 사본 — 레일이 들어가지 않는 화면(좁거나 낮은 창)에서만 보입니다 */}}
+      {{ partial "gui/tower.html" (dict "page" . "id" "tower-title-end" "class" "tower--end") }}
+
+      {{- $related := where (site.RegularPages.Related .) "Section" "posts" -}}
+      {{- if not $related }}{{ $related = where .Parent.RegularPagesRecursive "RelPermalink" "ne" .RelPermalink }}{{ end -}}
+      {{- with first 4 $related }}
+      <section class="related" aria-labelledby="related-title">
+        <header class="section-head section-head--row">
+          <div><h2 class="section-title" id="related-title">함께 보면 좋은 글</h2></div>
+          {{ with $.Parent }}<a class="link-more" href="{{ .RelPermalink }}">{{ .Title }} 전체 보기 →</a>{{ end }}
+        </header>
+        {{- $v := cond (eq (len .) 1) "row" "grid" }}
+        <div class="{{ if eq $v "row" }}post-list{{ else }}grid-cards grid-cards--2{{ end }}">
+          {{- range . }}{{ partial "gui/card.html" (dict "page" . "variant" $v) }}{{ end }}
+        </div>
+      </section>
+      {{- end }}
+
+      <section class="flag">
+        <div class="flag__pattern" aria-hidden="true"></div>
+        <div class="flag__inner">
+          <p class="flag__kicker">Finish</p>
+          <p class="flag__title">이 기록은 여기까지다</p>
+          <p class="flag__text"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time>에 남겼다.
+            {{- with site.Params.author.github }} · <a href="{{ . }}" rel="noopener">GitHub</a>{{ end }}
+            {{- with site.Params.author.email }} · <a href="mailto:{{ . }}">메일</a>{{ end }}
+          </p>
+        </div>
+      </section>
+    </div>
+
+    {{- /* 오른쪽 콕핏 레일: 텔레메트리(진행률 · 랩 · 섹터) + 트랙 맵 + 목차 + 같은 카테고리 타워.
+         ≥1280px 에선 휠 아래에 붙어 따라오고(sticky), 그보다 좁으면 목차 서랍이 됩니다(소제목이 2개 미만인 글은 서랍 없음).
+         랩 타이머 + 트랙 맵은 접을 수 있습니다(머리의 ⌃ 버튼, 고른 상태는 이 브라우저에 기억). 접으면 머리에 '진행률 · 섹터' 한 줄만. */}}
+    {{- /* 섹터 수 (gui.js 와 같은 규칙: 접이식 영역 밖의 h2 수, h2 가 없으면 소제목 수, 소제목이 없으면 1) — 첫 화면부터 '1/N' */ -}}
+    {{- $plain := replaceRE `(?s)<details\b.*?</details>` "" (string .Content) -}}
+    {{- $nH2 := len (findRE `<h2[^>]*\sid=` $plain) -}}
+    {{- $nHead := len (findRE `<h[234][^>]*\sid=` $plain) -}}
+    {{- $secTotal := cond (gt $nH2 0) $nH2 (cond (gt $nHead 0) $nHead 1) -}}
+    <aside class="post-aside" aria-label="텔레메트리">
+      <div class="telemetry" data-toc id="toc-panel">
+        <div class="telemetry__head">
+          <span class="telemetry__title">Telemetry</span>
+          <span class="telemetry__sum">
+            <b data-progress-text>0%</b>
+            <span class="telemetry__sum-sec" aria-hidden="true"><i>·</i><small>Sector</small><span data-sector-mini>1/{{ $secTotal }}</span></span>
+          </span>
+          <button type="button" class="telemetry__fold" data-tel-fold aria-expanded="true" aria-controls="tel-dash" aria-label="랩 타이머 · 트랙 맵">
+            <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 7.5 6 4.5l3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <div class="telemetry__collapse" id="tel-dash">
+          <div class="telemetry__collapse-in">
+            <div class="telemetry__dash">
+              <div class="telemetry__lap">
+                <span class="telemetry__k">Lap</span><b data-lap>00:00.0</b>
+                <span class="telemetry__k">Sector</span><b data-sector>1/{{ $secTotal }}</b>
+              </div>
+              {{ partial "gui/track-map.html" . }}
+            </div>
+          </div>
+        </div>
+        <div class="telemetry__bar" aria-hidden="true"><i data-progress-bar></i></div>
+        {{- if ge $tocCount 2 }}
+        {{ $toc | replaceRE "^<nav>" `<nav aria-label="텔레메트리 (목차)">` | safeHTML }}
+        {{- end }}
+      </div>
+      {{ partial "gui/tower.html" (dict "page" . "id" "tower-title-rail" "class" "tower--rail") }}
+    </aside>
+    {{- if ge $tocCount 2 }}
+    <button type="button" class="toc-fab" data-toc-toggle aria-controls="toc-panel" aria-expanded="false" aria-label="목차 열기">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h16M4 18h12" stroke="currentColor" stroke-width="2"/></svg>
+    </button>
+    {{- end }}
+  </div>
+</article>
 {{ end }}
-<br>
-<br>
-{{ .Content }}

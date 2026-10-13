@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" class="bull" aria-hidden="true" focusable="false">
+  <!-- Draktharr Lab — 직접 그린 별자리 황소 (원본 작업, 어떤 상표 도안도 따라 그리지 않음).
+       오른쪽으로 돌진하는 로우폴리 황소의 꼭짓점을 별로, 모서리를 별자리 연결선으로 그렸습니다.
+       눈 자리의 붉은 별은 실제 황소자리의 눈인 알데바란(Aldebaran)에 대한 오마주입니다.
+       선 색은 currentColor, 밝기는 CSS 변수 --bull-line / --bull-star. -->
+  <path class="bull__body" d="M94 76 L122 62 L172 56 L222 42 L262 54 L292 82 L312 102 L336 126 L342 142 L326 150 L296 140 L268 146 L250 158 L284 176 L306 198 L296 206 L270 184 L248 170 L232 162 L180 160 L150 156 L120 176 L94 204 L84 198 L104 168 L100 124 Z"/>
+  <path class="bull__far" d="M244 166 L254 200 L244 204 L236 168 M168 160 L156 198 L146 196 L156 158"/>
+  <path class="bull__horns" d="M296 92 Q320 96 334 70 M288 84 Q298 66 318 58 M284 92 L270 98 L284 102"/>
+  <path class="bull__tail" d="M94 76 Q66 58 56 84 M56 84 L48 96 M56 84 L60 98"/>
+  <path class="bull__facets" d="M222 42 L250 112 L268 146 M262 54 L250 112 L232 162 M292 82 L250 112 M292 82 L296 140 M312 102 L296 140 M250 112 L200 108 L222 42 M200 108 L172 56 M200 108 L180 160 M200 108 L148 106 L172 56 M148 106 L122 62 M148 106 L150 156 M148 106 L100 124 M200 108 L232 162"/>
+  <g class="bull__stars">
+    <circle class="bull__star bull__star--1" cx="222" cy="42" r="2.6" style="--t:0.00s;--d:3.20s"/>
+    <circle class="bull__star bull__star--1" cx="334" cy="70" r="2.6" style="--t:-2.59s;--d:5.45s"/>
+    <circle class="bull__star bull__star--1" cx="342" cy="142" r="2.6" style="--t:-5.18s;--d:3.65s"/>
+    <circle class="bull__star bull__star--1" cx="306" cy="198" r="2.6" style="--t:-7.77s;--d:5.90s"/>
+    <circle class="bull__star bull__star--1" cx="94" cy="204" r="2.6" style="--t:-1.85s;--d:4.10s"/>
+    <circle class="bull__star bull__star--1" cx="56" cy="84" r="2.6" style="--t:-4.44s;--d:6.35s"/>
+    <circle class="bull__star bull__star--2" cx="122" cy="62" r="1.7" style="--t:-7.03s;--d:4.55s"/>
+    <circle class="bull__star bull__star--2" cx="172" cy="56" r="1.7" style="--t:-1.11s;--d:6.80s"/>
+    <circle class="bull__star bull__star--2" cx="262" cy="54" r="1.7" style="--t:-3.70s;--d:5.00s"/>
+    <circle class="bull__star bull__star--2" cx="292" cy="82" r="1.7" style="--t:-6.29s;--d:3.20s"/>
+    <circle class="bull__star bull__star--2" cx="312" cy="102" r="1.7" style="--t:-0.37s;--d:5.45s"/>
+    <circle class="bull__star bull__star--2" cx="326" cy="150" r="1.7" style="--t:-2.96s;--d:3.65s"/>
+    <circle class="bull__star bull__star--2" cx="268" cy="146" r="1.7" style="--t:-5.55s;--d:5.90s"/>
+    <circle class="bull__star bull__star--2" cx="250" cy="158" r="1.7" style="--t:-8.14s;--d:4.10s"/>
+    <circle class="bull__star bull__star--2" cx="284" cy="176" r="1.7" style="--t:-2.22s;--d:6.35s"/>
+    <circle class="bull__star bull__star--2" cx="232" cy="162" r="1.7" style="--t:-4.81s;--d:4.55s"/>
+    <circle class="bull__star bull__star--2" cx="180" cy="160" r="1.7" style="--t:-7.40s;--d:6.80s"/>
+    <circle class="bull__star bull__star--2" cx="150" cy="156" r="1.7" style="--t:-1.48s;--d:5.00s"/>
+    <circle class="bull__star bull__star--2" cx="120" cy="176" r="1.7" style="--t:-4.07s;--d:3.20s"/>
+    <circle class="bull__star bull__star--2" cx="100" cy="124" r="1.7" style="--t:-6.66s;--d:5.45s"/>
+    <circle class="bull__star bull__star--2" cx="94" cy="76" r="1.7" style="--t:-0.74s;--d:3.65s"/>
+    <circle class="bull__star bull__star--2" cx="318" cy="58" r="1.7" style="--t:-3.33s;--d:5.90s"/>
+    <circle class="bull__star bull__star--2" cx="250" cy="112" r="1.7" style="--t:-5.92s;--d:4.10s"/>
+    <circle class="bull__star bull__star--2" cx="200" cy="108" r="1.7" style="--t:0.00s;--d:6.35s"/>
+    <circle class="bull__star bull__star--2" cx="148" cy="106" r="1.7" style="--t:-2.59s;--d:4.55s"/>
+    <circle class="bull__star bull__star--3" cx="336" cy="126" r="1.1" style="--t:-5.18s;--d:6.80s"/>
+    <circle class="bull__star bull__star--3" cx="296" cy="140" r="1.1" style="--t:-7.77s;--d:5.00s"/>
+    <circle class="bull__star bull__star--3" cx="296" cy="206" r="1.1" style="--t:-1.85s;--d:3.20s"/>
+    <circle class="bull__star bull__star--3" cx="270" cy="184" r="1.1" style="--t:-4.44s;--d:5.45s"/>
+    <circle class="bull__star bull__star--3" cx="248" cy="170" r="1.1" style="--t:-7.03s;--d:3.65s"/>
+    <circle class="bull__star bull__star--3" cx="84" cy="198" r="1.1" style="--t:-1.11s;--d:5.90s"/>
+    <circle class="bull__star bull__star--3" cx="104" cy="168" r="1.1" style="--t:-3.70s;--d:4.10s"/>
+    <circle class="bull__star bull__star--3" cx="48" cy="96" r="1.1" style="--t:-6.29s;--d:6.35s"/>
+    <circle class="bull__star bull__star--3" cx="60" cy="98" r="1.1" style="--t:-0.37s;--d:4.55s"/>
+    <circle class="bull__star bull__star--3" cx="270" cy="98" r="1.1" style="--t:-2.96s;--d:6.80s"/>
+    <circle class="bull__star bull__star--3" cx="254" cy="200" r="1.1" style="--t:-5.55s;--d:5.00s"/>
+    <circle class="bull__star bull__star--3" cx="244" cy="204" r="1.1" style="--t:-8.14s;--d:3.20s"/>
+    <circle class="bull__star bull__star--3" cx="156" cy="198" r="1.1" style="--t:-2.22s;--d:5.45s"/>
+    <circle class="bull__star bull__star--3" cx="146" cy="196" r="1.1" style="--t:-4.81s;--d:3.65s"/>
+    <circle class="bull__star bull__star--eye" cx="304" cy="111" r="2.4" style="--t:-1.10s;--d:5.40s"/>
+  </g>
+  <g class="bull__dust">
+    <circle class="bull__star bull__star--dust" cx="26" cy="28" r="0.9" style="--t:0.00s;--d:4.00s"/>
+    <circle class="bull__star bull__star--dust" cx="138" cy="18" r="1.2" style="--t:-4.51s;--d:4.80s"/>
+    <circle class="bull__star bull__star--dust" cx="362" cy="26" r="1.5" style="--t:-2.05s;--d:5.60s"/>
+    <circle class="bull__star bull__star--dust" cx="386" cy="178" r="0.9" style="--t:-6.56s;--d:6.40s"/>
+    <circle class="bull__star bull__star--dust" cx="18" cy="158" r="1.2" style="--t:-4.10s;--d:4.00s"/>
+    <circle class="bull__star bull__star--dust" cx="204" cy="226" r="1.5" style="--t:-1.64s;--d:4.80s"/>
+    <circle class="bull__star bull__star--dust" cx="334" cy="228" r="0.9" style="--t:-6.15s;--d:5.60s"/>
+    <circle class="bull__star bull__star--dust" cx="62" cy="230" r="1.2" style="--t:-3.69s;--d:6.40s"/>
+    <circle class="bull__star bull__star--dust" cx="392" cy="104" r="1.5" style="--t:-1.23s;--d:4.00s"/>
+    <circle class="bull__star bull__star--dust" cx="252" cy="12" r="0.9" style="--t:-5.74s;--d:4.80s"/>
+    <circle class="bull__star bull__star--dust" cx="8" cy="96" r="1.2" style="--t:-3.28s;--d:5.60s"/>
+    <circle class="bull__star bull__star--dust" cx="112" cy="232" r="1.5" style="--t:-0.82s;--d:6.40s"/>
+    <circle class="bull__star bull__star--dust" cx="372" cy="64" r="0.9" style="--t:-5.33s;--d:4.00s"/>
+    <circle class="bull__star bull__star--dust" cx="30" cy="210" r="1.2" style="--t:-2.87s;--d:4.80s"/>
+    <circle class="bull__star bull__star--dust" cx="176" cy="12" r="1.5" style="--t:-0.41s;--d:5.60s"/>
+    <circle class="bull__star bull__star--dust" cx="300" cy="18" r="0.9" style="--t:-4.92s;--d:6.40s"/>
+  </g>
+</svg>

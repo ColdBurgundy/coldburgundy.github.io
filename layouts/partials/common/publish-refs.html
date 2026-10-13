@@ -1,0 +1,27 @@
+{{- /*
+  본문에 직접 쓴 HTML(<img src> · <a href> · <video poster> · <source srcset> …)이 가리키는 글 폴더 파일을 배포합니다.
+  content/posts/_index.md 의 publishResources = false 때문에 원본 파일은 쓰일 때만 배포되는데,
+  Markdown 이미지·링크는 렌더 훅이 처리하지만 날 HTML 은 훅을 거치지 않아서 그대로 두면 404 가 납니다.
+  코드 블록 · 인라인 코드 안의 예시 HTML 은 건너뜁니다.
+  사용: 글 템플릿(layouts/posts/single.html)에서 {{ partial "common/publish-refs.html" . }}
+*/ -}}
+{{- $c := .RawContent -}}
+{{- $c = replaceRE "(?ms)^[ \t>]*(?:```|~~~).*?^[ \t>]*(?:```|~~~)" " " $c -}}
+{{- $c = replaceRE "`[^`\n]+`" " " $c -}}
+{{- $refs := slice -}}
+{{- range findRE `(?i)<(?:img|source|video|audio|track|a|embed|object|iframe)\b[^>]*>` $c -}}
+  {{- range findRESubmatch `(?i)\s(?:src|href|data|poster)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))` . -}}
+    {{- $refs = $refs | append (or (index . 1) (index . 2) (index . 3)) -}}
+  {{- end -}}
+  {{- range findRESubmatch `(?i)\ssrcset\s*=\s*(?:"([^"]*)"|'([^']*)')` . -}}
+    {{- range split (or (index . 1) (index . 2)) "," -}}
+      {{- with index (split (trim . " \t\n") " ") 0 }}{{ $refs = $refs | append . }}{{ end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- range uniq $refs -}}
+  {{- $u := urls.Parse . -}}
+  {{- if and $u.Path (not $u.IsAbs) (not (hasPrefix $u.Path "/")) -}}
+    {{- with $.Resources.Get (path.Clean $u.Path) }}{{ .Publish }}{{ end -}}
+  {{- end -}}
+{{- end -}}

@@ -1,0 +1,19 @@
+{{- /* 재귀 카테고리 트리. 입력: dict "section" 섹션 "current" 현재 페이지 "depth" 깊이 */ -}}
+{{- $current := .current -}}
+{{- $depth := .depth -}}
+{{- with .section.Sections.ByWeight -}}
+<ul class="cat-tree{{ if gt $depth 0 }} cat-tree--sub{{ end }}">
+  {{- range . }}
+  {{- $n := len .RegularPagesRecursive }}
+  {{- $active := or (eq . $current) ($current.IsDescendant .) }}
+  <li class="cat-tree__item{{ if $active }} is-active{{ end }}{{ if eq $n 0 }} is-empty{{ end }}">
+    <a class="cat-tree__link" href="{{ .RelPermalink }}" style="--cat: {{ partial "gui/cat-color.html" . | safeCSS }}"{{ if eq . $current }} aria-current="page"{{ end }}>
+      <span class="cat-tree__dot" aria-hidden="true"></span>
+      <span class="cat-tree__name">{{ .Title }}</span>
+      <span class="cat-tree__count">{{ $n }}</span>
+    </a>
+    {{- partial "gui/category-tree.html" (dict "section" . "current" $current "depth" (add $depth 1)) }}
+  </li>
+  {{- end }}
+</ul>
+{{- end -}}

@@ -1,0 +1,11 @@
+{{- /*
+  소제목. 수식이 든 소제목에는 data-label 로 읽기 쉬운 평문(예: "복잡도 O(n²) 분석")을 달아 두고,
+  목차(common/toc.html) · 휠 LCD(gui.js) · Mac 창 목차(mac-reader.js)가 모두 이 한 벌을 씁니다.
+  수식만으로 된 소제목은 Hugo 가 앵커를 만들지 못해(id="") 라벨로 앵커를 만듭니다. 목차의 빈 자리는 common/toc.html 이 채웁니다.
+*/ -}}
+{{- $label := "" -}}
+{{- if strings.Contains (string .Text) `class="katex"` }}{{ $label = partial "common/heading-label.html" .Text }}{{ end -}}
+{{- $id := .Anchor -}}
+{{- if not $id }}{{ $id = strings.Trim (anchorize $label | replaceRE `-{2,}` "-") "-" | default "heading" }}{{ end -}}
+<h{{ .Level }} id="{{ $id }}"{{ with .Attributes.class }} class="{{ . }}"{{ end }}{{ with $label }} data-label="{{ . }}"{{ end }}>{{ .Text }}<a class="heading-anchor" href="#{{ $id }}" aria-hidden="true" tabindex="-1"></a></h{{ .Level }}>
+{{- /**/ -}}

@@ -1,6 +1,7 @@
 +++
 title = "Hello World"
 date = "2025-06-18"
+draft = true  # terminalcv 테마 예제 글 — 발행하지 않음
 category = "News"
 author = "coolapso"
 description = "Hello world, welcome to your temrinal cv with blogging skills!"

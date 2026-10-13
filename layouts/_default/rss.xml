@@ -1,0 +1,45 @@
+{{- /* RSS: 홈 = posts 전체(About 같은 단독 페이지 제외), 카테고리 = 하위 폴더까지 포함 */ -}}
+{{- $authorEmail := site.Params.author.email | default "" -}}
+{{- $authorName := site.Params.author.name | default site.Title -}}
+{{- $pages := .Pages -}}
+{{- if .IsHome }}{{ $pages = where site.RegularPages "Section" "in" site.Params.mainSections }}
+{{- else if .IsSection }}{{ $pages = .RegularPagesRecursive }}
+{{- end -}}
+{{- $pages = $pages.ByDate.Reverse -}}
+{{- $limit := site.Config.Services.RSS.Limit -}}
+{{- if ge $limit 1 }}{{ $pages = first $limit $pages }}{{ end -}}
+{{- printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} · {{ site.Title }}{{ end }}</title>
+    <link>{{ .Permalink }}</link>
+    <description>{{ .Description | default site.Params.description }}</description>
+    <generator>Hugo</generator>
+    <language>{{ site.Language.LanguageCode }}</language>
+    {{- with $authorEmail }}
+    <managingEditor>{{ . }} ({{ $authorName }})</managingEditor>
+    {{- end }}
+    {{- with $pages }}
+    <lastBuildDate>{{ (index . 0).Lastmod.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</lastBuildDate>
+    {{- end }}
+    {{- with .OutputFormats.Get "RSS" }}
+    {{ printf "<atom:link href=%q rel=\"self\" type=%q />" .Permalink .MediaType | safeHTML }}
+    {{- end }}
+    {{- range $pages }}
+    <item>
+      <title>{{ .Title }}</title>
+      <link>{{ .Permalink }}</link>
+      <pubDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</pubDate>
+      {{- with $authorEmail }}
+      <author>{{ . }} ({{ $authorName }})</author>
+      {{- end }}
+      <guid>{{ .Permalink }}</guid>
+      {{- range .GetTerms "tags" }}
+      <category>{{ .LinkTitle }}</category>
+      {{- end }}
+      {{- /* 카드 · meta description 과 같은 평문 요약 (.Summary 는 KaTeX 마크업 · 소제목 · 표지 이미지까지 담겨 리더에서 깨짐) */}}
+      <description>{{ partial "common/excerpt.html" . | transform.XMLEscape | safeHTML }}</description>
+    </item>
+    {{- end }}
+  </channel>
+</rss>

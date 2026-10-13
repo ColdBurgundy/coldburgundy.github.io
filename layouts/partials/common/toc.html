@@ -1,0 +1,76 @@
+{{- /*
+  글 목차 HTML (.TableOfContents 와 같은 모양).
+  Hugo 목차는 소제목 속 인라인 수식을 빼먹어서 "복잡도 $O(n^2)$ 분석" 이 "복잡도  분석" 이 되고,
+  수식만 있는 소제목은 빈 <li></li> 로 남깁니다. 그래서 수식이 든 소제목은 render-heading 이 달아 둔
+  data-label(common/heading-label.html, 예: "복잡도 O(n²) 분석")로 글자를 바꾸고, 빈 자리는 같은 깊이의 그 소제목으로 채웁니다.
+  (영어 번역 <details> 속 소제목은 Hugo 목차에 없으므로 건너뜁니다.)
+  사용: {{ $toc := partial "common/toc.html" . }}
+*/ -}}
+{{- $toc := string .TableOfContents -}}
+{{- if strings.Contains (string .Content) "data-label=" -}}
+  {{- $c := replaceRE `(?s)<details\b.*?</details>` "" (string .Content) -}}
+  {{- $heads := slice -}}
+  {{- range findRESubmatch `<h([1-6]) id="([^"]*)"([^>]*)>` $c -}}
+    {{- $label := "" -}}
+    {{- with findRESubmatch `\sdata-label="([^"]*)"` (index . 3) 1 }}{{ $label = index (index . 0) 1 }}{{ end -}}
+    {{- $heads = $heads | append (dict "level" (int (index . 1)) "id" (index . 2) "label" $label) -}}
+  {{- end -}}
+
+  {{- /* 1) Hugo 가 앵커를 만든 소제목(목차 링크)과, 소제목 단계 = <ul> 깊이 + offset (startLevel 2 면 1) */ -}}
+  {{- $linked := slice -}}
+  {{- range findRE `<a href="#[^"]*">` $toc }}{{ $linked = $linked | append (strings.TrimSuffix `">` (strings.TrimPrefix `<a href="#` .)) }}{{ end -}}
+  {{- $offset := 1 -}}
+  {{- $depth := 0 -}}
+  {{- range findRE `<ul>|</ul>|<a href="#[^"]*">` $toc -}}
+    {{- if eq . "<ul>" }}{{ $depth = add $depth 1 }}
+    {{- else if eq . "</ul>" }}{{ $depth = sub $depth 1 }}
+    {{- else -}}
+      {{- $id := strings.TrimSuffix `">` (strings.TrimPrefix `<a href="#` .) -}}
+      {{- $found := false }}{{ range $heads }}{{ if eq .id $id }}{{ $offset = sub .level $depth }}{{ $found = true }}{{ break }}{{ end }}{{ end -}}
+      {{- if $found }}{{ break }}{{ end -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- /* 2) 수식이 든 소제목: 목차 글자를 라벨로 */ -}}
+  {{- range $heads -}}
+    {{- if and .label (in $linked .id) -}}
+      {{- $re := printf `(?s)(<a href="#%s">).*?(</a>)` (replaceRE `([\.+*?()|\[\]{}^$])` `\$1` .id) -}}
+      {{- $toc = replaceRE $re (printf "${1}%s${2}" (replace .label "$" "$$")) $toc -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- /* 3) 수식만 있는 소제목: 링크 없는 자리(<li></li>, 아래 단계를 품은 <li><ul>)를
+         바로 앞 · 뒤 목차 링크 사이에 있는 같은 단계의 수식 소제목으로 채웁니다.
+         못 찾으면 빈 <li></li> 는 지우고, 단계를 건너뛴 자리(<li><ul>)는 그대로 둡니다. */ -}}
+  {{- $keep := "\uE000" -}}
+  {{- $depth = 0 -}}
+  {{- $pos := 0 -}}
+  {{- range findRE `<ul>|</ul>|<li>(?:</li>|\s*<ul>)|<a href="#[^"]*">` $toc -}}
+    {{- if eq . "<ul>" }}{{ $depth = add $depth 1 }}
+    {{- else if eq . "</ul>" }}{{ $depth = sub $depth 1 }}
+    {{- else if hasPrefix . "<a" -}}
+      {{- $id := strings.TrimSuffix `">` (strings.TrimPrefix `<a href="#` .) -}}
+      {{- range $k, $h := $heads }}{{ if and (ge $k $pos) (eq $h.id $id) }}{{ $pos = add $k 1 }}{{ break }}{{ end }}{{ end -}}
+    {{- else -}}
+      {{- $fill := "" -}}
+      {{- range $k, $h := $heads -}}
+        {{- if lt $k $pos }}{{ continue }}{{ end -}}
+        {{- if in $linked $h.id }}{{ break }}{{ end -}}
+        {{- if and $h.label (eq $h.level (add $depth $offset)) -}}
+          {{- $fill = printf `<a href="#%s">%s</a>` $h.id $h.label -}}
+          {{- $pos = add $k 1 -}}
+          {{- break -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $new := replace . "<li>" (print "<li" $keep ">") 1 -}}
+      {{- if $fill }}{{ $new = replace . "<li>" (print "<li>" $fill) 1 }}
+      {{- else if eq . "<li></li>" }}{{ $new = "" }}{{ end -}}
+      {{- $toc = replace $toc . $new 1 -}}
+      {{- if hasSuffix . "<ul>" }}{{ $depth = add $depth 1 }}{{ end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $toc = replace $toc $keep "" -}}
+  {{- /* 비워진 <ul> · <li> 정리 (목차 단계 밖의 수식 소제목이 남긴 껍데기) */ -}}
+  {{- range seq 3 }}{{ $toc = replaceRE `<li>\s*</li>|<ul>\s*</ul>` "" $toc }}{{ end -}}
+{{- end -}}
+{{- return ($toc | safeHTML) -}}

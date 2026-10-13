@@ -1,0 +1,28 @@
+{{- /*
+  이미지 src 를 페이지 번들 리소스로 해석합니다.
+  입력: dict "page" .Page "src" "images/x.png"
+  반환: dict "src" (루트 기준 URL) "width" "height"
+  - 번들 안에 있으면 RelPermalink(/posts/.../images/x.png)로 바꿔서 CLI 창/직접 접속/RSS 어디서든 깨지지 않게 합니다.
+  - 가로 1400px 보다 큰 래스터 이미지는 webp 로 줄입니다.
+*/ -}}
+{{- $src := .src -}}
+{{- $out := dict "src" $src "width" 0 "height" 0 -}}
+{{- $u := urls.Parse $src -}}
+{{- if and (not $u.IsAbs) (not (hasPrefix $src "/")) $u.Path -}}
+  {{- $res := or (.page.Resources.Get $u.Path) (resources.Get $u.Path) -}}
+  {{- with $res -}}
+    {{- $img := . -}}
+    {{- $raster := and (eq $img.ResourceType "image") (not (in (slice "svg" "svg+xml" "gif") $img.MediaType.SubType)) -}}
+    {{- if and $raster (gt $img.Width 1400) -}}
+      {{- $img = $img.Resize "1400x webp q82" -}}
+    {{- end -}}
+    {{- if $raster -}}
+      {{- $out = dict "src" $img.RelPermalink "width" $img.Width "height" $img.Height -}}
+    {{- else -}}
+      {{- $out = dict "src" $img.RelPermalink "width" 0 "height" 0 -}}
+    {{- end -}}
+  {{- else -}}
+    {{- warnf "%s: 이미지 %q 를 글 폴더(번들)나 assets 에서 찾지 못했습니다" .page.Path $src -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

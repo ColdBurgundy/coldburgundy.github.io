@@ -1,6 +1,0 @@
-[submodule "themes/hugo-theme-terminalcv"]
-	path = themes/hugo-theme-terminalcv
-	url = https://github.com/coolapso/hugo-theme-terminalcv.git
-[submodule "themes/terminalcv"]
-	path = themes/terminalcv
-	url = https://github.com/coolapso/hugo-theme-terminalcv.git

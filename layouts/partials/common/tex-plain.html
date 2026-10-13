@@ -1,0 +1,83 @@
+{{- /*
+  TeX 수식 한 덩어리를 읽기 쉬운 평문으로 다듬습니다.   입력: TeX 문자열($ 없이)   반환: 문자열
+    O(n^2) → O(n²)   \log n → log n   \frac{a}{b} → a/b   \sqrt{n} → √n   x_{ij} \le 10 → xᵢⱼ ≤ 10   \alpha → α
+  소제목 라벨(common/heading-label.html → 목차 · 휠 LCD · Mac 창 목차)과 글 요약(common/excerpt.html)이 함께 씁니다.
+  모르는 명령(\foo)은 백슬래시만 떼고 이름을 남깁니다. (\max → max)
+*/ -}}
+{{- $t := . -}}
+{{- $lb := "\uE001" }}{{ $rb := "\uE002" }}{{ $us := "\uE003" -}}
+
+{{- /* 이스케이프한 글자: \{ \} \_ 는 아래 단계에서 지워지지 않게 잠시 바꿔 둡니다 */ -}}
+{{- $t = replace $t `\{` $lb }}{{ $t = replace $t `\}` $rb }}{{ $t = replace $t `\_` $us -}}
+{{- $t = replaceRE `\\([$%#&])` "$1" $t -}}
+{{- $t = replaceRE `\\\\|\\[,;:! ]|\\q?quad\b|~` " " $t -}}
+
+{{- /* 크기 · 글꼴 명령은 걷어내고 내용만 */ -}}
+{{- $t = replaceRE `\\(?:left|right|[Bb]igg?[lr]?|displaystyle|textstyle|scriptstyle|limits|nolimits)\b` "" $t -}}
+{{- $t = replaceRE `\\(?:text(?:bf|it|rm|tt|sf|normal)?|math(?:rm|bf|it|sf|tt|cal|bb|frak|scr)|operatorname\*?|boldsymbol|bm|mbox|hbox)\s*\{([^{}]*)\}` "$1" $t -}}
+{{- $t = replaceRE `\\pmod\s*\{([^{}]*)\}` "(mod $1)" $t -}}
+{{- $t = replaceRE `\\[bp]?mod\b` "mod" $t -}}
+{{- $t = replaceRE `\\binom\s*\{([^{}]*)\}\s*\{([^{}]*)\}` "C($1, $2)" $t -}}
+
+{{- /* 기호 · 그리스 문자 (\in 과 \infty 처럼 이름이 겹치지 않게, 이름 바로 뒤가 글자가 아닌 것만) */ -}}
+{{- $sym := dict
+    "cdot" "·" "times" "×" "div" "÷" "pm" "±" "mp" "∓" "ast" "∗" "circ" "∘"
+    "le" "≤" "leq" "≤" "ge" "≥" "geq" "≥" "ne" "≠" "neq" "≠" "ll" "≪" "gg" "≫"
+    "approx" "≈" "equiv" "≡" "sim" "∼" "simeq" "≃" "propto" "∝"
+    "infty" "∞" "in" "∈" "notin" "∉" "ni" "∋" "subset" "⊂" "subseteq" "⊆" "supset" "⊃" "supseteq" "⊇"
+    "cup" "∪" "cap" "∩" "setminus" "∖" "emptyset" "∅" "varnothing" "∅"
+    "to" "→" "rightarrow" "→" "leftarrow" "←" "gets" "←" "leftrightarrow" "↔" "mapsto" "↦"
+    "Rightarrow" "⇒" "implies" "⇒" "Leftarrow" "⇐" "Leftrightarrow" "⇔" "iff" "⇔"
+    "ldots" "…" "cdots" "⋯" "dots" "…" "vdots" "⋮"
+    "lfloor" "⌊" "rfloor" "⌋" "lceil" "⌈" "rceil" "⌉" "langle" "⟨" "rangle" "⟩"
+    "mid" "|" "vert" "|" "lvert" "|" "rvert" "|" "Vert" "‖" "lVert" "‖" "rVert" "‖"
+    "sum" "Σ" "prod" "Π" "int" "∫" "partial" "∂" "nabla" "∇"
+    "forall" "∀" "exists" "∃" "neg" "¬" "lnot" "¬" "land" "∧" "wedge" "∧" "lor" "∨" "vee" "∨" "oplus" "⊕" "otimes" "⊗"
+    "alpha" "α" "beta" "β" "gamma" "γ" "delta" "δ" "epsilon" "ε" "varepsilon" "ε" "zeta" "ζ" "eta" "η"
+    "theta" "θ" "vartheta" "ϑ" "iota" "ι" "kappa" "κ" "lambda" "λ" "mu" "μ" "nu" "ν" "xi" "ξ"
+    "pi" "π" "rho" "ρ" "sigma" "σ" "tau" "τ" "upsilon" "υ" "phi" "φ" "varphi" "φ" "chi" "χ" "psi" "ψ" "omega" "ω"
+    "Gamma" "Γ" "Delta" "Δ" "Theta" "Θ" "Lambda" "Λ" "Xi" "Ξ" "Pi" "Π" "Sigma" "Σ" "Phi" "Φ" "Psi" "Ψ" "Omega" "Ω"
+-}}
+{{- range $k, $v := $sym -}}
+  {{- $t = replaceRE (printf `\\%s([^A-Za-z]|$)` $k) (printf "%s${1}" $v) $t -}}
+{{- end -}}
+
+{{- /* √ · 분수 · 첨자: 안쪽 괄호부터 풀리도록 두 번.
+       한 덩어리가 아닌 인자는 괄호로 묶습니다 (\frac{n+1}{2} → (n+1)/2, \frac{n(n+1)}{2} → n(n+1)/2).
+       첨자는 유니코드 첨자 글자가 다 있으면 그것으로 (n^2 → n², a_{ij} → aᵢⱼ), 아니면 ^( ) / _( ) */ -}}
+{{- $sup := dict "0" "⁰" "1" "¹" "2" "²" "3" "³" "4" "⁴" "5" "⁵" "6" "⁶" "7" "⁷" "8" "⁸" "9" "⁹" "+" "⁺" "-" "⁻" "=" "⁼" "(" "⁽" ")" "⁾" "n" "ⁿ" "i" "ⁱ" "k" "ᵏ" "m" "ᵐ" "x" "ˣ" "T" "ᵀ" -}}
+{{- $sub := dict "0" "₀" "1" "₁" "2" "₂" "3" "₃" "4" "₄" "5" "₅" "6" "₆" "7" "₇" "8" "₈" "9" "₉" "+" "₊" "-" "₋" "=" "₌" "(" "₍" ")" "₎"
+    "a" "ₐ" "e" "ₑ" "h" "ₕ" "i" "ᵢ" "j" "ⱼ" "k" "ₖ" "l" "ₗ" "m" "ₘ" "n" "ₙ" "o" "ₒ" "p" "ₚ" "r" "ᵣ" "s" "ₛ" "t" "ₜ" "u" "ᵤ" "v" "ᵥ" "x" "ₓ" -}}
+{{- $loose := `[\s+\-*/=<>,·×÷±≤≥≠∈→]` -}}
+{{- range seq 2 -}}
+  {{- range findRESubmatch `\\sqrt\s*\{([^{}]*)\}` $t -}}
+    {{- $in := strings.TrimSpace (index . 1) -}}
+    {{- if findRE $loose (replaceRE `\([^()]*\)|\[[^\[\]]*\]` "" $in) 1 }}{{ $in = printf "(%s)" $in }}{{ end -}}
+    {{- $t = replace $t (index . 0) (printf "√%s" $in) -}}
+  {{- end -}}
+  {{- range findRESubmatch `\\[dt]?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}` $t -}}
+    {{- $a := strings.TrimSpace (index . 1) }}{{ $b := strings.TrimSpace (index . 2) -}}
+    {{- if findRE $loose (replaceRE `\([^()]*\)|\[[^\[\]]*\]` "" $a) 1 }}{{ $a = printf "(%s)" $a }}{{ end -}}
+    {{- if findRE $loose (replaceRE `\([^()]*\)|\[[^\[\]]*\]` "" $b) 1 }}{{ $b = printf "(%s)" $b }}{{ end -}}
+    {{- $t = replace $t (index . 0) (printf "%s/%s" $a $b) -}}
+  {{- end -}}
+  {{- range findRESubmatch `([_^])\s*(?:\{([^{}]*)\}|([A-Za-z0-9]))` $t -}}
+    {{- $mark := index . 1 -}}
+    {{- $in := strings.TrimSpace (or (index . 2) (index . 3)) -}}
+    {{- $map := cond (eq $mark "^") $sup $sub -}}
+    {{- $out := "" -}}
+    {{- range split $in "" -}}
+      {{- with index $map . }}{{ $out = print $out . }}{{ else }}{{ $out = "" }}{{ break }}{{ end -}}
+    {{- end -}}
+    {{- if not $out -}}
+      {{- $out = cond (eq (strings.RuneCount $in) 1) (print $mark $in) (printf "%s(%s)" $mark $in) -}}
+    {{- end -}}
+    {{- $t = replace $t (index . 0) $out -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* 남은 명령은 이름만 (\log → log), 묶음 괄호는 지우고, 맡겨 둔 글자를 되돌립니다 */ -}}
+{{- $t = replaceRE `\\([A-Za-z]+)` "$1" $t -}}
+{{- $t = replaceRE `[{}]` "" $t -}}
+{{- $t = replace $t $lb "{" }}{{ $t = replace $t $rb "}" }}{{ $t = replace $t $us "_" -}}
+{{- return (replaceRE `\s+` " " $t | strings.TrimSpace) -}}

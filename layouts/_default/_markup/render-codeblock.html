@@ -1,0 +1,9 @@
+{{- $lang := .Type | default "text" -}}
+<div class="codeblock" data-lang="{{ $lang }}">
+  <div class="codeblock__bar">
+    <span class="codeblock__lang">{{ $lang }}</span>
+    <button type="button" class="codeblock__copy" aria-label="코드 복사">Copy</button>
+  </div>
+  {{- (transform.HighlightCodeBlock .).Wrapped -}}
+</div>
+{{- /**/ -}}

@@ -1,0 +1,18 @@
+<div class="search" id="search" role="dialog" aria-modal="true" aria-label="글 검색" hidden data-search>
+  <div class="search__backdrop" data-search-close></div>
+  <div class="search__panel">
+    <div class="search__bar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.2"/></svg>
+      <input type="search" class="search__input" placeholder="제목, 태그, 내용으로 검색…" autocomplete="off" spellcheck="false" role="combobox" aria-label="검색어" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results" data-search-input>
+      <kbd>Esc</kbd>
+    </div>
+    <ul class="search__results" id="search-results" role="listbox" aria-label="검색 결과" data-search-results></ul>
+    <p class="sr-only" aria-live="polite" data-search-status></p>
+    <p class="search__hint"><kbd>↑</kbd><kbd>↓</kbd> 이동 · <kbd>Enter</kbd> 열기 · <kbd>Esc</kbd> 닫기</p>
+  </div>
+</div>
+{{- /* 복사 결과 등 짧은 알림을 화면 낭독기에 읽어 주는 곳 (gui.js announce) */}}
+<p class="sr-only" aria-live="polite" data-announce></p>
+<script>window.DL_GUI = {{ dict "indexURL" ("index.json" | relURL) }};</script>
+{{- $js := resources.Get "js/gui.js" | minify | fingerprint }}
+<script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>
