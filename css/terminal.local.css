@@ -1,14 +1,19 @@
-/* --- 1. D2Coding 웹 폰트 정의 --- */
+/* --- 1. 터미널 글꼴 ---
+   D2Coding 을 설치한 방문자는 그 글꼴을 그대로 씁니다(내려받기 없음).
+   없으면 원본에서 한자·가나·사용자 정의 영역(PUA)만 뺀 서브셋을 받습니다 (541KB, 원본 full 1.48MB).
+   라틴·그리스·키릴·기호·로마 숫자·체크 표시·상자 그리기 ╲╱│├·한글 11,172자는 원본 그대로 들어 있습니다.
+   원본이 D2Coding 이라는 이름을 예약해 두었으므로(OFL Reserved Font Name) 서브셋은 DraktharrMono 로 이름을 바꿨습니다.
+   라이선스: fonts/OFL-DraktharrMono.txt */
 @font-face {
-    font-family: 'D2Coding';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_three@1.0/D2Coding.woff') format('woff');
+    font-family: 'DraktharrMono';
+    src: local('D2Coding'), local('D2Coding Regular'), url('fonts/DraktharrMono.woff2') format('woff2');
     font-weight: normal;
-    font-display: swap; 
+    font-display: swap;
 }
 
-/* --- 2. (핵심) 터미널의 '--font' 변수를 D2Coding으로 설정 --- */
+/* --- 2. (핵심) 터미널의 '--font' 변수 --- */
 .terminal {
-    --font: "D2Coding", "Consolas", "Courier New", monospace;
+    --font: "DraktharrMono", "Consolas", "Courier New", monospace;
     --size: 1.3;
 }
 
