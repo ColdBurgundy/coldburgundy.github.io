@@ -51,25 +51,27 @@ int main()
 }
 ```
 
-{{< details summary="English version" class="lang-en" >}}
-### Condition {#en-condition}
+{{< en >}}
+![Codeforces 4A A. Watermelon problem cover](images/cover.jpg)
+
+## Condition {#en-condition}
 time limit per test : 1 second  
 memory limit per test : 64 megabytes  
 input : standard input  
 output : standard output  
 
-### Prob : [A. Watermelon](https://codeforces.com/contest/4/problem/A) {#en-prob-a-watermelon}
+## Prob : [A. Watermelon](https://codeforces.com/contest/4/problem/A) {#en-prob-a-watermelon}
 One hot summer day Pete and his friend Billy decided to buy a watermelon. They chose the biggest and the ripest one, in their opinion. After that the watermelon was weighed, and the scales showed w kilos. They rushed home, dying of thirst, and decided to divide the berry, however they faced a hard problem.
 
 Pete and Billy are great fans of even numbers, that's why they want to divide the watermelon in such a way that each of the two parts weighs even number of kilos, at the same time it is not obligatory that the parts are equal. The boys are extremely tired and want to start their meal as soon as possible, that's why you should help them and find out, if they can divide the watermelon in the way they want. For sure, each of them should get a part of positive weight.
 
-### INPUT {#en-input}
+## INPUT {#en-input}
 The first (and the only) input line contains integer number w (1 ≤ w ≤ 100) — the weight of the watermelon bought by the boys.
 
-### OUTPUT {#en-output}
+## OUTPUT {#en-output}
 Print YES, if the boys can divide the watermelon into two parts, each of them weighing even number of kilos; and NO in the opposite case.
 
-### Sol {#en-sol}
+## Sol {#en-sol}
 There is no need to think hard about this problem. Boys will always have weights with even values. Now, let’s think about the sum of two even numbers. The sum of two even numbers must be even. Is that really true?
 
 $$Pete : P = 2x \quad x \in \mathbb{N}$$
@@ -82,6 +84,16 @@ $$P+B=2x+2y=2(x+y)=2k \quad k \in \mathbb{N}, \; 2k \geq 4$$
 
 Therefore, the weight of the watermelon must be an even number. However, the point to note here is the 2k range. 2k is a value greater than 4, so the even number 2 must be excluded. The code written with this in mind is as follows.
 
-### Code {#en-code}
-_The code is the same as the Korean version above._
-{{< /details >}}
+## Code {#en-code}
+```c
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+int main()
+{
+	int a;
+	scanf("%d", &a);
+	printf("%s", (a % 2 == 0 && a > 2) ? "YES" : "NO");
+	return 0;
+}
+```
+{{< /en >}}

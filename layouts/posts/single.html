@@ -11,6 +11,24 @@
 {{- $toc := partial "common/toc.html" . | replaceRE `\s*id="TableOfContents"` "" -}}
 {{- $tocCount := len (findRE `<a ` $toc) -}}
 {{- $cliHref := printf "%s#/%s" ("/" | relURL) $path -}}
+{{- /* 영어 번역({{< en >}} → details[data-lang-block="en"] … 끝 표시 /en): 있으면 KO/EN 스위치 + 영어 목차 · 섹터 수 · 분량.
+       영어 목차는 접이식 머리(summary)와 그 안의 다른 접이식 영역을 뺀 소제목으로 (gui.js 의 영어 소제목과 같은 규칙) */ -}}
+{{- $content := string .Content -}}
+{{- $reEn := `(?s)<details[^>]*\sdata-lang-block="en"[^>]*>(.*?)</details><!--/en-->` -}}
+{{- $enHTML := "" -}}
+{{- with findRESubmatch $reEn $content 1 }}{{ $enHTML = index (index . 0) 1 }}{{ end -}}
+{{- $hasEn := ne $enHTML "" -}}
+{{- $enBody := $enHTML | replaceRE `(?s)<summary\b.*?</summary>` "" | replaceRE `(?s)<details\b.*?</details>` "" -}}
+{{- $tocEn := partial "gui/toc-en.html" $enBody -}}
+{{- $tocCountEn := $tocEn.count -}}
+{{- $anyToc := or (ge $tocCount 2) (ge $tocCountEn 2) -}}
+{{- /* 분량: 한국어 = 전체 - 영어 (Hugo 와 같은 셈: 한글은 글자, 영문은 낱말 — 한글 501자/분, 영문 213낱말/분) */ -}}
+{{- $rtKo := .ReadingTime }}{{ $rtEn := 0 -}}
+{{- if $hasEn -}}
+  {{- $enWords := countwords ($enBody | plainify) -}}
+  {{- $rtEn = div (add $enWords 212) 213 | default 1 -}}
+  {{- $rtKo = div (add (math.Max 0 (sub .WordCount $enWords) | int) 500) 501 | default 1 -}}
+{{- end -}}
 
 <article class="post" data-post data-date="{{ .Date.Format "2006-01-02" }}" data-tags="{{ delimit $tagNames "," }}" data-words="{{ .WordCount }}" data-reading-time="{{ .ReadingTime }}" style="--cat: {{ $color | safeCSS }}">
   <header class="post-hero">
@@ -28,7 +46,13 @@
       <ul class="post-hero__meta">
         <li>{{ .Params.author | default site.Params.author.name }}</li>
         <li><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time></li>
+        {{- if $hasEn }}
+        <li><span data-lang-only="ko">{{ $rtKo }}분 분량</span><span data-lang-only="en">{{ $rtEn }}분 분량</span></li>
+        {{- /* 도구 막대가 없는 화면(<1280px)의 읽는 언어 스위치: 같은 동작, 옆으로 미끄러짐 */}}
+        <li class="post-hero__lang"><button type="button" class="lang-switch lang-switch--row" role="switch" aria-checked="false" aria-label="영어로 읽기" data-lang-switch>{{ partial "gui/lang-switch.html" }}</button></li>
+        {{- else }}
         <li>{{ .ReadingTime }}분 분량</li>
+        {{- end }}
       </ul>
       {{- with $tags }}
       <div class="post-hero__tags">{{ range . }}{{ partial "gui/tyre.html" . }}{{ end }}</div>
@@ -39,7 +63,7 @@
 
   {{- /* 세 칸 그리드: 가운데 읽기 열은 언제나 화면 정중앙, 양옆 칸은 같은 너비라 레일이 열을 밀지 않습니다.
          넓은 화면(≥1280px): 왼쪽 도구 막대 + 오른쪽 콕핏 레일. 그보다 좁으면 레일은 숨고 목차는 서랍(FAB)으로. */}}
-  <div class="post-layout{{ if lt $tocCount 2 }} post-layout--notoc{{ end }}">
+  <div class="post-layout{{ if not $anyToc }} post-layout--notoc{{ end }}">
     <div class="post-dock" role="group" aria-label="글 도구">
       <button type="button" class="dock__btn" data-dock-copy aria-label="링크 복사">
         <svg class="dock__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -50,6 +74,14 @@
         <span class="dock__mono" aria-hidden="true">&gt;_</span>
         <span class="dock__tip" aria-hidden="true">터미널에서 읽기</span>
       </a>
+      {{- if $hasEn }}
+      <span class="dock__sep" aria-hidden="true"></span>
+      {{- /* 읽는 언어: 위 KO · 아래 EN 으로 손잡이가 미끄러지는 스위치 (켜짐 = 영어). 모양은 html.read-en 이 정하므로 첫 그림부터 맞고, aria-checked 는 gui.js 가 맞춤 */}}
+      <button type="button" class="dock__btn dock__lang lang-switch" role="switch" aria-checked="false" aria-label="영어로 읽기" data-lang-switch>
+        {{- partial "gui/lang-switch.html" }}
+        <span class="dock__tip" aria-hidden="true"><span data-lang-only="ko">영어로 읽기</span><span data-lang-only="en">한국어로 읽기</span></span>
+      </button>
+      {{- end }}
       <span class="dock__sep" aria-hidden="true"></span>
       <button type="button" class="dock__btn" data-scroll-top aria-label="맨 위로">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14.5 12 8.5l6 6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -74,16 +106,27 @@
       </aside>
       {{- end }}
 
-      {{- if ge $tocCount 2 }}
+      {{- if $anyToc }}
       <details class="race-plan" open>
-        <summary><span class="race-plan__title">목차</span><span class="race-plan__count">{{ $tocCount }}</span></summary>
-        {{ $toc | replaceRE "^<nav>" `<nav aria-label="레이스 플랜 (목차)">` | safeHTML }}
+        <summary><span class="race-plan__title">목차</span>
+          {{- if $hasEn }}<span class="race-plan__count" data-lang-only="ko">{{ $tocCount }}</span><span class="race-plan__count" data-lang-only="en">{{ $tocCountEn }}</span>
+          {{- else }}<span class="race-plan__count">{{ $tocCount }}</span>{{ end }}</summary>
+        {{- if ge $tocCount 2 }}
+        {{ $toc | replaceRE "^<nav>" (printf `<nav aria-label="레이스 플랜 (목차)"%s>` (cond $hasEn ` data-toc-lang="ko" data-lang-only="ko"` "")) | safeHTML }}
+        {{- end }}
+        {{- if and $hasEn (ge $tocCountEn 2) }}
+        <nav aria-label="레이스 플랜 (목차)" data-toc-lang="en" data-lang-only="en">{{ $tocEn.html | replaceRE "^<ul>" `<ul lang="en">` | safeHTML }}</nav>
+        {{- end }}
       </details>
       {{- end }}
 
       <div class="post-body prose" data-post-body>
         {{ .Content }}
       </div>
+      {{- if $hasEn }}
+      {{- /* EN 으로 읽는 방문자(head.html 이 html.read-en 을 붙임): 영어 영역을 첫 그림 전에 펼쳐 둡니다 */}}
+      <script>if(document.documentElement.classList.contains('read-en'))document.querySelector('[data-lang-block="en"]').open=true</script>
+      {{- end }}
 
       <footer class="post-foot">
         {{- with $tags }}
@@ -150,18 +193,28 @@
          ≥1280px 에선 휠 아래에 붙어 따라오고(sticky), 그보다 좁으면 목차 서랍이 됩니다(소제목이 2개 미만인 글은 서랍 없음).
          랩 타이머 + 트랙 맵은 접을 수 있습니다(머리의 ⌃ 버튼, 고른 상태는 이 브라우저에 기억). 접으면 머리에 '진행률 · 섹터' 한 줄만. */}}
     {{- /* 섹터 수 (gui.js 와 같은 규칙: 접이식 영역 밖의 h2 수, h2 가 없으면 소제목 수, 소제목이 없으면 1) — 첫 화면부터 '1/N' */ -}}
-    {{- $plain := replaceRE `(?s)<details\b.*?</details>` "" (string .Content) -}}
+    {{- $plain := replaceRE $reEn "" $content | replaceRE `(?s)<details\b.*?</details>` "" -}}
     {{- $nH2 := len (findRE `<h2[^>]*\sid=` $plain) -}}
     {{- $nHead := len (findRE `<h[234][^>]*\sid=` $plain) -}}
     {{- $secTotal := cond (gt $nH2 0) $nH2 (cond (gt $nHead 0) $nHead 1) -}}
+    {{- /* 영어도 같은 규칙. 두 언어의 섹터 수가 다르면 첫 그림의 '1/N' 을 언어별로 */ -}}
+    {{- $nH2En := len (findRE `<h2[^>]*\sid=` $enBody) -}}
+    {{- $nHeadEn := len (findRE `<h[234][^>]*\sid=` $enBody) -}}
+    {{- $secTotalEn := cond (gt $nH2En 0) $nH2En (cond (gt $nHeadEn 0) $nHeadEn 1) -}}
+    {{- $secFirst := printf "1/%d" $secTotal -}}
+    {{- if and $hasEn (ne $secTotalEn $secTotal) }}{{ $secFirst = printf `<span data-lang-only="ko">1/%d</span><span data-lang-only="en">1/%d</span>` $secTotal $secTotalEn }}{{ end -}}
     <aside class="post-aside" aria-label="텔레메트리">
       <div class="telemetry" data-toc id="toc-panel">
         <div class="telemetry__head">
           <span class="telemetry__title">Telemetry</span>
           <span class="telemetry__sum">
             <b data-progress-text>0%</b>
-            <span class="telemetry__sum-sec" aria-hidden="true"><i>·</i><small>Sector</small><span data-sector-mini>1/{{ $secTotal }}</span></span>
+            <span class="telemetry__sum-sec" aria-hidden="true"><i>·</i><small>Sector</small><span data-sector-mini>{{ $secFirst | safeHTML }}</span></span>
           </span>
+          {{- if $hasEn }}
+          {{- /* 목차 서랍(<1280px)의 읽는 언어 스위치: 글 중간에서도 서랍을 열어 바꾸고 읽던 섹터에 그대로 머뭅니다 (레일 화면에선 숨김 — 도구 막대에 있음) */}}
+          <button type="button" class="lang-switch lang-switch--row telemetry__lang" role="switch" aria-checked="false" aria-label="영어로 읽기" data-lang-switch>{{ partial "gui/lang-switch.html" }}</button>
+          {{- end }}
           <button type="button" class="telemetry__fold" data-tel-fold aria-expanded="true" aria-controls="tel-dash" aria-label="랩 타이머 · 트랙 맵">
             <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 7.5 6 4.5l3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
@@ -169,9 +222,11 @@
         <div class="telemetry__collapse" id="tel-dash">
           <div class="telemetry__collapse-in">
             <div class="telemetry__dash">
+              {{- /* 랩: M:SS.mmm (LCD 숫자, 1/1000초 — 분 · 초 · 천분의 일 세 칸, 구분점은 칸 사이 고정 자리) · 섹터: 지금/전체.
+                     휠 LCD 처럼 이름은 위, 값은 아래 */}}
               <div class="telemetry__lap">
-                <span class="telemetry__k">Lap</span><b data-lap>00:00.0</b>
-                <span class="telemetry__k">Sector</span><b data-sector>1/{{ $secTotal }}</b>
+                <span class="telemetry__cell"><span class="telemetry__k">Lap</span><b data-lap><span data-lap-part>0</span><i>:</i><span data-lap-part>00</span><i>.</i><span data-lap-part>000</span></b></span>
+                <span class="telemetry__cell telemetry__cell--sec"><span class="telemetry__k">Sector</span><b data-sector>{{ $secFirst | safeHTML }}</b></span>
               </div>
               {{ partial "gui/track-map.html" . }}
             </div>
@@ -179,12 +234,15 @@
         </div>
         <div class="telemetry__bar" aria-hidden="true"><i data-progress-bar></i></div>
         {{- if ge $tocCount 2 }}
-        {{ $toc | replaceRE "^<nav>" `<nav aria-label="텔레메트리 (목차)">` | safeHTML }}
+        {{ $toc | replaceRE "^<nav>" (printf `<nav aria-label="텔레메트리 (목차)"%s>` (cond $hasEn ` data-toc-lang="ko" data-lang-only="ko"` "")) | safeHTML }}
+        {{- end }}
+        {{- if and $hasEn (ge $tocCountEn 2) }}
+        <nav aria-label="텔레메트리 (목차)" data-toc-lang="en" data-lang-only="en">{{ $tocEn.html | replaceRE "^<ul>" `<ul lang="en">` | safeHTML }}</nav>
         {{- end }}
       </div>
       {{ partial "gui/tower.html" (dict "page" . "id" "tower-title-rail" "class" "tower--rail") }}
     </aside>
-    {{- if ge $tocCount 2 }}
+    {{- if $anyToc }}
     <button type="button" class="toc-fab" data-toc-toggle aria-controls="toc-panel" aria-expanded="false" aria-label="목차 열기">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h16M4 18h12" stroke="currentColor" stroke-width="2"/></svg>
     </button>

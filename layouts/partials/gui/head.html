@@ -29,8 +29,10 @@
 <script>try{if(sessionStorage.getItem('dl-lights')!=='1'&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('dl-intro')}catch(e){}</script>
 {{- end }}
 {{- if and .IsPage (eq .Section "posts") }}
-{{- /* 글 페이지: 첫 그림 전에 — 스크립트가 도는 환경 표시(트랙 맵은 서킷을 고를 때까지 숨김) + 텔레메트리 접힘 상태(gui.js 와 같은 키) */}}
-<script>(function(c){c.add('dl-js');try{if(localStorage.getItem('dl-telemetry')==='folded')c.add('tel-folded')}catch(e){}})(document.documentElement.classList)</script>
+{{- /* 글 페이지: 첫 그림 전에 — 스크립트가 도는 환경 표시(트랙 맵은 서킷을 고를 때까지 숨김) + 텔레메트리 접힘 상태(gui.js 와 같은 키)
+       + 영어 번역이 있는 글이면 이 방문자가 고른 읽는 언어(dl-lang = en → html.read-en: 한국어 본문 대신 영어, gui.js 와 같은 키) */}}
+{{- $hasEn := strings.Contains (string .Content) `data-lang-block="en"` }}
+<script>(function(c){c.add('dl-js');try{if(localStorage.getItem('dl-telemetry')==='folded')c.add('tel-folded'){{ if $hasEn }};if(localStorage.getItem('dl-lang')==='en')c.add('read-en'){{ end }}}catch(e){}})(document.documentElement.classList)</script>
 {{- end }}
 <title>{{ $title }}</title>
 <meta name="description" content="{{ $desc }}">

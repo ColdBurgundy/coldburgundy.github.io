@@ -55,14 +55,16 @@ int main()
 }
 ```
 
-{{< details summary="English version" class="lang-en" >}}
-### Condition {#en-condition}
+{{< en >}}
+![Codeforces 71A A. Way Too Long Words problem cover](images/cover.jpg)
+
+## Condition {#en-condition}
 time limit per test : 1 seconds  
 memory limit per test : 256 megabytes  
 input : standard input  
 output : standard output  
 
-### Prob : [A. Way Too Long Words](https://codeforces.com/problemset/problem/71/A) {#en-prob-a-way-too-long-words}
+## Prob : [A. Way Too Long Words](https://codeforces.com/problemset/problem/71/A) {#en-prob-a-way-too-long-words}
 Sometimes some words like "localization" or "internationalization" are so long that writing them many times in one text is quite tiresome.
 
 Let's consider a word too long, if its length is **strictly more** than 10 characters. All too long words should be replaced with a special abbreviation.
@@ -73,15 +75,33 @@ Thus, "localization" will be spelt as "l10n", and "internationalization» will b
 
 You are suggested to automatize the process of changing the words with abbreviations. At that all too long words should be replaced by the abbreviation and the words that are not too long should not undergo any changes.
 
-### INPUT {#en-input}
+## INPUT {#en-input}
 The first line contains an integer $n (1 ≤ n ≤ 100)$. Each of the following n lines contains one word. All the words consist of lowercase Latin letters and possess the lengths of from 1 to 100 characters.
 
-### OUTPUT {#en-output}
+## OUTPUT {#en-output}
 Print n lines. The i-th line should contain the result of replacing of the i-th word from the input data.
 
-### Sol {#en-sol}
+## Sol {#en-sol}
 Just write the code as requested by the problem. Coding this in C++ is as follows.
 
-### Code {#en-code}
-_The code is the same as the Korean version above._
-{{< /details >}}
+## Code {#en-code}
+```c++
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include <string>
+using namespace std;
+int main()
+{
+	int n, i;
+	string str;
+	cin >> n; cin.ignore();
+	for (i = 0; i < n; i++)
+	{
+		getline(cin, str);
+		if (str.size() > 10) cout << str.front() << (str.size() - 2) << str.back() << '\n';
+		else cout << str << '\n';
+	}
+	return 0;
+}
+```
+{{< /en >}}

@@ -88,17 +88,22 @@
     <header class="section-head">
       <span class="section-index">01</span>
       <h2 class="section-title">카테고리</h2>
-      <p class="section-desc">글이 많은 순서로 정렬했습니다.</p>
+      <p class="section-desc">글이 많은 하위 카테고리 8개</p>
     </header>
+    {{- /* 큰 카테고리(untitled_cs, research …)는 빼고, 글이 실제로 쌓이는 하위 카테고리만 글 수로 줄 세웁니다.
+         글 수가 같으면 메뉴에 놓인 순서(상위 카테고리 weight → 하위 카테고리 weight)를 따릅니다. */}}
     {{- $max := 1 }}
     {{- $ranked := slice }}
     {{- range $sections }}
-      {{- $n := len .RegularPagesRecursive }}
-      {{- $max = math.Max $max $n }}
-      {{- $ranked = $ranked | append (dict "s" . "n" $n "key" (add (mul $n 1000) (sub 999 .Weight))) }}
+      {{- if and .Parent (ne .Parent $root) (not .Sections) }}
+        {{- $n := len .RegularPagesRecursive }}
+        {{- $max = math.Max $max $n }}
+        {{- $order := add (mul .Parent.Weight 100) .Weight }}
+        {{- $ranked = $ranked | append (dict "s" . "n" $n "key" (add (mul $n 100000) (sub 99999 $order))) }}
+      {{- end }}
     {{- end }}
     <div class="teams">
-      {{- range $i, $r := sort $ranked "key" "desc" }}
+      {{- range $i, $r := first 8 (sort $ranked "key" "desc") }}
       {{- $s := $r.s }}
       {{- $n := $r.n }}
       <a class="team{{ if eq $n 0 }} team--empty{{ end }}" href="{{ $s.RelPermalink }}" style="--cat: {{ partial "gui/cat-color.html" $s | safeCSS }}; --pct: {{ div (mul $n 100.0) $max }}%">

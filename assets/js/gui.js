@@ -423,8 +423,9 @@
   /* ---------- 글 페이지 ---------- */
   var post = $('[data-post]');
   var body = post && $('[data-post-body]', post);
+  var root = d.documentElement;
 
-  // 최상위가 비어 있는 목차(h3만 있는 글)를 한 단계 평탄화
+  // 최상위가 비어 있는 목차(h3만 있는 글)를 한 단계 평탄화 (한국어 · 영어 목차 모두)
   $$('.race-plan nav, .telemetry nav').forEach(function (navEl) {
     var ul = $(':scope > ul', navEl);
     while (ul && ul.children.length === 1 && !$(':scope > li > a', ul) && $(':scope > li > ul', ul)) {
@@ -434,17 +435,29 @@
     }
   });
 
-  var tocLinks = $$('.telemetry a[href^="#"], .race-plan a[href^="#"]');
-  var telLinks = $$('.telemetry a[href^="#"]');
-  // 접힌 영역(영어 번역본 등)의 제목은 섹터 계산에서 뺍니다
-  var heads = body ? $$('h2[id], h3[id], h4[id]', body).filter(function (h) { return !h.closest('details'); }) : [];
-  var headIds = heads.map(function (h) { return h.id; });
-  // 섹터 번호는 본문의 'SECTOR 0N' 라벨(CSS 카운터, h2 만 셉니다)과 같게: h3/h4 는 자기가 속한 h2 의 섹터.
-  // h2 가 하나도 없는 글이면 소제목 순서 그대로.
-  var h2Count = heads.filter(function (h) { return h.tagName === 'H2'; }).length;
-  var secOf = [];
-  heads.reduce(function (n, h, i) { if (h.tagName === 'H2') n++; secOf[i] = h2Count ? Math.max(1, n) : i + 1; return n; }, 0);
-  var secTotal = h2Count || heads.length;
+  /* ---------- 읽는 언어 (KO / EN) ----------
+     영어 번역({{< en >}} → details[data-lang-block="en"])이 있는 글에만 스위치가 있습니다(왼쪽 도구 막대, 좁은 화면은 제목 아래 · 목차 서랍 머리).
+     EN 이면 한국어 본문 대신 영어 영역이 펼쳐진 본문(html.read-en — CSS)이고, 소제목을 읽는 것은 모두 영어 소제목으로 바뀝니다:
+     목차 · 구간 시간 · 휠 LCD 의 섹터 · 텔레메트리 SECTOR · 트랙 맵 경계 · 시프트 라이트 진행률.
+     바꿀 때마다 타이밍은 새로 시작하고(startSession), 읽던 섹터(같은 번호)의 같은 비율 자리에 머뭅니다(setLang).
+     고른 언어는 이 브라우저에 기억(dl-lang) — head.html 이 첫 그림 전에 html.read-en 을, single.html 이 영어 영역을 펼쳐 둡니다. */
+  var enBlock = body && $('[data-lang-block="en"]', body);
+  var lang = enBlock && root.classList.contains('read-en') ? 'en' : 'ko';
+  if (!enBlock) root.classList.remove('read-en');
+  else if (lang === 'en') enBlock.open = true;
+  // 지금 언어의 소제목. 접힌 영역(다른 접이식 · 한국어일 때의 영어 번역)의 제목은 섹터 계산에서 뺍니다
+  function headsOf(l) {
+    if (!body) return [];
+    var home = l === 'en' ? enBlock : null;
+    return $$('h2[id], h3[id], h4[id]', home || body).filter(function (h) { return h.closest('details') === home; });
+  }
+  function navsOf(l) {
+    return $$('.telemetry nav, .race-plan nav').filter(function (n) { return (n.getAttribute('data-toc-lang') || 'ko') === l; });
+  }
+  var allTocLinks = $$('.telemetry a[href^="#"], .race-plan a[href^="#"]');
+  // 아래 값들은 언어를 고를 때마다 startSession() 이 다시 채웁니다
+  var tocLinks = [], telLinks = [], telNav = null;
+  var heads = [], headIds = [], secOf = [], secTotal = 1, headTexts = [];
   var pctText = $('[data-progress-text]');
   var pctBar = $('[data-progress-bar]');
   var currentId = null;
@@ -477,7 +490,7 @@
   // Hugo 의 목차(.TableOfContents)는 제목 속 수식을 빼먹습니다 → 수식이 든 제목만 본문 제목의 내용을 그대로 옮겨 옵니다
   (body ? $$('h2[id], h3[id], h4[id]', body) : []).forEach(function (h) {
     if (!$('.katex', h)) return;
-    tocLinks.forEach(function (a) {
+    allTocLinks.forEach(function (a) {
       if (decodeURIComponent(a.getAttribute('href').slice(1)) !== h.id) return;
       var label = d.createElement('span');   // 한 덩어리로 (링크가 flex 라서 글자·수식이 따로 놀지 않게)
       [].forEach.call(h.childNodes, function (n) {
@@ -565,10 +578,10 @@
      · 읽었다고 보기 어려운 속도로 스쳐 지나간 런(목표의 1/10 미만)과, 목차 · 앵커 링크로 건너뛰는 동안 지나친 구간은
        기록하지 않습니다(트랙 리밋 위반처럼 랩 삭제) — 처음에 글 끝까지 훑어본 뒤 제대로 읽어도 첫 기록이 '노랑'이 되지 않게. */
   var lapEl = $('[data-lap]'), sectorEl = $('[data-sector]'), sectorMini = $('[data-sector-mini]');
-  var nSec = Math.max(1, secTotal), nMini = Math.max(1, heads.length);
   function zeros(n) { for (var a = [], i = 0; i < n; i++) a.push(0); return a; }
   function board(n) { return { n: n, cur: -1, run: zeros(n), ok: [], tgt: zeros(n), pb: [], last: [], col: [] }; }
-  var secB = board(nSec), miniB = board(nMini);
+  // 섹터 수 · 미니 섹터 수 · 두 보드 · 랩은 startSession() 이 언어마다 새로
+  var nSec = 1, nMini = 1, secB = board(1), miniB = board(1);
   var lap = { ms: 0, tgt: 0, pb: null, col: null };
   var bounds = null;   // 진행률 경계 { sec: [0, …, 1], mini: [0, …, 1] } — 창 크기 · 본문 높이가 바뀌면 다시 잼
   var COLS = ['purple', 'green', 'yellow'];
@@ -620,16 +633,18 @@
     if (p <= edge[k] + (edge[k + 1] - edge[k]) * 0.25) b.ok[k] = true;
   }
 
-  // 목표 시간: 구간마다 보이는 글의 분량 (닫힌 접이식 영역 · 수식의 MathML 사본 · 줄 번호 · 버튼 글자는 뺌)
+  // 목표 시간: 구간마다 보이는 글의 분량 (닫힌 접이식 영역 · 수식의 MathML 사본 · 줄 번호 · 버튼 글자는 뺌).
+  // 지금 언어의 본문만 셉니다 — 한국어면 영어 영역을 통째로, 영어면 영어 영역 안만(숨은 'English version' 머리 빼고)
   var RATE_CJK = 14, RATE_WORD = 4.5, IMG_MS = 1200, MIN_MS = 2500;   // 글자/초 · 낱말/초 · 그림 한 장 · 구간 최소
   var RE_CJK = /[\u1100-\u11ff\u2e80-\u2fff\u3040-\u30ff\u3130-\u318f\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\uf900-\ufaff]/g;
   var RE_WORD = /[A-Za-z0-9]+(?:['’._-][A-Za-z0-9]+)*/g;
   var SKIP_TXT = '.katex-mathml, .heading-anchor, button, .ln, script, style, .sr-only';
   function closedDetails(el) { return el && el.tagName === 'DETAILS' && !el.open; }
   function measureTargets() {
-    var ms = zeros(nMini), cur = 0, hi = 0;
-    var walker = d.createTreeWalker(body, 5, { acceptNode: function (n) {   // 5 = 요소 + 글자
+    var ms = zeros(nMini), cur = 0, hi = 0, en = lang === 'en';
+    var walker = d.createTreeWalker(en ? enBlock : body, 5, { acceptNode: function (n) {   // 5 = 요소 + 글자
       if (n.nodeType !== 1) return closedDetails(n.parentElement) ? 2 : 1;
+      if (n === enBlock || (en && n.tagName === 'SUMMARY' && n.parentElement === enBlock)) return 2;
       if (n.matches(SKIP_TXT) || (closedDetails(n.parentElement) && n.tagName !== 'SUMMARY')) return 2;   // 2 = 하위까지 건너뜀
       return 1;
     } });
@@ -669,25 +684,36 @@
     bounds = { sec: sec, mini: mini };
   }
 
-  function clockFmt(ms, tenth) {
-    var sec = Math.floor(ms / 1000), m = Math.floor(sec / 60), r = sec % 60;
-    var out = (m < 10 ? '0' : '') + m + ':' + (r < 10 ? '0' : '') + r;
-    return tenth ? out + '.' + Math.floor(ms % 1000 / 100) : out;
+  // F1 식 시간 — 랩: M:SS.mmm (0:58.312 · 1:23.456), 구간: SS.mmm (1분이 넘으면 M:SS.mmm), 기록 전: --.---
+  function pad(v, k) { v = String(v); while (v.length < k) v = '0' + v; return v; }
+  function lapFmt(ms) {
+    var t = Math.max(0, Math.min(Math.floor(ms), 5999999));   // 99:59.999 에서 멈춤 (LCD 자리 수)
+    return Math.floor(t / 60000) + ':' + pad(Math.floor(t / 1000) % 60, 2) + '.' + pad(t % 1000, 3);
   }
+  function secFmt(ms) {
+    var t = Math.max(0, Math.floor(ms));
+    return t >= 60000 ? lapFmt(t) : pad(Math.floor(t / 1000), 2) + '.' + pad(t % 1000, 3);
+  }
+  var NO_TIME = '--.---';
 
-  // 텔레메트리 목차 줄: h2(섹터 첫 줄)는 섹터를, h3/h4 는 미니 섹터를 보여 줍니다
+  // 텔레메트리 목차 줄: h2(섹터 첫 줄)는 섹터를, h3/h4 는 미니 섹터를 보여 줍니다 (언어마다 그 언어의 목차로)
   var rows = [];
-  if (body) telLinks.forEach(function (a) {
-    var k = headIds.indexOf(decodeURIComponent(a.getAttribute('href').slice(1)));
-    if (k === -1) return;
-    var t = d.createElement('span');
-    t.className = 'toc-time';
-    t.setAttribute('aria-hidden', 'true');
-    t.textContent = '--:--';
-    a.appendChild(t);
-    var isSec = k === 0 || secOf[k] !== secOf[k - 1];
-    rows.push({ a: a, time: t, b: isSec ? secB : miniB, j: isSec ? secOf[k] - 1 : k, key: '', txt: '--:--' });
-  });
+  function buildRows() {
+    rows = [];
+    telLinks.forEach(function (a) {
+      var k = headIds.indexOf(decodeURIComponent(a.getAttribute('href').slice(1)));
+      if (k === -1) return;
+      var t = $('.toc-time', a);
+      if (!t) {
+        t = d.createElement('span');
+        t.className = 'toc-time';
+        t.setAttribute('aria-hidden', 'true');
+        a.appendChild(t);
+      }
+      var isSec = k === 0 || secOf[k] !== secOf[k - 1];
+      rows.push({ a: a, time: t, b: isSec ? secB : miniB, j: isSec ? secOf[k] - 1 : k, key: null, txt: null });
+    });
+  }
 
   /* ---------- 텔레메트리 접기 ----------
      랩 타이머 + 트랙 맵을 접으면 머리에 '진행률 · 섹터' 한 줄만 남고 움직이는 것이 없습니다
@@ -697,11 +723,12 @@
   if (telFold) telFold.setAttribute('aria-expanded', folded ? 'false' : 'true');
 
   function paintRows() {
+    var extra = sinceTick();
     for (var i = 0; i < rows.length; i++) {
       var r = rows[i], b = r.b, j = r.j, live = b.cur === j, col = b.col[j] || '';
       var run = live && !folded;
-      // 10초 안쪽의 기록은 1/10초까지 (빨리 읽은 짧은 구간이 '00:00' 으로 보이지 않게). 달리는 중인 줄은 초까지만
-      var txt = run ? clockFmt(b.run[j]) : (b.last[j] != null ? clockFmt(b.last[j], b.last[j] < 10000) : '--:--');
+      // 달리는 줄은 지금까지의 시간(마지막 박자 뒤의 몫까지), 지난 줄은 마지막 기록. 접혀 있으면 마지막 기록만
+      var txt = run ? secFmt(b.run[j] + extra) : (b.last[j] != null ? secFmt(b.last[j]) : NO_TIME);
       var key = col + (live ? '|live' : '') + (run ? '|run' : '');
       if (key !== r.key) {
         r.key = key;
@@ -712,31 +739,103 @@
       if (txt !== r.txt) { r.txt = txt; r.time.textContent = txt; }
     }
   }
+  // 랩 숫자는 분 · 초 · 1/1000초 세 칸 (single.html). 구분점(: .)은 칸 사이 제자리라 매 프레임 바뀌는 건 끝 칸의 글자뿐.
+  // 아직 달리지 않은 랩(체커기 너머에서 언어를 바꿔 새 판이 됨)은 0:00.000 에 멈춰 있지 않고 '-:--.---'
+  var lapParts = lapEl ? $$('[data-lap-part]', lapEl) : [];
+  function showLap(ms) {
+    var t = lap.blank ? '-:--.---' : lapFmt(ms);
+    if (lapParts.length !== 3) { if (lapEl.textContent !== t) lapEl.textContent = t; return; }
+    t = t.split(/[:.]/);
+    for (var i = 0; i < 3; i++) if (lapParts[i].textContent !== t[i]) lapParts[i].textContent = t[i];
+  }
+  function paintLapTime() {
+    if (lapEl && !folded) showLap(lap.ms + sinceTick());
+  }
   function paintLap() {
     if (!lapEl) return;
     setT(lapEl, lap.col);
-    lapEl.textContent = clockFmt(lap.ms, true);
+    showLap(lap.ms + sinceTick());
   }
-  var lastTick = performance.now();
+
+  /* ---------- 시계 ----------
+     시간은 0.1초 박자(advance)로 쌓고, 숨은 탭 · 체커기 뒤에는 흐르지 않습니다. 화면에 그리는 건 따로:
+     랩 타이머가 실제로 보이는 동안(펼쳐짐 · 탭이 보임 · 화면 안 · 체커기 전)만 rAF 로 매 프레임 1/1000초까지,
+     그 밖에는 박자마다(움직임 줄이기 설정이면 늘 박자마다). 구간을 넘는 순간에도 먼저 쌓아 두어 기록이 ms 단위로 맞습니다. */
+  var lastTick = performance.now(), clockRuns = !d.hidden;
+  function advance() {
+    var now = performance.now(), dt = now - lastTick;
+    lastTick = now;
+    if (!clockRuns || finished) return;
+    lap.ms += dt;
+    if (secB.cur >= 0 && secB.cur < secB.n) secB.run[secB.cur] += dt;   // 시간이 흐르는 건 지금 구간 하나뿐
+    if (miniB.cur >= 0 && miniB.cur < miniB.n) miniB.run[miniB.cur] += dt;
+  }
+  function sinceTick() { return clockRuns && !finished ? Math.max(0, performance.now() - lastTick) : 0; }
+  var clockRaf = 0, lapSeen = false;
+  function clockOn() {
+    return !!lapEl && !reduce && !folded && clockRuns && !finished && lapSeen && !(aside && aside.classList.contains('is-away'));
+  }
+  function clockFrame() {
+    clockRaf = 0;
+    if (!clockOn()) return;
+    paintLapTime();
+    paintRows();
+    clockRaf = requestAnimationFrame(clockFrame);
+  }
+  function wakeClock() { if (!clockRaf && clockOn()) clockRaf = requestAnimationFrame(clockFrame); }
   if (body) {
-    measureTargets();
     // 접이식 영역(영어 번역본 등)을 열고 닫으면 그 구간의 분량이 바뀝니다
     body.addEventListener('toggle', function (e) { if (e.target.tagName === 'DETAILS') measureTargets(); }, true);
     setInterval(function () {
-      var now = performance.now(), dt = now - lastTick;
-      lastTick = now;
-      if (d.hidden || finished) return;
-      lap.ms += dt;
-      if (secB.cur >= 0 && secB.cur < secB.n) secB.run[secB.cur] += dt;   // 시간이 흐르는 건 지금 구간 하나뿐
-      if (miniB.cur >= 0 && miniB.cur < miniB.n) miniB.run[miniB.cur] += dt;
-      if (lapEl && !folded) lapEl.textContent = clockFmt(lap.ms, true);
+      advance();
+      // 매 프레임 그리는 중이거나, 랩 타이머가 보이지 않으면(접힘 · 닫힌 서랍 · 화면 밖) 쌓기만 — 줄 색 · 기록은 스크롤(updateDash)이 그림
+      if (clockRaf || !lapSeen) return;
+      paintLapTime();
       paintRows();
     }, 100);
+    // 탭을 떠나는 순간까지는 쌓고, 숨어 있던 동안은 버립니다
+    d.addEventListener('visibilitychange', function () { advance(); clockRuns = !d.hidden; wakeClock(); });
+    if (lapEl && 'IntersectionObserver' in w) {
+      new IntersectionObserver(function (en) { lapSeen = en[en.length - 1].isIntersecting; wakeClock(); }).observe(lapEl);
+    } else lapSeen = true;
   }
 
   var navLine = 0;   // 이 선을 지난 소제목이 '현재 섹터' (헤더 높이 + 여유). 창 크기가 바뀔 때만 다시 잽니다.
   function measureNav() { navLine = (parseInt(getComputedStyle(d.documentElement).getPropertyValue('--nav-h'), 10) || 84) + 90; }
-  var headTexts = [];
+
+  /* 타이밍 한 판: 지금 언어의 소제목 · 목차로 섹터를 다시 세고, 시간 · 색 · 개인 최고를 모두 처음부터 */
+  function startSession() {
+    heads = headsOf(lang);
+    headIds = heads.map(function (h) { return h.id; });
+    // 섹터 번호는 본문의 'SECTOR 0N' 라벨(CSS 카운터, h2 만 셉니다)과 같게: h3/h4 는 자기가 속한 h2 의 섹터.
+    // h2 가 하나도 없는 글이면 소제목 순서 그대로.
+    var h2Count = heads.filter(function (h) { return h.tagName === 'H2'; }).length;
+    secOf = [];
+    heads.reduce(function (n, h, i) { if (h.tagName === 'H2') n++; secOf[i] = h2Count ? Math.max(1, n) : i + 1; return n; }, 0);
+    secTotal = h2Count || heads.length;
+    nSec = Math.max(1, secTotal);
+    nMini = Math.max(1, heads.length);
+    secB = board(nSec);
+    miniB = board(nMini);
+    // 체커기 너머에서 시작한 판은 시계가 멈춰 있으니 랩을 비워 둡니다(blank) — 다시 올라와 체커기를 벗어나면 0 부터
+    lap = { ms: 0, tgt: 0, pb: null, col: null, blank: finished };
+    lastTick = performance.now();
+    bounds = null;
+    currentId = null;
+    headTexts = [];
+    var navs = navsOf(lang);
+    tocLinks = [];
+    navs.forEach(function (n) { tocLinks = tocLinks.concat($$('a[href^="#"]', n)); });
+    telNav = navs.filter(function (n) { return !!n.closest('.telemetry'); })[0] || null;
+    telLinks = telNav ? $$('a[href^="#"]', telNav) : [];
+    // 다른 언어 목차에 남은 표시(지금 줄 · 지난 줄 · 타이밍 색)는 지웁니다
+    allTocLinks.forEach(function (a) { a.classList.remove('is-active', 'is-passed', 'is-live'); setT(a, null); });
+    buildRows();
+    if (body) measureTargets();
+    paintLap();
+    paintRows();
+  }
+  if (body) startSession();
 
   /* ---------- 미니 트랙 맵: 섹터 = 소제목, 읽은 만큼 차가 한 바퀴 돕니다 ----------
      섹터 n 은 그 섹터 첫 소제목부터 다음 섹터 첫 소제목까지의 본문 구간(첫 섹터는 글 첫머리부터). 경계는 경로 길이의 비율.
@@ -908,6 +1007,7 @@
       if (tm) { tm.u = 0; tm.at = tm.to = finished ? 1 : readProgress(); }
       paintLap();
       ensureMap();
+      wakeClock();
     }
     paintRows();
     fitRail();   // 접히는 칸의 최종 높이로 타워 자리를 다시 고릅니다
@@ -949,6 +1049,7 @@
       d.body.classList.toggle('dock-away', railOn && oDock < 0.5);
     }
 
+    advance();   // 구간을 넘기 전에 지금까지의 시간을 쌓아 둠 (기록이 박자가 아니라 이 순간 기준)
     var fin = p >= 0.985;
     if (fin !== finished) {
       finished = fin;
@@ -956,6 +1057,8 @@
       // 체커기 = 한 바퀴 완주. 랩 시간은 이어서 흐르므로(다시 올라가 읽으면) 다음 완주는 개인 최고와 비교됩니다
       if (fin && counts(lap.ms, lap.tgt)) { lap.col = grade(lap.ms, lap.tgt, lap.pb); if (lap.pb == null || lap.ms < lap.pb) lap.pb = lap.ms; }
       else lap.col = null;
+      if (!fin) lap.blank = false;   // 체커기를 벗어남: 비워 둔 랩도 이제 흐름
+      else if (lap.ms < FLYBY_MS) lap.blank = true;   // 달리기도 전에 체커기(글 끝에서 새로 고침 등): 0:00.0xx 에 멈춰 두지 않음
       paintLap();
     }
     // 지금 구간: 결승선 너머 = n, 첫 소제목 앞(글 첫머리) = 1구간
@@ -983,9 +1086,9 @@
         a.classList.toggle('is-active', hid === id);
         a.classList.toggle('is-passed', k !== -1 && k < idx);
       });
-      // 목록만 스크롤합니다 — 위의 랩 타이머 · % · 진행 막대는 늘 보이게 (CSS: .telemetry > nav 가 스크롤 영역)
-      var act = $('.telemetry a.is-active');
-      var tel = $('.telemetry > nav');
+      // 목록만 스크롤합니다 — 위의 랩 타이머 · % · 진행 막대는 늘 보이게 (CSS: .telemetry > nav 가 스크롤 영역, 지금 언어의 것)
+      var tel = telNav;
+      var act = tel && $('a.is-active', tel);
       if (act && tel && tel.scrollHeight > tel.clientHeight) {
         var r = act.getBoundingClientRect(), tr = tel.getBoundingClientRect();
         if (r.top < tr.top + 24 || r.bottom > tr.bottom - 24) {
@@ -993,6 +1096,7 @@
         }
       }
     }
+    wakeClock();   // 체커기에서 돌아왔거나 레일이 다시 보이면 랩 타이머를 다시 그림
   }
 
   /* ---------- 휠 버튼 인디케이터 ---------- */
@@ -1036,7 +1140,7 @@
       fab.setAttribute('aria-label', open ? '목차 닫기' : '목차 열기');
     }
     if (open && !was) {
-      var first = $('nav a', aside) || $('a, button', aside);
+      var first = (telNav && $('a', telNav)) || $('a, button', aside);
       if (first) setTimeout(function () { first.focus({ preventScroll: true }); }, 60);
       // 서랍 속 트랙 맵: 이제 보이니 서킷을 고르고 배율을 다시 잽니다
       if (tm) tm.u = 0;
@@ -1091,7 +1195,6 @@
      랩 타이머를 접고 펴는 동안에도 끝 상태로 판단합니다(접히는 칸의 최종 높이로 계산). */
   var layoutEl = aside && aside.parentNode;
   var railTower = aside && $('.tower--rail', aside);
-  var railNav = aside && $('.telemetry > nav', aside);
   var collapseEl = aside && $('.telemetry__collapse', aside), collapseIn = aside && $('.telemetry__collapse-in', aside);
   var NAV_MIN = 176;   // 목차 5줄 + 위아래 여백
   var RAIL_STAGES = [['', null], ['rail-short', '.is-extra'], ['rail-min', '.is-far'], ['rail-tight', null]];
@@ -1099,6 +1202,7 @@
     var maxH = parseFloat(getComputedStyle(aside).maxHeight) || Infinity;
     var railH = aside.getBoundingClientRect().height;
     var dash = collapseEl && collapseIn ? (folded ? 0 : collapseIn.scrollHeight) - collapseEl.getBoundingClientRect().height : 0;
+    var railNav = telNav;   // 지금 언어의 목차
     var navH = railNav ? railNav.clientHeight : 0, navFull = railNav ? railNav.scrollHeight : 0;
     var natural = railH - navH + navFull + dash;   // 아무것도 줄이지 않았을 때의 레일 높이
     if (!railNav) return natural <= maxH + 1;
@@ -1389,6 +1493,122 @@
       hostLeave();
     });
   }
+
+  /* ---------- 읽는 언어 바꾸기 ----------
+     스위치(켜짐 = EN): 누르기 · Space · Enter 로 바꾸고, ↑/← = KO · ↓/→ = EN. 바꾼 뒤에도 읽던 자리 그대로 —
+     지금 섹터 번호와 그 섹터 안에서의 비율을 재 두었다가 새 언어의 같은 섹터 같은 비율로(그 번호가 없으면 본문 첫머리로).
+     본문 앞(제목 · 라디오 · 목차)을 보고 있었다면 스크롤은 그대로. 옮기는 건 한 번에(부드러운 스크롤 없이). */
+  var langSwitches = $$('[data-lang-switch]');
+  function syncSwitches() {
+    langSwitches.forEach(function (sw) { sw.setAttribute('aria-checked', lang === 'en' ? 'true' : 'false'); });
+  }
+  // 섹터 s(0부터, -1 = 첫 소제목 앞의 글 첫머리)의 문서 좌표 [시작, 끝] — 지금 언어 기준
+  function secSpan(s, y, top, bottom) {
+    var a = s < 0 ? top : null;
+    for (var i = 0; i < heads.length; i++) {
+      var k = secOf[i] - 1, t = heads[i].getBoundingClientRect().top + y;
+      if (a === null && k === s) a = t;
+      else if (a !== null && k > s) return [a, t];
+    }
+    return a === null ? null : [a, bottom];
+  }
+  function bodyBox(y) {
+    var top = body.getBoundingClientRect().top + y;
+    return { top: top, bottom: top + body.offsetHeight };
+  }
+  function readSpot() {
+    if (!navLine) measureNav();
+    var y = w.scrollY, line = y + navLine, bb = bodyBox(y);
+    if (line < bb.top) return null;
+    var s = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].getBoundingClientRect().top + y - line <= 0) s = secOf[i] - 1; else break;
+    }
+    var r = secSpan(s, y, bb.top, bb.bottom);
+    return { s: s, f: r ? Math.max(0, Math.min(1, (line - r[0]) / Math.max(1, r[1] - r[0]))) : 0 };
+  }
+  // 스크롤만 한 번에 (html 의 부드러운 스크롤 없이)
+  function jumpTo(fn) {
+    var st = root.style, sb = st.scrollBehavior;
+    st.scrollBehavior = 'auto';
+    fn();
+    st.scrollBehavior = sb;
+  }
+  // 마지막으로 바꾼 순간: { lang: 바꾼 언어, y: 옮겨 간 자리, back: 떠나온 자리, vw: 창 너비 }.
+  // 그 뒤 스크롤하지 않고 되돌리면 떠나온 자리 그대로 — 비율로 다시 재면 반올림만큼씩 밀려 번역을 오가며 비교할 때 자리가 샙니다
+  var swap = null;
+  // opt.target: 이 소제목으로 (주소의 #앵커) · opt.y: 이 자리로 (뒤로 가기) · opt.keep: 고른 언어로 기억하지 않음 (링크 · 기록을 따라온 경우)
+  function setLang(l, opt) {
+    if (!enBlock || l === lang) return;
+    opt = opt || {};
+    var y0 = w.scrollY;
+    var to = opt.y != null ? opt.y
+      : !opt.target && swap && swap.lang === lang && swap.y === y0 && swap.vw === w.innerWidth ? swap.back : null;
+    var spot = opt.target || to != null ? null : readSpot();
+    advance();
+    lang = l;
+    root.classList.toggle('read-en', l === 'en');
+    if (l === 'en') enBlock.open = true;
+    if (!opt.keep) store('localStorage', 'dl-lang', l);
+    syncSwitches();
+    startSession();   // 새 언어의 섹터로 새 타이밍 (시간 · 색 초기화)
+    if (opt.target) {
+      jumpTo(function () { opt.target.scrollIntoView({ block: 'start' }); });   // scroll-padding 이 휠 아래로 맞춤
+    } else if (spot) {
+      if (!navLine) measureNav();
+      var y = w.scrollY, bb = bodyBox(y), r = secSpan(spot.s, y, bb.top, bb.bottom);
+      // 섹터 첫머리(비율 0)면 소제목이 기준선을 1px 넘게 — 반올림으로 앞 섹터에 남지 않게. 그 밖에는 비율 그대로
+      to = r ? r[0] + Math.max(1, spot.f * (r[1] - r[0])) - navLine : bb.top - (navLine - 70);
+    }
+    if (!opt.target && to != null) jumpTo(function () { w.scrollTo(0, Math.max(0, Math.round(to))); });
+    swap = opt.target ? null : { lang: l, y: w.scrollY, back: y0, vw: w.innerWidth };
+    if (!reduce && !opt.target) [body].concat(navsOf(l)).forEach(function (el) { restartAnim(el, 'is-swapped', 420); });
+    // 건너뛴 것으로 칩니다: 도착한 구간은 그 자리부터 (첫머리 근처면 곧바로 인정 — cover)
+    jumping = false;
+    landed = true;
+    dropMap();
+    if (tm) tm.at = tm.to = finished ? 1 : readProgress();   // 트랙 맵의 차는 새 자리에서 (출발선부터 달려오지 않게)
+    fitRail();
+    onScroll();
+  }
+  langSwitches.forEach(function (sw) {
+    sw.addEventListener('click', function () { setLang(lang === 'en' ? 'ko' : 'en'); });
+    sw.addEventListener('keydown', function (e) {
+      var to = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 'en' : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? 'ko' : null;
+      if (!to) return;
+      e.preventDefault();   // 화면 대신 스위치가 움직임
+      setLang(to);
+    });
+  });
+  // 숨은 언어의 소제목을 가리키는 주소(#en-sol 을 한국어로, #sol 을 영어로 읽는 중)로 오면 그 언어로 보여 주고 그 자리로.
+  // 링크를 따라온 것이라 고른 언어(dl-lang)는 바꾸지 않습니다
+  function followHash() {
+    if (!enBlock || location.hash.length < 2) return;
+    var id;
+    try { id = decodeURIComponent(location.hash.slice(1)); } catch (e) { return; }
+    var t = d.getElementById(id);
+    if (!t || t === enBlock || !body.contains(t)) return;
+    var want = enBlock.contains(t) ? 'en' : 'ko';
+    if (want !== lang) setLang(want, { target: t, keep: true });
+  }
+  followHash();
+  w.addEventListener('hashchange', followHash);
+  // 뒤로 · 앞으로: 앵커 링크를 누르는 순간 떠나는 기록에 그때의 언어 · 자리를 적어 두고(history.state — 아래 클릭 처리),
+  // 그 기록으로 돌아오면 그 언어 그 자리로. 한국어 본문에서 영어 앵커로 건너갔다가 뒤로 가기를 누르면 한국어의 그 링크 자리로 돌아옵니다
+  // (popstate 는 브라우저가 스크롤을 되돌리기 전에 오므로 레이아웃을 먼저 바꿔 두고, 같은 자리를 직접 한 번 더 맞춤)
+  w.addEventListener('popstate', function (e) {
+    var s = e.state;
+    if (enBlock && s && (s.dlLang === 'ko' || s.dlLang === 'en') && s.dlLang !== lang) setLang(s.dlLang, { keep: true, y: +s.dlY || 0 });
+  });
+  if (enBlock) d.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!a || a.getAttribute('href').length < 2) return;
+    try {
+      var st = history.state && typeof history.state === 'object' ? history.state : {};
+      history.replaceState(Object.assign({}, st, { dlLang: lang, dlY: w.scrollY }), '');
+    } catch (err) {}
+  });
+  syncSwitches();
 
   /* ---------- scroll loop ----------
      스크롤 리스너는 이것 하나(passive). 속도계만 이벤트마다 재고, 나머지(시프트 라이트 · 기어 · 섹터 ·

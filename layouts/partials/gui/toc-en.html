@@ -1,0 +1,26 @@
+{{- /*
+  영어 번역본({{< en >}})의 목차 — Hugo 목차(.TableOfContents)와 같은 모양(<ul><li><a href="#…">…</a><ul>…</ul></li></ul>, h2~h4).
+  영어 영역은 RenderString 으로 그려져 Hugo 목차에 들어가지 않으므로 그 HTML 에서 직접 만듭니다.
+  글자는 Hugo 목차처럼: 소제목 속 링크는 글자만, 수식이 든 소제목은 data-label(평문 라벨).
+  사용: partial "gui/toc-en.html" $enHTML → dict "html" (<ul>…</ul>, 소제목이 없으면 "") "count" (링크 수)
+*/ -}}
+{{- $heads := findRESubmatch `(?s)<h([234]) id="([^"]+)"([^>]*)>(.*?)</h[234]>` . -}}
+{{- $out := "" -}}
+{{- $lvl := 1 -}}
+{{- range $heads -}}
+  {{- $L := int (index . 1) -}}
+  {{- $text := index . 4 | replaceRE `<a class="heading-anchor"[^>]*></a>` "" | replaceRE `</?a\b[^>]*>` "" | strings.TrimSpace -}}
+  {{- with findRESubmatch `\sdata-label="([^"]*)"` (index . 3) 1 }}{{ $text = index (index . 0) 1 }}{{ end -}}
+  {{- if gt $L $lvl -}}
+    {{- /* 더 깊은 단계: 건너뛴 단계는 빈 <li> 로 (Hugo 목차와 같게, gui.js 가 최상위가 빈 목차는 평탄화) */ -}}
+    {{- range seq (add $lvl 1) $L }}{{ $out = print $out "<ul>\n<li>" }}{{ end -}}
+  {{- else -}}
+    {{- $out = print $out "</li>\n" -}}
+    {{- if lt $L $lvl }}{{ range seq (add $L 1) $lvl }}{{ $out = print $out "</ul>\n</li>\n" }}{{ end }}{{ end -}}
+    {{- $out = print $out "<li>" -}}
+  {{- end -}}
+  {{- $lvl = $L -}}
+  {{- $out = printf `%s<a href="#%s">%s</a>` $out (index . 2) $text -}}
+{{- end -}}
+{{- if $heads }}{{ range seq 2 $lvl }}{{ $out = print $out "</li>\n</ul>\n" }}{{ end }}{{ end -}}
+{{- return (dict "html" $out "count" (len $heads)) -}}

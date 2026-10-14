@@ -56,14 +56,16 @@ int main()
 }
 ```
 
-{{< details summary="English version" class="lang-en" >}}
-### Condition {#en-condition}
+{{< en >}}
+![Codeforces 194A A. Exams problem cover](images/cover.jpg)
+
+## Condition {#en-condition}
 time limit per test : 2 seconds  
 memory limit per test : 256 megabytes  
 input : standard input  
 output : standard output  
 
-### Prob : [A. Exams](https://codeforces.com/problemset/problem/194/A) {#en-prob-a-exams}
+## Prob : [A. Exams](https://codeforces.com/problemset/problem/194/A) {#en-prob-a-exams}
 One day the Codeforces round author sat exams. He had n exams and he needed to get an integer from 2 to 5 for each exam. He will have to re-sit each failed exam, i.e. the exam that gets mark 2.
 
 The author would need to spend too much time and effort to make the sum of his marks strictly more than k. That could have spoilt the Codeforces round. On the other hand, if the sum of his marks is strictly less than k, the author's mum won't be pleased at all.
@@ -72,18 +74,18 @@ The Codeforces authors are very smart and they always get the mark they choose t
 
 Help the author and find the minimum number of exams he will have to re-sit if he passes the exams in the way that makes the sum of marks for all n exams equal exactly k.
 
-### INPUT {#en-input}
+## INPUT {#en-input}
 The single input line contains space-separated integers n and k (1 ≤ n ≤ 50, 1 ≤ k ≤ 250) — the number of exams and the required sum of marks.
 
 It is guaranteed that there exists a way to pass n exams in the way that makes the sum of marks equal exactly k.
 
-### OUTPUT {#en-output}
+## OUTPUT {#en-output}
 Print the single number — the minimum number of exams that the author will get a 2 for, considering that the sum of marks for all exams must equal k.
 
-### Sol {#en-sol}
+## Sol {#en-sol}
 A exam has a minimum score of 2 points. Therefore, the n exams we want will contain at least 2n scores.
 
-![n개 시험에 2점씩 배정해 2n을 채우고 k가 k-2n으로 줄어드는 그림](images/1.png)
+![Giving each of the n exams 2 points uses up 2n, leaving k-2n](images/1.png)
 
 Now all that remains is k-2n. Let k-2n be p, and think about this.
 1. $p<0$  
@@ -95,6 +97,17 @@ Now all that remains is k-2n. Let k-2n be p, and think about this.
 
 Below is the code that implements the above explanation.
 
-### Code {#en-code}
-_The code is the same as the Korean version above._
-{{< /details >}}
+## Code {#en-code}
+```c
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+int main()
+{
+	int n, k;
+	scanf("%d %d", &n, &k);
+	k -= (n * 2);
+	printf("%d", k >= n ? 0 : n - k);
+	return 0;
+}
+```
+{{< /en >}}

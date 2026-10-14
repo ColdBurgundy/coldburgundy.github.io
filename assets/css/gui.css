@@ -1130,6 +1130,10 @@ a.tyre:hover .tyre__ring { animation: tyre-spin .6s linear infinite; }
 }
 .post-hero__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 0; margin: 0 0 22px; padding: 0; list-style: none; font: 500 14px var(--f-tech); letter-spacing: .02em; color: var(--text-2); }
 .post-hero__meta li + li::before { content: ""; display: inline-block; width: 3px; height: 3px; margin: 0 12px 3px; border-radius: 50%; background: var(--muted); }
+/* 읽는 언어 스위치(가로형): 도구 막대가 없는 화면에서만 — 메타 줄 오른쪽 끝에, 점 없이 (줄이 넘치면 다음 줄 오른쪽으로).
+   보이는 건 아래 RESPONSIVE 의 <1280px */
+.post-hero__lang { display: none; align-items: center; margin-left: auto; padding-left: 16px; }
+.post-hero__meta li.post-hero__lang::before { content: none; }
 .post-hero__tags { display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* 가운데 읽기 열 — 본문 · 제목 블록 · 글 끝 블록이 어느 너비에서나 화면 정중앙에 옵니다.
@@ -1275,17 +1279,17 @@ a.tyre:hover .tyre__ring { animation: tyre-spin .6s linear infinite; }
   border-radius: 12px;
   box-shadow: inset 0 0 24px rgba(var(--blue-rgb), .05);
 }
-.telemetry__lap {
-  display: grid;
-  grid-template-columns: auto 1fr auto auto;
-  align-items: center;
-  gap: 4px 10px;
-  padding: 10px 12px;
-}
+/* 랩 · 섹터 두 칸: 휠 LCD(.disp__cell)처럼 이름은 위, 값은 아래. 랩은 M:SS.mmm — 7-세그먼트 숫자는 칸 너비가 같고
+   콜론 · 점은 폭이 거의 없어 숫자가 바뀌어도 흔들리지 않습니다. 가장 좁은 레일(232px)에서도 10분 넘는 랩(12:34.567)까지 한 줄 */
+.telemetry__lap { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+.telemetry__cell { display: flex; flex-direction: column; gap: 7px; min-width: 0; padding: 11px 12px 12px; }
+.telemetry__cell--sec { align-items: flex-end; border-left: 1px solid rgba(214, 224, 255, .06); }
 .telemetry__k { font: 600 8.5px/1 var(--f-tech); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
 /* 랩 시간: 달리는 동안은 흰 LCD 숫자, 체커기를 받으면 그 랩의 타이밍 색(보라 · 초록 · 노랑) */
-.telemetry__lap [data-lap] { font: 700 15px/1 var(--f-digit); font-style: italic; color: var(--t, #eef1f8); text-shadow: 0 0 8px color-mix(in srgb, var(--t, #d6e0ff) 32%, transparent); transition: color .3s, text-shadow .3s; }
-.telemetry__lap [data-sector] { font: 700 13px/1 var(--f-tech); color: var(--text); font-variant-numeric: tabular-nums; }
+.telemetry__lap [data-lap] { font: 700 17px/1 var(--f-digit); font-style: italic; white-space: nowrap; color: var(--t, #eef1f8); text-shadow: 0 0 8px color-mix(in srgb, var(--t, #d6e0ff) 32%, transparent); transition: color .3s, text-shadow .3s; }
+/* 7-세그먼트 글꼴의 : 와 . 는 폭이 없어 앞 숫자에 겹칩니다 — 칸 사이에 제 자리를 조금 줘서 1:23.456 이 또렷하게 */
+.telemetry__lap [data-lap] i { font-style: inherit; margin: 0 1px 0 2px; }
+.telemetry__lap [data-sector] { font: 700 15px/17px var(--f-tech); white-space: nowrap; color: var(--text); font-variant-numeric: tabular-nums; }
 .telemetry__bar { flex: none; height: 3px; margin: 14px 4px 10px; border-radius: 3px; background: rgba(255, 255, 255, .06); overflow: hidden; }
 .telemetry__bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: linear-gradient(90deg, var(--green), var(--yellow) 60%, var(--red-hi)); }
 .tel-folded .telemetry__bar { margin-top: 12px; }
@@ -1319,7 +1323,9 @@ a.tyre:hover .tyre__ring { animation: tyre-spin .6s linear infinite; }
 .telemetry a:hover { color: var(--text); background: rgba(255, 255, 255, .04); }
 .telemetry a.t-purple, .telemetry a.t-green, .telemetry a.t-yellow { color: var(--text-2); }
 .telemetry a.is-active { color: var(--text); background: rgba(255, 255, 255, .05); }
-.toc-time { flex: none; margin-left: auto; padding-left: 8px; white-space: nowrap; font: 600 10.5px/1 var(--f-tech); color: var(--t, var(--faint)); font-variant-numeric: tabular-nums; transition: color .3s; }
+/* 구간 시간: SS.mmm (1분이 넘으면 M:SS.mmm, 기록 전 --.---). 매 프레임 째깍이므로 숫자 폭이 모두 같은 글꼴(Saira — Chakra Petch 는
+   고정 폭 숫자가 없어 오른쪽 정렬된 시간이 좌우로 떨림)에, 최소 너비(SS.mmm 한 벌)라 기록이 생겨도 줄이 흔들리지 않음 */
+.toc-time { flex: none; min-width: 3.55em; margin-left: auto; padding-left: 8px; box-sizing: content-box; text-align: right; white-space: nowrap; font: 600 10.5px/1 "Saira", var(--f-tech); font-stretch: 100%; letter-spacing: .02em; color: var(--t, var(--faint)); font-variant-numeric: tabular-nums; transition: color .3s; }
 .toc-time.is-run { color: var(--text); }
 /* F1 타이밍 색: 보라 = 목표 이하, 초록 = 이번 방문의 개인 최고, 노랑 = 개인 최고보다 느림 (gui.js 가 t-* 를 붙임) */
 .t-purple { --t: var(--purple); }
@@ -1478,6 +1484,70 @@ a.tyre:hover .tyre__ring { animation: tyre-spin .6s linear infinite; }
 }
 .dock__btn.is-done .dock__tip { color: var(--green); }
 
+/* ---------- 읽는 언어 스위치 (영어 번역이 있는 글만 — posts/single.html · gui/lang-switch.html) ----------
+   휠의 2단 토글처럼: 어두운 홈 위로 손잡이 하나가 미끄러집니다. 도구 막대에선 위 KO · 아래 EN(세로),
+   막대가 없는 좁은 화면에선 제목 아래 메타 줄과 목차 서랍 머리에 가로로(글 중간에서도 서랍을 열어 바꿈). 손잡이 자리는 html.read-en 이 정하므로 첫 그림부터 맞습니다.
+   움직임 줄이기 설정이면 곧바로(전역 규칙). 스크립트가 없으면 스위치 대신 본문 끝의 접이식 영어 영역 그대로 */
+.lang-switch {
+  --sw-w: 28px;
+  --sw-h: 60px;
+  --sw-pad: 2px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.lang-switch--row { --sw-w: 60px; --sw-h: 28px; }
+.lang-switch__track {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  width: var(--sw-w);
+  height: var(--sw-h);
+  padding: var(--sw-pad);
+  background: #03060e;
+  border: 1px solid rgba(214, 224, 255, .1);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .8);
+  transition: border-color .2s;
+}
+.lang-switch--row .lang-switch__track { grid-template-rows: none; grid-template-columns: 1fr 1fr; }
+.lang-switch__thumb {
+  position: absolute;
+  inset: var(--sw-pad) var(--sw-pad) auto;
+  height: calc(50% - var(--sw-pad));
+  border-radius: 999px;
+  background: linear-gradient(180deg, #29335a, #1a2241);
+  border: 1px solid rgba(214, 224, 255, .2);
+  box-shadow: 0 2px 6px rgba(0, 0, 6, .7), inset 0 1px 0 rgba(255, 255, 255, .07);
+  transition: transform .38s var(--ease), border-color .2s;
+}
+.lang-switch--row .lang-switch__thumb { inset: var(--sw-pad) auto var(--sw-pad) var(--sw-pad); width: calc(50% - var(--sw-pad)); height: auto; }
+.read-en .lang-switch__thumb { transform: translateY(100%); }
+.read-en .lang-switch--row .lang-switch__thumb { transform: translateX(100%); }
+/* 글자는 손잡이 위에: 고른 쪽만 밝게. 넓은 글꼴의 자간만큼 오른쪽이 비지 않게 되돌립니다 */
+.lang-switch__opt { position: relative; display: grid; place-items: center; padding-left: .08em; font: 400 8.5px/1 var(--f-wide); letter-spacing: .08em; color: var(--faint); transition: color .25s; }
+html:not(.read-en) .lang-switch__opt--ko, .read-en .lang-switch__opt--en { color: #fff; }
+.lang-switch:hover .lang-switch__track { border-color: var(--hair-3); }
+.lang-switch:hover .lang-switch__thumb { border-color: rgba(214, 224, 255, .3); }
+.lang-switch:hover .lang-switch__opt { color: var(--text-2); }
+html:not(.read-en) .lang-switch:hover .lang-switch__opt--ko, .read-en .lang-switch:hover .lang-switch__opt--en { color: #fff; }
+.lang-switch:focus-visible { outline: none; }
+.lang-switch:focus-visible .lang-switch__track { outline: 2px solid var(--focus); outline-offset: 2px; }
+/* 도구 막대 안: 둥근 버튼 대신 홈 모양 그대로 (바탕 · 원형 테두리 없이), 말풍선은 다른 버튼과 같게 */
+.dock__lang { width: 38px; height: auto; padding: 4px 0; border-radius: 999px; }
+.dock__lang:hover, .dock__lang:focus-visible { background: transparent; }
+/* 좁은 화면(제목 아래)의 가로형: 손가락으로 누르기 쉽게 보이지 않는 판을 넓힙니다 */
+.lang-switch--row::after { content: ""; position: absolute; inset: -8px -6px; }
+/* 목차 서랍 머리의 스위치(<1280px 에서만 — 아래 RESPONSIVE): 접기 버튼의 보이지 않는 판 위에 놓여 눌리는 건 스위치 */
+.telemetry__lang { display: none; z-index: 1; flex: none; }
+html:not(.dl-js) .lang-switch, html:not(.dl-js) .dock__sep:has(+ .dock__lang) { display: none; }
+
 /* 글 끝 */
 .post-foot { display: flex; flex-direction: column; gap: 18px; margin-top: 64px; padding-top: 26px; border-top: 1px solid var(--hair); }
 .post-foot__tags { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -1634,7 +1704,27 @@ a.tyre:hover .tyre__ring { animation: tyre-spin .6s linear infinite; }
 .prose details.lang-en[open] > summary::before, .prose details.lang-en > summary:hover::before { color: var(--text); border-color: color-mix(in srgb, var(--cat) 55%, var(--hair-3)); }
 .prose details > summary + * { margin-top: 20px; }
 .prose details > :last-child { margin-bottom: 22px; }
-.prose details h3 { font-size: 19px; }
+html:not(.read-en) .prose details h3 { font-size: 19px; }
+/* 영어 번역({{< en >}})이 접이식으로 보일 때(스크립트 없음): 섹터 번호는 01 부터, 상자 안이라 소제목은 조금 작게 */
+.prose details.lang-en { counter-reset: sector; }
+html:not(.read-en) .prose details.lang-en h2 { margin-top: 2.2em; font-size: 23px; }
+/* 영어 영역 첫머리의 대표 이미지(.en-cover — shortcodes/en.html)는 EN 본문에서만. 접이식으로 볼 때는 한국어 본문 위에 이미 있으니 숨김 */
+html:not(.read-en) .prose details.lang-en .en-cover { display: none; }
+html:not(.read-en) .prose details.lang-en > .en-cover + * { margin-top: 20px; }
+
+/* 읽는 언어 (영어 번역이 있는 글 — html.read-en 은 head.html 이 첫 그림 전에, gui.js 가 스위치로 붙입니다)
+   EN: 한국어 본문은 숨고 영어 영역이 머리줄 없이 펼쳐진 본문으로 (본문 열 자리 · 너비는 그대로).
+   KO: 스위치가 대신하므로 영어 영역은 숨김. 언어마다 다른 글자(목차 · 개수 · 분량 · 말풍선)는 data-lang-only 로 */
+html:not(.read-en) [data-lang-only="en"], .read-en [data-lang-only="ko"] { display: none; }
+.read-en .post-body > :not([data-lang-block="en"]) { display: none; }
+.dl-js:not(.read-en) .post-body > [data-lang-block="en"] { display: none; }
+.read-en .prose details[data-lang-block="en"] { margin: 0; padding: 0; background: none; border: 0; border-radius: 0; }
+.read-en .prose details[data-lang-block="en"] > summary { display: none; }
+.read-en .prose details[data-lang-block="en"] > summary + * { margin-top: 0; }
+.read-en .prose details[data-lang-block="en"] > :last-child { margin-bottom: 0; }
+/* 언어를 바꾼 순간: 본문과 목차가 제자리에서 살짝 밝아지며 들어옵니다 (투명도만 — 읽던 자리는 그대로) */
+.post-body.is-swapped, .telemetry nav.is-swapped, .race-plan nav.is-swapped { animation: lang-in .36s var(--ease-soft); }
+@keyframes lang-in { from { opacity: .15; } }
 
 /* code blocks */
 .codeblock { position: relative; margin: 1.8em 0; background: #080d1d; border: 1px solid var(--hair-2); border-radius: var(--r); overflow: hidden; }
@@ -1952,6 +2042,10 @@ a.tyre:hover .tyre__ring { animation: tyre-spin .6s linear infinite; }
   /* 서랍 머리는 닫기 버튼 몫만큼 좁으니 접힌 요약은 '100% · 4/4' 로 (SECTOR 글자 없이) */
   .telemetry__sum-sec small { display: none; }
   .toc-fab { display: grid; transition: opacity .2s, visibility .2s; }
+  .dl-js .post-hero__lang { display: flex; }
+  /* 서랍 머리의 읽는 언어 스위치는 제목 자리(왼쪽 끝)에 — 좁은 서랍엔 제목 · 진행률 · 스위치 · 두 버튼이 한 줄에 다 들어가지 않습니다 */
+  .dl-js .telemetry__lang { display: inline-grid; order: -1; margin-left: -4px; }
+  .dl-js .telemetry__head:has(.telemetry__lang) .telemetry__title { display: none; }
   body:has(.post-aside.is-open) .toc-fab, body:has(.post-aside.is-open) .to-top { opacity: 0; visibility: hidden; pointer-events: none; }
 }
 @media (max-width: 1279.98px) and (max-height: 620px) {

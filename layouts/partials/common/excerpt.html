@@ -1,7 +1,7 @@
 {{- /*
   글 요약 (평문): description 이 있으면 그것, 없으면 Markdown 원문에서 본문 문장만 뽑아 만듭니다.
   카드 · <meta description> · og/JSON-LD · index.json(CLI 와 GUI 검색)이 모두 이 결과를 씁니다.
-  1) Markdown 단계: 코드 블록, shortcode(영어 번역 details 는 통째로), 주석, 수식, 이미지, 각주 표시를 걷어내고
+  1) Markdown 단계: 코드 블록, shortcode(영어 번역 en · details 는 통째로), 주석, 수식, 이미지, 각주 표시를 걷어내고
      링크는 글자만 남깁니다. (상대 경로 링크·이미지를 목록 페이지 기준으로 풀다가 경고가 나지 않도록)
   2) markdownify 로 HTML 을 만든 뒤 소제목 · 표 · 들여쓴 코드 · <details> 를 걷어냅니다. (setext 제목, 파이프 없는 표도 함께)
   3) 블록 사이에 공백을 넣고 태그를 지워 평문으로 만듭니다.
@@ -19,6 +19,7 @@
   {{- $c = replaceRE "(?ms)^[ \t>]*```.*?^[ \t>]*```" " " $c -}}
   {{- $c = replaceRE "(?ms)^[ \t>]*~~~.*?^[ \t>]*~~~" " " $c -}}
   {{- $c = replaceRE `(?s)\{\{[<%]\s*details\b.*?\{\{[<%]\s*/\s*details\s*[>%]\}\}` " " $c -}}
+  {{- $c = replaceRE `(?s)\{\{[<%]\s*en\s*[>%]\}\}.*?\{\{[<%]\s*/\s*en\s*[>%]\}\}` " " $c -}}
   {{- $c = replaceRE `(?s)\{\{[<%].*?[>%]\}\}` " " $c -}}
   {{- $c = replaceRE `(?s)<!--.*?-->` " " $c -}}
   {{- range findRE "`[^`\n]+`" $c -}}

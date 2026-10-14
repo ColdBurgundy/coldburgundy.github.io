@@ -51,27 +51,49 @@ int main()
 }
 ```
 
-{{< details summary="English version" class="lang-en" >}}
-### Condition {#en-condition}
+{{< en >}}
+![Codeforces 231A A. Team problem cover](images/cover.jpg)
+
+## Condition {#en-condition}
 time limit per test : 2 seconds  
 memory limit per test : 256 megabytes  
 input : standard input  
 output : standard output  
 
-### Prob : [A. Team](https://codeforces.com/problemset/problem/231/A) {#en-prob-a-team}
+## Prob : [A. Team](https://codeforces.com/problemset/problem/231/A) {#en-prob-a-team}
 One day three best friends Petya, Vasya and Tonya decided to form a team and take part in programming contests. Participants are usually offered several problems during programming contests. Long before the start the friends decided that they will implement a problem if at least two of them are sure about the solution. Otherwise, the friends won't write the problem's solution.
 
 This contest offers n problems to the participants. For each problem we know, which friend is sure about the solution. Help the friends find the number of problems for which they will write a solution.
 
-### INPUT {#en-input}
+## INPUT {#en-input}
 The first input line contains a single integer n (1 ≤ n ≤ 1000) — the number of problems in the contest. Then n lines contain three integers each, each integer is either 0 or 1. If the first number in the line equals 1, then Petya is sure about the problem's solution, otherwise he isn't sure. The second number shows Vasya's view on the solution, the third number shows Tonya's view. The numbers on the lines are separated by spaces.
 
-### OUTPUT {#en-output}
+## OUTPUT {#en-output}
 Print a single integer — the number of problems the friends will implement on the contest.
 
-### Sol {#en-sol}
+## Sol {#en-sol}
 For each line you enter, you are given three values of 0 or 1. Let's think about the sum of these. It will have values from 0 to 3. In this case, in the case of 0 and 1, the three friends cannot solve the problem. Therefore, the sum value only needs to be greater than 1. All you need to do is calculate this logic for each line you input. The code written based on this is as follows.
 
-### Code {#en-code}
-_The code is the same as the Korean version above._
-{{< /details >}}
+## Code {#en-code}
+```c
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+int main()
+{
+	int n, i, j, num, cnt = 0, x;
+	scanf("%d", &n);
+	for (i = 0; i < n; i++)
+	{
+		num = 0;
+		for (j = 0; j < 3; j++)
+		{
+			scanf("%d", &x);
+			num += x;
+		}
+		if (num > 1) cnt++;
+	}
+	printf("%d", cnt);
+	return 0;
+}
+```
+{{< /en >}}

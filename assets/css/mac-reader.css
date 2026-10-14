@@ -311,6 +311,9 @@
 .mac-overlay .paper summary:focus-visible { outline: 1px dotted #000; outline-offset: -4px; }
 .mac-overlay .paper details > :not(summary) { margin-left: 1.1rem; margin-right: 1.1rem; }
 .mac-overlay .paper details > :last-child { margin-bottom: 1.1rem; }
+/* 영어 번역 첫머리의 대표 이미지(.en-cover)는 GUI 의 EN 본문 몫 — 여기선 바로 위 한국어 본문에 이미 있으니 숨김 */
+.mac-overlay .paper .en-cover { display: none; }
+.mac-overlay .paper details.lang-en > summary + *, .mac-overlay .paper details.lang-en > .en-cover + * { margin-top: 1.2rem; }
 
 .mac-overlay .paper :not(pre) > code {
   font-family: var(--mac-mono);

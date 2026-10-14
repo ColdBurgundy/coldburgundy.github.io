@@ -1,0 +1,38 @@
+{{- /*
+  영어 번역본: 한국어 본문 뒤에
+
+      {{< en >}}
+      ## Condition {#en-condition}
+      …영어 Markdown…
+      {{< /en >}}
+
+  로 씁니다. 안쪽은 본문과 같은 Markdown(소제목 · 그림 · 코드 · 수식 · 링크 훅 그대로)으로 그리고, 결과는 접이식 영역 하나입니다.
+  - GUI: 글에 영어 번역이 있으면 KO/EN 스위치가 생기고(posts/single.html), EN 으로 고르면 한국어 본문 대신 이 영역이 펼쳐진 본문이 됩니다(gui.js).
+    KO 일 때는 스위치가 대신하므로 이 영역은 숨습니다.
+  - 스크립트가 없을 때와 CLI 의 Mac 창에서는 지금처럼 'English version' 접이식 영역 (Mac 창 목차 · Hugo 목차에도 들어가지 않음).
+  - 소제목은 한국어와 같은 단계로(## 섹터 · ### 하위) 써야 EN 의 섹터가 한국어와 맞습니다.
+    앵커는 {#en-…} 로 직접 다는 것을 권하지만, 빠뜨려도 여기서 'en-' 을 붙여 한국어 소제목과 겹치지 않게 합니다(영어 본문 속 #링크도 함께).
+  - 끝의 주석 표시(/en)는 템플릿(posts/single.html)이 영어 영역의 끝을 찾는 표시입니다 (배포 HTML 에서는 압축 때 빠짐).
+*/ -}}
+{{- $html := .Inner | strings.TrimSpace | .Page.RenderString (dict "display" "block") | string -}}
+{{- range findRESubmatch `<h[1-6] id="([^"]+)"` $html -}}
+  {{- $id := index . 1 -}}
+  {{- if not (hasPrefix $id "en-") -}}
+    {{- $html = replace $html (printf `id="%s"` $id) (printf `id="en-%s"` $id) -}}
+    {{- $html = replace $html (printf `href="#%s"` $id) (printf `href="#en-%s"` $id) -}}
+  {{- end -}}
+{{- end -}}
+{{- /* 영어 영역 첫머리의 그림이 한국어 본문에도 있는 그림(대표 이미지)이면 EN 본문에서만 보이게 표시합니다(.en-cover).
+       접이식으로 볼 때(스크립트 없음 · Mac 창)는 바로 위 한국어 본문에 이미 있으니 숨김 (gui.css · mac-reader.css) */ -}}
+{{- with findRESubmatch `^\s*!\[[^\]]*\]\(\s*<?([^\s)>]+)` .Inner 1 -}}
+  {{- $src := index (index . 0) 1 -}}
+  {{- $ko := replaceRE `(?s)\{\{[<%]\s*en\s*[>%]\}\}.*` "" $.Page.RawContent -}}
+  {{- if in $ko $src -}}
+    {{- $html = replaceRE `^(\s*)<p>(<img\b[^>]*>)</p>` `$1<p class="en-cover">$2</p>` $html -}}
+  {{- end -}}
+{{- end -}}
+<details class="lang-en" lang="en" data-lang-block="en">
+  <summary>English version</summary>
+  {{ $html | safeHTML }}
+</details>{{ "<!--/en-->" | safeHTML }}
+{{- /**/ -}}
