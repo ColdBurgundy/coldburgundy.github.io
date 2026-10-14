@@ -1,10 +1,14 @@
-+++
-title = "$1. [BOJ] 10156 과자"
-date = "2024-01-01"
-description = "과자 가격 K, 개수 N, 가진 돈 M이 주어질 때 K×N−M을 계산하고 음수면 0으로 처리해 부족한 금액을 구하는 풀이"
-tags = ["BOJ", "Bronze4", "수학", "사칙연산"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$1. [BOJ] 10156 과자"
+date: 2024-01-01
+description: "과자 가격 K, 개수 N, 가진 돈 M이 주어질 때 K×N−M을 계산하고 음수면 0으로 처리해 부족한 금액을 구하는 풀이"
+tags:
+  - "BOJ"
+  - "Bronze4"
+  - "수학"
+  - "사칙연산"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 10156 과자 문제 대표 이미지](images/cover.jpg)
 

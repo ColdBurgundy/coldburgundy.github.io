@@ -1,0 +1,13 @@
+{{- /* 서킷 데이터 (assets/data/circuits.json — bacinger/f1-circuits, MIT) 를 한 번만 읽어 둡니다 (partialCached).
+     url  : 지문 붙은 주소 — gui.js 가 페이지마다 한 번 불러와 트레이스 · 별자리 · 트랙 맵이 함께 씁니다 (캐시가 잘 듣고, head.html 이 미리 받기)
+     list : 빌드 때 쓰는 서킷 목록 — 스크립트 없이도 보이는 기본 트레이스 · 트랙 맵 (circuit-pick.html) */ -}}
+{{- $out := dict "url" "" "list" slice -}}
+{{- with resources.Get "data/circuits.json" -}}
+  {{- $data := . | transform.Unmarshal -}}
+  {{- $list := slice -}}
+  {{- range $data.circuits -}}
+    {{- if and .d .viewBox .speed (ge (len .speed) 24) }}{{ $list = $list | append . }}{{ end -}}
+  {{- end -}}
+  {{- $out = dict "url" (. | minify | fingerprint).RelPermalink "list" $list -}}
+{{- end -}}
+{{- return $out -}}

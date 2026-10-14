@@ -86,6 +86,39 @@ body {
   overflow-x: hidden;
 }
 body.is-locked { overflow: hidden; }
+
+/* ---------- 페이지 이동 (View Transitions) ----------
+   사이트 안에서 다른 페이지로 넘어갈 때: 상단 휠은 자기 이름(dl-wheel)으로 떼어 내 제자리에 두고, 본문만 짧게 바뀝니다 —
+   (휠 이름은 전환하는 동안에만: 이름이 붙은 요소는 backdrop root 가 되어 유리 같은 흐림이 뒤의 본문을 못 흐리게 하므로.
+    :active-view-transition, 또는 head.html 이 pageswap · pagereveal 에서 붙였다 떼는 html.vt-wheel)
+   본문은 겹쳐 비치지 않게 차례로(fade-through): 지난 페이지가 살짝 위로 흐려지며 먼저 빠지고(0.14초), 거의 다 빠진 뒤에
+   새 페이지가 조금 아래에서 떠오릅니다(0.08초 뒤 0.28초 — 모두 0.36초 안). 뒤로 가기는 방향만 반대(head.html 이 type back).
+   휠은 겹쳐 흐리지 않고 새 휠로 곧바로 바뀝니다(LCD 처럼 — 지난 휠 그림은 숨김). 두 휠의 모양이 같도록, 스크롤해서 얇아진 휠에서 떠나면
+   새 페이지도 얇은 휠로 시작해 전환이 끝난 뒤 평소처럼 부드럽게 펴집니다(head.html · gui.js).
+   전환하는 동안은 휠 몸체를 불투명하게 — 이름이 붙은 동안 유리 흐림이 꺼져 뒤의 본문이 그대로 비치므로. 끝나면 유리로 천천히 돌아갑니다.
+   움직임 줄이기 설정이면 전환 자체를 켜지 않습니다. 지원하지 않는 브라우저는 .dl-enter(head.html)가 본문만 짧게 떠오르게. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}
+html { background: var(--bg); }
+.vt-wheel .wheel { view-transition-name: dl-wheel; }
+html:active-view-transition .wheel { view-transition-name: dl-wheel; }
+.vt-wheel .wheel__shell, html:active-view-transition .wheel__shell { background-color: #0b1124; transition: none; }
+::view-transition-group(root) { animation-duration: .36s; }
+::view-transition-old(root) { animation: vt-out .14s cubic-bezier(.3, 0, .2, 1) both; }
+::view-transition-new(root) { animation: vt-in .28s cubic-bezier(.2, .8, .2, 1) .08s both; }
+html:active-view-transition-type(back)::view-transition-old(root) { animation-name: vt-out-back; }
+html:active-view-transition-type(back)::view-transition-new(root) { animation-name: vt-in-back; }
+::view-transition-group(dl-wheel) { animation-duration: .36s; animation-timing-function: cubic-bezier(.33, 1, .68, 1); }
+::view-transition-old(dl-wheel) { display: none; }
+::view-transition-new(dl-wheel) { animation: none; }
+@keyframes vt-out { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(12px); } }
+@keyframes vt-out-back { to { opacity: 0; transform: translateY(6px); } }
+@keyframes vt-in-back { from { opacity: 0; transform: translateY(-12px); } }
+/* 뷰 전환이 없는 브라우저: 방금 사이트 안에서 넘어온 페이지의 본문만 흐린 데서 또렷하게 (투명도만 — 고정 요소의 기준 상자가 바뀌지 않게) */
+.dl-enter .site-main { animation: dl-enter .34s cubic-bezier(.2, .8, .2, 1) backwards; }
+@keyframes dl-enter { from { opacity: 0; } }
 img, svg { display: block; max-width: 100%; }
 a { color: inherit; }
 button { font: inherit; color: inherit; }
@@ -171,6 +204,8 @@ kbd {
   transition: transform .5s var(--ease-soft);
 }
 .wheel.is-compact { --wheel-h: 50px; --wheel-lift: -4px; }
+/* 페이지 전환으로 넘어오며 지난 페이지의 얇은 휠을 이어 받을 때(head.html): 줄어드는 움직임 없이 곧바로 */
+.wheel.is-instant, .wheel.is-instant *, .wheel.is-instant::before { transition: none !important; }
 /* 스크롤 중 휠 위 틈과 LCD 양옆으로 글자가 비치지 않게 하는 옅은 그늘 (D19).
    휠 몸체 뒤는 비워 둡니다 — 반투명 유리 너머로 본문이 흐릿하게 비쳐 보여야 하니까요.
    (이 요소의 0 = 휠 위 4px, 몸체는 --wheel-pt + 4px 부터 --wheel-h 만큼) */
@@ -221,6 +256,7 @@ kbd {
   backdrop-filter: blur(16px) saturate(160%);
   border: 1px solid rgba(214, 224, 255, .1);
   box-shadow: 0 22px 44px -22px rgba(0, 0, 6, .9), inset 0 1px 0 rgba(214, 224, 255, .08);
+  transition: background-color .3s ease;   /* 페이지 전환 뒤 불투명 → 유리로 돌아갈 때만 (전환 중 규칙은 transition: none) */
 }
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
   .wheel__shell { background-color: #0b1124; }
@@ -337,6 +373,8 @@ kbd {
 .nav__item .drop { z-index: 2; }
 .wheel.is-compact .drop { top: calc(100% + 38px); }
 .nav__item.is-open .drop { opacity: 1; visibility: visible; transform: none; }
+/* 다른 페이지로 떠나며 닫을 때는 곧바로 (gui.js .is-leaving) — 뒤로 가기로 돌아온 페이지의 첫 그림에 열린 패널이 남지 않게 */
+.nav__item.is-leaving .drop { transition: none; }
 /* 버튼에서 패널로 내려가는 동안 마우스가 빈 틈을 지나도 닫히지 않게: 패널 바로 위, 패널 너비만큼의 보이지 않는 다리 */
 @media (hover: hover) {
   .wheel .drop::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 46px; }
@@ -428,6 +466,20 @@ kbd {
 .wheel__leds.is-rev i:not(.on) { animation: rev .85s ease-out both; animation-delay: calc(var(--i, 0) * 26ms); }
 @keyframes shift-flash { 50% { background: #161d33; box-shadow: none; } }
 @keyframes rev { 35% { background: var(--c); box-shadow: 0 0 8px var(--c); } }
+/* 페이지 이동 중 — 다음 페이지가 150ms 안에 뜨지 않을 때만(gui.js): 시프트 라이트가 양 끝에서 가운데로 차올랐다가 같은 순서로 비워지기를 되풀이.
+   --e = 가장자리에서 몇 번째 LED 인지. 새 페이지 · 뒤로 가기 복원 · 멈춘 이동에서는 곧바로 꺼집니다.
+   움직임 줄이기 설정이면 움직이지 않고 한 칸 건너 켜 둡니다 */
+.wheel__leds.is-loading i { background: #161d33; box-shadow: none; animation: led-load 1.05s cubic-bezier(.45, 0, .55, 1) calc(var(--e, 0) * 55ms) infinite both; }
+/* 켜질 때는 천천히(첫 24%) — 다음 페이지가 곧 뜨는 이동에서는 끝의 LED 가 희미하게 감돌다 마는 정도로 */
+@keyframes led-load {
+  0% { background: #161d33; box-shadow: none; }
+  24%, 52% { background: var(--c); box-shadow: 0 0 8px var(--c); }
+  72%, 100% { background: #161d33; box-shadow: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wheel__leds.is-loading i { animation: none; }
+  .wheel__leds.is-loading i:nth-child(odd) { background: var(--c); box-shadow: 0 0 6px var(--c); }
+}
 
 .wheel__display {
   position: relative;
@@ -620,8 +672,9 @@ kbd {
   --bull-line: .12;
   --bull-star: .85;
 }
-.hero__grid, .hero__track, .hero__bull, .hero__inner, .start-lights { transition: translate 1.1s var(--ease); }
+.hero__grid, .hero__track, .hero__bull, .hero__sky, .hero__inner, .start-lights { transition: translate 1.1s var(--ease); }
 .hero .hero__grid { translate: calc(var(--px) * -14px) calc(var(--py) * -10px); }
+.hero .hero__sky { translate: calc(var(--px) * -7px) calc(var(--py) * -5px); }
 .hero .hero__track { translate: calc(var(--px) * -26px) calc(var(--py) * -14px); }
 .hero .hero__bull { translate: calc(var(--px) * -10px) calc(var(--py) * -6px); }
 .hero .hero__inner { translate: calc(var(--px) * 6px) calc(var(--py) * 4px); }
@@ -692,8 +745,17 @@ kbd {
    첫 줄은 16자까지만 맞추고, 그보다 긴 제목은 자연스럽게 줄을 바꿉니다 */
 .hero__line--lead { font-size: min(1em, calc((100vw - var(--gutter) * 2) / (var(--n, 12) * var(--cw-lead)))); text-wrap: balance; }
 .hero__line--dim { color: color-mix(in srgb, var(--text) 42%, var(--bg)); font-weight: 700; white-space: nowrap; font-size: min(1em, calc((100vw - var(--gutter) * 2) / (var(--n, 15) * var(--cw-dim)))); }
-/* 가장 긴 단어 + 깜빡이는 커서(.11em)가 들어가는 크기 */
-.hero__line--typed { white-space: nowrap; min-height: 1em; font-size: min(1em, calc((100vw - var(--gutter) * 2) / (var(--n, 17) * var(--cw) + .2))); }
+/* 가장 긴 단어(--n 글자) + 깜빡이는 커서(.11em)가 한 줄에 들어가는 크기. 단어가 바뀌어도 줄 높이는 그대로(1em)라 아래가 밀리지 않습니다.
+   좁은 화면(≤560px)은 한 줄에 맞추면 글자가 너무 작아지므로, 가장 긴 낱말(--nt 글자) 기준 크기로 낱말 단위 두 줄까지 — 높이는 늘 두 줄(2em).
+   (561 ~ 720px 는 가장 긴 단어도 거의 제 크기로 한 줄에 들어가므로 한 줄 — 빈 둘째 줄을 남기지 않게) */
+/* 줄 상자는 컨테이너(1200px)를 벗어나 화면 양쪽 여백까지 — 글자 크기 식과 같은 폭이라 긴 단어도 가운데에 (컨테이너 안이면 오른쪽으로만 넘침) */
+.hero__line--typed { width: calc(100vw - var(--gutter) * 2); margin-inline: calc(50% - 50vw + var(--gutter)); white-space: nowrap; min-height: 1em; font-size: min(1em, calc((100vw - var(--gutter) * 2) / (var(--n, 17) * var(--cw) + .2))); }
+@media (max-width: 720px) {
+  .hero__sub { margin-top: 16px; }
+}
+@media (max-width: 560px) {
+  .hero__line--typed { white-space: normal; min-height: 2em; font-size: min(1em, calc((100vw - var(--gutter) * 2) / (var(--nt, 12) * var(--cw) + .2))); }
+}
 .hero__typed { color: var(--red-hi); }
 .hero__caret {
   display: inline-block;
@@ -730,7 +792,9 @@ kbd {
 .hero.is-intro .hero__badge, .hero.is-intro .hero__title, .hero.is-intro .hero__sub, .hero.is-intro .hero__scroll,
 .dl-intro .hero:not(.is-go) .hero__badge, .dl-intro .hero:not(.is-go) .hero__title,
 .dl-intro .hero:not(.is-go) .hero__sub, .dl-intro .hero:not(.is-go) .hero__scroll { opacity: 0; transform: translateY(14px); }
-.hero.is-offscreen *, .hero.is-offscreen *::before, .hero.is-offscreen *::after { animation-play-state: paused !important; }
+/* 화면 밖의 히어로(홈 · 목록 · 글 · 404)는 반짝임 · 트레이스 등 모든 움직임을 멈춥니다 (gui.js 가 .is-offscreen) */
+.hero.is-offscreen *, .hero.is-offscreen *::before, .hero.is-offscreen *::after,
+.page-hero.is-offscreen *, .post-hero.is-offscreen *, .dnf.is-offscreen * { animation-play-state: paused !important; }
 
 /* 텔레메트리 속도 트레이스 */
 .trace {
@@ -749,10 +813,13 @@ kbd {
 .trace__svg { position: absolute; left: 0; top: var(--trace-top); width: 100%; height: calc(100% - var(--trace-top) - 12px); overflow: visible; }
 .trace__svg path { fill: none; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
 .trace__ghost { stroke: rgba(255, 255, 255, .05); stroke-width: 5; }
-.trace__line { stroke: var(--cat, var(--red)); stroke-width: 1.4; opacity: .75; stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: trace-draw 2.4s var(--ease) .3s forwards; }
-.trace__pulse { stroke: #fff; stroke-width: 2.2; stroke-dasharray: 10 1000; stroke-dashoffset: 1010; opacity: .85; animation: trace-run 7s linear 2.6s infinite; }
-@keyframes trace-draw { to { stroke-dashoffset: 0; } }
-@keyframes trace-run { from { stroke-dashoffset: 1010; } to { stroke-dashoffset: 0; } }
+/* 선은 왼쪽(출발선)에서 오른쪽으로 그려집니다 — 잘라 내는 상자(clip-path)를 여는 방식이라 화면 너비와 상관없이 끝까지.
+   (점선 길이로 그리면 non-scaling-stroke 때문에 넓은 화면에서 선이 2/3 쯤에서 멈춤) */
+.trace__line { stroke: var(--cat, var(--red)); stroke-width: 1.4; opacity: .75; clip-path: inset(-60% 100% -60% 0); animation: trace-draw 2.4s var(--ease) .3s forwards; }
+/* 스크립트가 없을 때의 흰 펄스 — 점선 간격을 아주 길게 두어 한 개만, 어느 너비에서도 끝까지 달리도록 넉넉히 (스크립트가 있으면 .trace__car) */
+.trace__pulse { stroke: #fff; stroke-width: 2.2; stroke-dasharray: 10 100000; stroke-dashoffset: 1010; opacity: .85; animation: trace-run 7s linear 2.6s infinite; }
+@keyframes trace-draw { to { clip-path: inset(-60% -2% -60% 0); } }
+@keyframes trace-run { from { stroke-dashoffset: 10; } to { stroke-dashoffset: -2200; } }
 .trace__base { position: absolute; left: 0; right: 0; bottom: 11px; height: 1px; background: rgba(255, 255, 255, .08); }
 .trace__base::before {
   content: "";
@@ -763,6 +830,21 @@ kbd {
   height: 5px;
   background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .16) 0 1px, transparent 1px 48px);
 }
+/* 섹터 경계: 랩 거리의 1/3 · 2/3 에 옅은 세로선 (가로 = 랩 거리) */
+.trace__splits i { position: absolute; top: calc(var(--trace-top) - 6px); bottom: 11px; width: 1px; background: linear-gradient(transparent, rgba(214, 224, 255, .075) 40%, rgba(214, 224, 255, .1)); }
+.trace__splits i:first-child { left: 33.333%; }
+.trace__splits i:last-child { left: 66.667%; }
+.trace--thin .trace__splits { display: none; }
+/* 서킷 데이터가 오면(gui.js): 그리기 시작 전이면 그대로 바꿔 끼우고, 이미 그리는 중이면 살짝 흐렸다가 새 서킷으로 다시 그립니다.
+   흰 펄스는 스크립트가 맡아 실제 속도대로(코너에서 느리게, 직선에서 빠르게) 달립니다(.is-data) */
+.trace__svg { transition: opacity .26s var(--ease); }
+.trace.is-swap .trace__svg { opacity: 0; transition-duration: .18s; }
+.trace__ghost { animation: fade .7s ease .15s backwards; }
+.trace.is-data .trace__pulse { display: none; }
+/* 흰 점(차) — 스크립트가 실제 속도대로 달리게 합니다 (.is-data, transform 키프레임) */
+.trace__car { position: absolute; left: 0; top: var(--trace-top); width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: #fff; box-shadow: 0 0 7px 1px rgba(255, 255, 255, .5); opacity: 0; pointer-events: none; transition: opacity .3s; }
+.trace.is-data .trace__car { opacity: .92; }
+.trace.is-swap .trace__car { opacity: 0; }
 .trace__sectors { position: absolute; left: 0; right: 0; bottom: 16px; display: flex; }
 .trace__sectors i { flex: 1; text-align: center; font: 600 9px/1 var(--f-tech); font-style: normal; letter-spacing: .2em; color: rgba(214, 224, 255, .24); }
 .trace--thin .trace__sectors { display: none; }
@@ -803,6 +885,55 @@ kbd {
   border: 1px solid var(--hair-2);
 }
 .trace.is-flip .trace__read { left: auto; right: 12px; }
+
+/* 서킷 별자리 (partials/gui/sky.html · gui.js) — 그 히어로의 트레이스와 같은 서킷을 옅은 별자리로.
+   별은 황소와 같은 모양 · 반짝임(.bull__star, 밝기 --bull-star): 코너 정점 = 밝은 별(--1), 꺾이는 곳 = 중간 별(--2),
+   긴 직선 사이 = 흐린 별(--3), 둘레의 먼지 별, 출발선 = 붉은 별(--eye). 연결선은 그보다 더 옅게(--sky-line).
+   상자는 서킷 비율(--ar, gui.js)대로 --sky-w × --sky-h 안에 들어가고, 놓이는 곳마다 .sky--* 가 자리 · 세기를 정합니다.
+   데이터가 오면 천천히 떠오르고(.is-in), 스크립트가 없으면 비어 있습니다. 화면 밖이면 반짝임을 멈춤(.is-offscreen) */
+.sky {
+  --ar: 1;
+  --sky-w: 320px;
+  --sky-h: 260px;
+  --bull-star: .62;
+  --sky-line: .085;
+  position: absolute;
+  z-index: -1;
+  width: min(var(--sky-w), var(--sky-h) * var(--ar));
+  aspect-ratio: var(--ar);
+  color: #dfe6ff;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.8s var(--ease-soft);
+}
+.sky.is-in { opacity: 1; }
+.sky__svg { display: block; width: 100%; height: 100%; overflow: visible; }
+/* 반짝임은 별 하나하나가 아니라 별을 번갈아 나눠 담은 네 무리(.sky__tw)가 서로 다른 박자로 — 황소의 반짝임과 같은 깊이 */
+.sky .bull__star { animation: none; }
+.sky__tw { animation: sky-twinkle var(--d, 4s) ease-in-out var(--t, 0s) infinite; }
+@keyframes sky-twinkle { 50% { opacity: .32; } }
+/* 별의 빛 번짐은 황소와 같은 화면 px 로 (--u = 사용자 단위/px, gui.js) */
+.sky .bull__star--1 { filter: drop-shadow(0 0 calc(var(--u, 1) * 2.5px) currentColor); }
+.sky .bull__star--eye { filter: drop-shadow(0 0 calc(var(--u, 1) * 3px) var(--red-hi)); }
+.sky__line { fill: none; stroke: currentColor; stroke-width: 1px; stroke-linejoin: round; vector-effect: non-scaling-stroke; opacity: var(--sky-line); }
+/* 이름표: 별자리 상자 너비 안에서만 (긴 이름은 오른쪽 맞춤 두 줄) — 제목 쪽으로 삐져나가지 않게 */
+.sky__name { position: absolute; top: calc(100% + 12px); right: 0; width: max(100%, 180px); margin: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: baseline; gap: 6px 10px; text-align: right; text-wrap: balance; font: 400 8px/1.5 var(--f-wide); letter-spacing: .24em; text-transform: uppercase; color: rgba(214, 224, 255, .26); }
+.sky__name span { min-width: 0; }
+.sky__name small { flex: none; font: 600 9px/1 var(--f-tech); letter-spacing: .14em; white-space: nowrap; color: rgba(214, 224, 255, .2); }
+/* 홈: 황소(왼쪽 아래 붉은 빛)와 대각선으로 — 오른쪽 위 푸른 빛 속에. 이름표는 상자 오른쪽 끝에서 250px 안으로만 (가운데 제목 쪽으로 번지지 않게) */
+.hero__sky { position: absolute; inset: 0; }
+.sky--home .sky__name { width: clamp(180px, 100%, 250px); }
+.sky--home { --sky-w: min(360px, 25vw); --sky-h: min(300px, 32vh); right: max(4vw, calc(50% - 660px)); top: calc(var(--nav-h) + 7vh); --bull-star: .7; --sky-line: .09; }
+/* 목록(카테고리 · 태그 · 소개): 제목 오른쪽 빈자리. 통계 줄이 없는 짧은 머리(소개 · 일반 페이지, .page-hero--short)는
+   별자리를 낮고 조금 위로 — 이름표가 아래 트레이스에 닿지 않게 */
+.sky--page { --sky-w: min(340px, 27vw); --sky-h: 220px; right: max(var(--gutter), calc(50% - 600px)); top: calc(var(--nav-h) + 58px); }
+.page-hero--short .sky--page { --sky-h: 150px; top: calc(var(--nav-h) + 40px); }
+/* 글: 가운데 열 오른쪽 여백 (레일 쪽). 위아래 자리는 제목 블록 옆 — 머리 아래쪽(트레이스 + 이름표 자리 150px 위)에 바닥을 맞추되
+   휠 아래로는 올라가지 않게. 화면이 높아 머리가 길어져도(2560×1440 등) 표지 그림 위쪽에 홀로 떠 있지 않고 제목 곁에 머뭅니다.
+   (상자 높이 = min(--sky-w / --ar, --sky-h) — 너비 식과 같은 계산) */
+.sky--post { --sky-w: min(300px, calc((100vw - 740px) / 2 - 64px)); --sky-h: 250px; right: max(var(--gutter), calc((100% - 740px) / 2 - var(--sky-w) - 24px)); top: max(calc(var(--nav-h) + 56px), calc(100% - 150px - min(var(--sky-w) / var(--ar), var(--sky-h)))); }
+/* 404: 가운데 큰 황소를 피해 오른쪽 위 */
+.sky--dnf { --sky-w: min(280px, 22vw); --sky-h: 220px; right: max(4vw, calc(50% - 640px)); top: calc(var(--nav-h) + 6vh); --bull-star: .5; --sky-line: .07; }
 
 /* ==========================================================================
    SECTIONS
@@ -970,7 +1101,10 @@ kbd {
   background: linear-gradient(112deg, transparent 44%, color-mix(in srgb, var(--cat) 75%, transparent) 44% 48%, transparent 48% 49.5%, rgba(255, 255, 255, .5) 49.5% 50.2%, transparent 50.2%);
   opacity: .7;
 }
-.livery__num { position: absolute; right: 7%; bottom: 0; font-family: var(--f-display); font-weight: 900; font-stretch: 120%; font-style: italic; font-size: clamp(60px, 8vw, 120px); line-height: .9; color: rgba(255, 255, 255, .07); }
+/* 번호 크기는 썸네일 너비와 글자 수(--len, livery.html)에 맞춤 — 책의 절 번호(2.15)처럼 긴 번호도 작은 카드에서 잘리지 않게.
+   두 자리까지는 예전 그대로(clamp), 컨테이너 단위를 모르는 브라우저도 예전 크기 */
+.livery { container-type: inline-size; }
+.livery__num { position: absolute; right: 7%; bottom: 0; font-family: var(--f-display); font-weight: 900; font-stretch: 120%; font-style: italic; font-size: clamp(60px, 8vw, 120px); font-size: min(clamp(60px, 8vw, 120px), calc(140cqi / max(var(--len, 2), 2))); line-height: .9; color: rgba(255, 255, 255, .07); }
 .livery__badge { position: absolute; left: 7%; top: 12%; font: 400 12px/1 var(--f-wide); letter-spacing: .14em; color: rgba(255, 255, 255, .8); }
 
 /* chip & tyre */
@@ -1043,10 +1177,12 @@ a.tyre:hover .tyre__ring { animation: tyre-spin .6s linear infinite; }
   font-family: var(--f-display);
   font-weight: 800;
   font-stretch: 112%;
-  font-size: clamp(38px, 5.6vw, 72px);
+  /* 아주 좁은 화면에서 긴 영어 낱말(Implementation 등)이 글자 중간에서 끊기지 않게, 가장 긴 낱말(--n 글자, page-hero.html)이 한 줄에 들어가는 크기까지만 */
+  font-size: min(clamp(38px, 5.6vw, 72px), calc((100vw - var(--gutter) * 2) / (var(--n, 1) * var(--cw-title, .62))));
   line-height: 1.05;
   letter-spacing: -.025em;
 }
+.f1 .page-hero__title { --cw-title: .74; }
 .page-hero__desc { margin: 0; max-width: 680px; color: var(--text-2); font-size: 17px; }
 .page-hero__stats { display: flex; flex-wrap: wrap; gap: 14px 40px; margin: 30px 0 0; }
 .page-hero__stats dt { font: 400 10px/1 var(--f-wide); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
@@ -1093,6 +1229,231 @@ a.tyre:hover .tyre__ring { animation: tyre-spin .6s linear infinite; }
 .empty__art { display: block; width: 150px; margin: 0 auto 22px; color: var(--blue-hi); --bull-line: .3; --bull-star: .9; }
 .empty__title { margin: 0; font: 400 12px var(--f-wide); letter-spacing: .16em; text-transform: uppercase; color: var(--text-2); }
 .empty__text { margin: 8px 0 0; color: var(--muted); }
+
+/* ==========================================================================
+   BOOK — 책 목차 (partials/gui/book-toc.html · book-meter.html, 탭 동작은 gui.js)
+   책 한 권 = 머리(책 이름 · 진행 계기판) + 챕터 고르개 + 고른 챕터의 절 목록.
+   절 목록은 책의 차례처럼 번호 · 제목 · 날짜가 한 줄씩, 타이밍 시트처럼 열이 맞고 쓴 절에만 LED 가 켜집니다.
+   ========================================================================== */
+/* 머리: 책 이름(영어 · 판) · 한국어판 이름 · 쓴 절 / 챕터 / 마지막으로 쓴 날 · 절마다 LED 하나 */
+.book-meter__book { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 0; max-width: 680px; font: 500 17px/1.45 var(--f-body); color: var(--text-2); }
+.book-meter__ed { flex: none; padding: 5px 9px 4px; border: 1px solid var(--hair-2); border-radius: 999px; font: 400 9px/1 var(--f-wide); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.book-meter__ko { margin: 4px 0 0; font-size: 15px; color: var(--muted); }
+.book-meter__stats { margin-top: 28px; }
+.book-meter__of { margin-left: 4px; font-size: .58em; font-weight: 700; font-stretch: 100%; letter-spacing: .01em; color: var(--muted); }
+.page-hero__stats .book-meter__date { font-size: 20px; line-height: 30px; font-weight: 700; font-stretch: 104%; letter-spacing: .01em; font-variant-numeric: tabular-nums; color: var(--text-2); }
+/* LED: 챕터마다 시프트 라이트처럼 어두운 집 안에 절 수만큼. 쓴 절은 책 색으로 켜지고(처음 한 번 차례로), 초안(-D 미리보기)은 테두리만 */
+.book-meter__leds { display: flex; flex-wrap: wrap; gap: 12px 10px; margin-top: 24px; }
+.book-meter__ch { display: flex; flex-direction: column; gap: 8px; }
+.book-meter__dots { display: flex; gap: 3px; padding: 4px 6px; background: #03060e; border: 1px solid rgba(214, 224, 255, .07); border-radius: 999px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .8); }
+.book-meter__dots i { width: 5px; height: 5px; border-radius: 50%; background: #161d33; }
+.book-meter__dots i.is-on { background: var(--cat); box-shadow: 0 0 6px var(--cat); animation: book-led .5s var(--ease) calc(.3s + var(--k, 0) * 70ms) backwards; }
+.book-meter__dots i.is-draft { background: transparent; box-shadow: inset 0 0 0 1px rgba(var(--yellow-rgb), .55); }
+@keyframes book-led { from { background: #161d33; box-shadow: none; } }
+.book-meter__ch small { padding-left: 6px; font: 600 9.5px/1 var(--f-tech); letter-spacing: .14em; color: var(--faint); }
+
+/* 두 칸: 왼쪽 챕터 고르개(휠 아래에 붙어 따라옴) + 오른쪽 절 목록 */
+.book__layout { display: grid; grid-template-columns: minmax(240px, 290px) minmax(0, 1fr); gap: 32px; align-items: start; }
+.book__nav { position: sticky; top: calc(var(--nav-h) + 28px); }
+.book__nav-title { margin: 4px 0 12px 15px; font: 400 9.5px/1 var(--f-wide); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.book__tabs { position: relative; display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.book__tabitem { position: relative; z-index: 1; }
+.book__tab {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px 16px 15px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--r);
+  color: var(--text-2);
+  text-decoration: none;
+  transition: background .25s, border-color .25s, color .25s;
+}
+.book__tab:hover { background: rgba(214, 224, 255, .035); color: var(--text); }
+/* 고른 챕터: 스크립트가 없으면 판 자체가, 있으면 미끄러지는 받침(.book__pill)이 바탕을 그립니다 */
+.book__tab.is-on { background: var(--surface); border-color: var(--hair-2); color: var(--text); }
+.book.is-live .book__tab.is-on { background: transparent; border-color: transparent; }
+.book__pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: var(--pw, 0);
+  height: var(--ph, 0);
+  transform: translate(var(--px, 0), var(--py, 0));
+  background: var(--surface);
+  border: 1px solid var(--hair-2);
+  border-radius: var(--r);
+  box-shadow: 0 18px 36px -24px rgba(0, 0, 6, .9);
+  pointer-events: none;
+  transition: transform .42s var(--ease), width .42s var(--ease), height .42s var(--ease);
+}
+.book__pill.is-instant { transition: none; }
+.book__tab-num { padding-top: 1px; font: 800 22px/1 var(--f-display); font-stretch: 112%; letter-spacing: -.01em; font-variant-numeric: tabular-nums; color: var(--faint); transition: color .25s; }
+.book__tab.is-on .book__tab-num { color: var(--cat); }
+.book__tab-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.book__tab-en { font: 600 14px/1.38 var(--f-body); letter-spacing: -.005em; }
+.book__tab-ko { font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+.book__tab-meter { display: flex; align-items: center; gap: 10px; margin-top: 9px; }
+.book__tab-bar { flex: 1; height: 2px; border-radius: 2px; background: rgba(214, 224, 255, .08); overflow: hidden; }
+.book__tab-bar i { display: block; width: var(--done, 0%); height: 100%; border-radius: inherit; background: var(--cat); }
+.book__tab-count { flex: none; font: 600 11px/1 var(--f-tech); letter-spacing: .02em; font-variant-numeric: tabular-nums; color: var(--faint); }
+.book__tab-count b { font-weight: 600; color: var(--text-2); }
+.book__tab:focus-visible { outline-offset: -2px; border-radius: var(--r); }
+
+/* 절 목록 판 */
+.book__panels { min-width: 0; }
+/* --book-cols: 줄과 머리줄이 함께 쓰는 열 (번호 · LED · 제목 · 날짜). 판이 넓으면 아래 컨테이너 쿼리가 한국어 제목 열을 더함 */
+.book__panel { --book-cols: 40px 6px minmax(0, 1fr) auto; container: book-panel / inline-size; padding: 26px 22px 14px; background: var(--surface); border: 1px solid var(--hair); border-radius: var(--r-lg); }
+.book__panel:focus-visible { outline-offset: 2px; border-radius: var(--r-lg); }
+.book__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px 28px; padding: 0 12px 22px; border-bottom: 1px solid var(--hair); }
+.book__head-text { min-width: 0; }
+.book__kicker { margin: 0 0 12px; font: 400 9.5px/1 var(--f-wide); letter-spacing: .18em; text-transform: uppercase; color: color-mix(in srgb, var(--cat) 72%, #fff); }
+.book__title { margin: 0; font-family: var(--f-display); font-weight: 700; font-stretch: 106%; font-size: clamp(22px, 2.1vw, 28px); line-height: 1.2; letter-spacing: -.012em; text-wrap: balance; }
+.book__title-ko { margin: 7px 0 0; font-size: 15px; color: var(--text-2); }
+.book__score { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 9px; margin: 0; }
+.book__score small { order: -1; font: 400 9px/1 var(--f-wide); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.book__score b { font: 800 30px/1 var(--f-display); font-stretch: 112%; font-variant-numeric: tabular-nums; }
+.book__score-of { margin-left: 3px; font: 700 15px/1 var(--f-display); color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* 줄: 번호 · LED · 영어 제목(한국어 제목) · 날짜 — 머리줄(No. · Section · Date)과 같은 열 */
+.book__cols { display: grid; grid-template-columns: var(--book-cols); gap: 14px; padding: 16px 12px 8px; font: 400 8.5px/1 var(--f-wide); letter-spacing: .18em; text-transform: uppercase; color: var(--faint); }
+.book__cols span:nth-child(2) { grid-column: 3; }
+.book__cols span:last-child { justify-self: end; }
+.book__list { margin: 0; padding: 0; list-style: none; }
+.book__row + .book__row { border-top: 1px solid rgba(214, 224, 255, .05); }
+.book__item { display: grid; grid-template-columns: var(--book-cols); gap: 14px; align-items: start; padding: 12px; border-radius: 10px; color: var(--text-2); text-decoration: none; }
+a.book__item { transition: background .2s; }
+a.book__item:hover { background: rgba(214, 224, 255, .045); }
+a.book__item:focus-visible { outline-offset: -2px; border-radius: 10px; }
+.book__num { padding-top: 4px; font: 600 13px/1 var(--f-tech); letter-spacing: .02em; font-variant-numeric: tabular-nums; color: var(--muted); }
+.book__led { width: 6px; height: 6px; margin-top: 8px; border-radius: 50%; background: transparent; box-shadow: inset 0 0 0 1px rgba(214, 224, 255, .16); transition: box-shadow .2s, background .2s; }
+.book__name { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.book__en { font: 600 15px/1.45 var(--f-body); letter-spacing: -.005em; color: var(--text); }
+.book__ko { font-size: 13.5px; line-height: 1.5; color: var(--text-2); }
+.book__state { justify-self: end; padding-top: 3px; font: 500 12px/1.2 var(--f-tech); letter-spacing: .02em; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--muted); }
+/* 쓴 절: LED 가 책 색으로 켜지고, 마우스를 올리면 조금 더 밝게 */
+.is-written .book__num { color: var(--text-2); }
+.is-written .book__led { background: var(--cat); box-shadow: 0 0 7px color-mix(in srgb, var(--cat) 75%, transparent); }
+.is-written a.book__item:hover .book__led { box-shadow: 0 0 10px var(--cat); }
+.is-written a.book__item:hover .book__state { color: var(--text-2); }
+/* 아직 쓰지 않은 절: 흐리게, 링크 없음 */
+.is-todo .book__num { color: var(--faint); }
+.is-todo .book__en { font-weight: 500; color: var(--muted); }
+.is-todo .book__ko { color: var(--faint); }
+/* 초안(hugo -D 미리보기에서만): 링크는 걸리고 LED 는 테두리만 */
+.is-draft .book__led { box-shadow: inset 0 0 0 1px rgba(var(--yellow-rgb), .6); }
+.is-draft .book__en { color: var(--text-2); }
+.book__tag { display: inline-block; padding: 4px 7px 3px; border: 1px solid rgba(var(--yellow-rgb), .2); border-radius: 999px; font: 400 8px/1 var(--f-wide); letter-spacing: .14em; text-transform: uppercase; color: rgba(var(--yellow-rgb), .7); }
+/* 온라인 전용 절: 제목 끝의 작은 지구본 */
+.book__web { display: inline-flex; margin-left: 8px; vertical-align: -1px; color: var(--faint); }
+.book__web svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1; }
+.book__nowrap { white-space: nowrap; }
+.is-written .book__web { color: var(--muted); }
+
+/* 판이 넓으면(≥760px) 영어 · 한국어 제목을 나란한 두 열로 — 타이밍 시트처럼 열이 맞고 대부분 한 줄 */
+.book__cols-ko { display: none; }
+@container book-panel (min-width: 760px) {
+  .book__cols, .book__item { grid-template-columns: 40px 6px minmax(0, 1.3fr) minmax(0, 1fr) 84px; }
+  .book__cols span:nth-child(2) { grid-column: 3; }
+  .book__cols { align-items: center; }
+  /* 한글 머리는 본문 글꼴로 (Michroma 에는 한글이 없음) */
+  .book__cols-ko { display: block; grid-column: 4; font: 600 11px/1 var(--f-body); letter-spacing: .04em; color: var(--faint); }
+  .book__cols span:nth-child(4) { grid-column: 5; justify-self: end; }
+  .book__name { display: contents; }
+  .book__ko { font-size: 14px; line-height: 1.55; }
+  .book__item { row-gap: 0; }
+}
+
+/* 차례에 없는 노트 */
+.book__extra { margin-top: 10px; padding-top: 14px; border-top: 1px solid var(--hair); }
+.book__extra-title { margin: 0 12px 4px; font: 400 9px/1 var(--f-wide); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.book__list--extra .book__num { color: var(--faint); }
+
+/* 판 끝: 지구본 설명 · 이전/다음 챕터 */
+.book__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-top: 8px; padding: 14px 0 0; border-top: 1px solid var(--hair); }
+.book__legend { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; margin: 0; padding: 0 12px; font-size: 12.5px; color: var(--muted); }
+.book__legend .book__web { margin: 0; }
+.book__legend-note { color: var(--faint); }
+.book__step { display: flex; gap: 6px; margin-left: auto; }
+.book__go { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 10px; text-decoration: none; transition: background .2s; }
+.book__go--next { align-items: flex-end; margin-left: auto; text-align: right; }
+.book__go:hover { background: rgba(214, 224, 255, .045); }
+.book__go-dir { font: 400 9px/1 var(--f-wide); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); transition: color .2s; }
+.book__go-title { font-size: 13.5px; line-height: 1.3; color: var(--text-2); }
+.book__go:hover .book__go-dir { color: var(--text); }
+
+/* 책 폴더 바로 아래 노트 */
+.book__more { margin-top: 56px; }
+.book__more-title { margin: 0 0 18px; font-family: var(--f-display); font-weight: 700; font-stretch: 106%; font-size: 22px; }
+
+/* 챕터를 바꾼 순간: 머리 → 줄이 짧은 간격으로 떠오릅니다 (움직임 줄이기 설정이면 없음 — gui.js 가 붙이지 않음) */
+.book__panel.is-entering .book__head { animation: book-in .34s var(--ease) both; }
+.book__panel.is-entering .book__cols { animation: book-in .34s var(--ease) .03s both; }
+.book__panel.is-entering .book__row { animation: book-row .36s var(--ease) both; animation-delay: calc(40ms + min(var(--k, 0), 12) * 13ms); }
+@keyframes book-in { from { opacity: 0; transform: translateY(6px); } }
+@keyframes book-row { from { opacity: 0; transform: translateY(5px); } }
+/* 한 줄에 다 들어가지 않는 너비(≤960px): LED 는 챕터마다 한 줄씩 (이름표는 왼쪽) — 여러 줄로 흩어지지 않게 */
+@media (max-width: 960px) {
+  .book-meter__leds { flex-direction: column; gap: 7px; margin-top: 22px; }
+  .book-meter__ch { display: grid; grid-template-columns: 34px auto; align-items: center; justify-content: start; gap: 0; }
+  .book-meter__ch small { order: -1; padding: 0; }
+}
+@media (max-width: 1100px) {
+  .book__layout { grid-template-columns: minmax(216px, 250px) minmax(0, 1fr); gap: 22px; }
+  .book__tab { padding-right: 12px; }
+  .book__panel { padding: 22px 14px 12px; }
+}
+/* 낮은 창(넓은 화면): 따라오는 챕터 목록이 화면 아래로 잘리지 않게 한국어 제목을 접고 조금 촘촘히, 아주 낮으면 따라오지 않게 */
+@media (min-width: 900px) and (max-height: 780px) {
+  .book__nav { top: calc(var(--nav-h) + 16px); }
+  .book__nav-title { margin-bottom: 8px; }
+  .book__tab { padding-block: 11px 12px; }
+  .book__tab-ko { display: none; }
+  .book__tab-meter { margin-top: 7px; }
+}
+@media (min-width: 900px) and (max-height: 540px) {
+  .book__nav { position: static; }
+}
+/* 좁은 화면(<900px): 챕터 고르개는 목록 위의 가로 한 줄 — 어두운 집 안의 칸(번호 · 한국어 제목 · 진행), 챕터가 많으면 옆으로 밀어 봅니다 */
+@media (max-width: 899.98px) {
+  .book__layout { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .book__nav { position: static; }
+  .book__nav-title { display: none; }
+  .book__tabs { flex-direction: row; gap: 2px; padding: 4px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; background: rgba(3, 6, 14, .6); border: 1px solid var(--hair); border-radius: calc(var(--r) + 4px); }
+  .book__tabs::-webkit-scrollbar { display: none; }
+  .book__tabitem { flex: 1 0 0; min-width: 112px; }
+  /* 칸마다 번호 · 제목 한 줄 · 진행 — 진행 막대는 모든 칸이 같은 높이에 (margin-top: auto) */
+  .book__tab { height: 100%; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; justify-items: center; gap: 7px; padding: 12px 10px 11px; text-align: center; }
+  .book__tab-num { padding: 0; font-size: 20px; }
+  .book__tab-body { align-items: center; width: 100%; }
+  .book__tab-en { display: none; }
+  .book__tab-ko { max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12px; line-height: 1.4; }
+  .book__tab-ko-sub { display: none; }
+  .book__tab-meter { flex-direction: column-reverse; align-self: stretch; gap: 7px; margin-top: auto; padding-top: 5px; }
+  .book__tab-bar { flex: none; width: 100%; }
+}
+@media (max-width: 599.98px) {
+  .book-meter__book { font-size: 15.5px; }
+  .book-meter__ko { font-size: 14px; }
+  .book-meter__stats { gap: 14px 30px; margin-top: 22px; }
+  .book__tabitem { min-width: 50px; }
+  .book__tab { gap: 8px; padding: 11px 4px 10px; }
+  .book__tab-ko { display: none; }
+  .book__tab-meter { margin-top: 0; padding: 0 6px; }
+  .book__panel { --book-cols: 32px 6px minmax(0, 1fr) auto; padding: 18px 8px 6px; border-radius: var(--r); }
+  .book__head { flex-direction: column; align-items: flex-start; gap: 14px; padding: 0 8px 18px; }
+  .book__score { flex-direction: row; align-items: baseline; gap: 10px; }
+  .book__score small { order: 0; }
+  .book__score b { font-size: 24px; }
+  .book__cols { display: none; }
+  .book__item { gap: 10px; padding: 11px 8px; }
+  .book__en { font-size: 14.5px; }
+  .book__ko { font-size: 13px; }
+  .book__yr { display: none; }
+  .book__legend { padding: 0 8px; }
+  .book__step { width: 100%; justify-content: space-between; margin: 0; }
+}
 
 /* ==========================================================================
    POST
@@ -1420,6 +1781,13 @@ a.tyre:hover .tyre__ring { animation: tyre-spin .6s linear infinite; }
 .tower--end .tower__row { grid-template-columns: 24px 7px minmax(0, 1fr) auto; gap: 12px; padding: 10px; font-size: 14.5px; }
 .tower--end .tower__led { width: 7px; height: 7px; }
 .tower--end .tower__yr { display: inline; }
+/* 책의 글: 순위 대신 절 번호(2.1 · 4.14)라 번호 칸을 조금 넓게, 왼쪽 맞춤 */
+.tower--book .tower__row { grid-template-columns: 30px 6px minmax(0, 1fr) auto; }
+.tower--book .tower__pos { text-align: left; font-size: 11.5px; }
+.tower--end.tower--book .tower__row { grid-template-columns: 36px 7px minmax(0, 1fr) auto; }
+@media (max-width: 640px) {
+  .tower--end.tower--book .tower__row { grid-template-columns: 32px 6px minmax(0, 1fr) auto; }
+}
 
 /* ---------- 왼쪽 도구 막대 (.post-dock) — 링크 복사 · 터미널에서 읽기 · 맨 위로 ----------
    얇은 알약 하나에 아이콘 버튼만. 이름은 바깥쪽(왼쪽) 말풍선으로 — 본문을 가리지 않게 */
@@ -2121,6 +2489,39 @@ html:not(.read-en) [data-lang-only="en"], .read-en [data-lang-only="ko"] { displ
   .search { padding-top: 8vh; }
   .pager { flex-wrap: wrap; row-gap: 10px; }
   .pager__pages { order: -1; width: 100%; justify-content: center; flex-wrap: wrap; }
+}
+/* 별자리 · 트레이스 (좁은 화면) — 별자리는 이름표 없이 작게, 글자와 겹치지 않는 위쪽 빈자리로.
+   트레이스는 한 바퀴를 좁은 폭에 담으면 코너마다 뾰족해지므로 세로 폭을 줄여 차분하게 */
+/* 레일이 없는 글(≤1279px): 오른쪽 여백이 좁아 너비만 맞추면 넓적한 서킷이 납작한 점 무리가 되므로, 서킷 비율과 상관없이 넓이가 비슷하게
+   (너비 = √비율 × 104px — 넓적하면 더 넓고 낮게, 길쭉하면 더 좁고 높게). 휠 바로 아래 오른쪽 위 — 넓적한 서킷은 낮아서 경로 줄 위에 머뭅니다.
+   sqrt() 를 모르는 브라우저는 위의 너비 식 그대로 */
+@media (max-width: 1279.98px) {
+  .sky--post { --sky-w: 170px; --sky-h: 170px; right: var(--gutter); top: calc(var(--nav-h) + 10px); }
+  .sky--post .sky__name, .sky--dnf .sky__name { display: none; }
+  .sky--home { --sky-h: min(250px, 27vh); }   /* 긴 단어(Competitive Programming)가 거의 한 줄을 다 쓰므로 이름표가 그 위에 머물게 */
+}
+@supports (width: calc(sqrt(4) * 1px)) {
+  @media (max-width: 1279.98px) { .sky--post { width: min(var(--sky-w), var(--sky-h) * var(--ar), sqrt(var(--ar)) * 104px); } }
+}
+@media (max-width: 960px) {
+  .sky--home .sky__name { display: none; }
+  .sky--home { --sky-w: 34vw; --sky-h: 22vh; right: 5vw; top: calc(var(--nav-h) + 14px); }
+  .sky--page { --sky-w: 30vw; --sky-h: 150px; }
+  .page-hero--short .sky--page { --sky-h: 120px; }
+  .sky--post { --sky-w: 34vw; --sky-h: 62px; top: calc(var(--nav-h) + 2px); --bull-star: .5; --sky-line: .07; width: min(var(--sky-w), var(--sky-h) * var(--ar)); }
+  .sky--dnf { --sky-w: 34vw; --sky-h: min(18vh, 140px); }
+}
+@media (max-width: 640px) {
+  .sky__name { display: none; }
+  /* 아주 길쭉한 서킷(제다 등)은 좁은 화면에선 가는 줄 하나로만 보이므로 띄우지 않음 (.is-narrow, gui.js) */
+  .sky.is-narrow { display: none; }
+  .sky--home { --sky-w: 30vw; --sky-h: 120px; right: var(--gutter); top: calc(var(--nav-h) + 10px); }
+  /* 목록 머리: 경로 줄 · 제목이 화면 폭을 거의 다 쓰므로, 별자리는 휠과 경로 줄 사이의 빈 띠에만 (글 머리의 ≤960px 와 같은 방식) */
+  .sky--page, .page-hero--short .sky--page { --sky-w: 30vw; --sky-h: 60px; top: calc(var(--nav-h) + 4px); }
+  /* 404: 가운데 큰 DNF 위쪽 빈자리 안에서만 */
+  .sky--dnf { --sky-w: 30vw; --sky-h: 96px; top: calc(var(--nav-h) + 4vh); }
+  .trace { --trace-top: 52px; }
+  .trace--thin { --trace-top: 36px; }
 }
 @media (max-width: 420px) {
   /* 아주 좁은 화면: 터미널 전환은 메뉴(드로어) 안의 버튼으로 */

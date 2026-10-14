@@ -1,0 +1,21 @@
+{{- /* 이 섹션(카테고리)이 책인지: data/books/*.yaml 의 section(예: "untitled_cs/cod")과 경로가 같은 섹션 = 책 첫 화면,
+     그 아래 섹션 = 챕터(yaml 의 chapters[].slug 폴더) 또는 그 안. 책이 아니면 빈 dict.
+     입력: 섹션 페이지(글이면 .Parent 를 넘깁니다) · 돌려줌: dict "key" yaml 이름 "book" yaml 내용 "root" 책 섹션 "chapter" 챕터 항목 "chapterPage" 챕터 섹션
+     카드 · 타워 · 휠 LCD 처럼 여러 번 부르므로 partialCached (섹션 경로를 키로) 로 부릅니다 */ -}}
+{{- $s := . -}}
+{{- $res := dict -}}
+{{- if and $s $s.IsSection -}}
+  {{- range $key, $b := site.Data.books -}}
+    {{- with $b.section -}}
+      {{- $root := site.GetPage (printf "/posts/%s" .) -}}
+      {{- if and $root (or (eq $s $root) ($s.IsDescendant $root)) -}}
+        {{- $res = dict "key" $key "book" $b "root" $root -}}
+        {{- range $b.chapters -}}
+          {{- $cp := site.GetPage (printf "/posts/%s/%s" $b.section .slug) -}}
+          {{- if and $cp (or (eq $s $cp) ($s.IsDescendant $cp)) }}{{ $res = merge $res (dict "chapter" . "chapterPage" $cp) }}{{ end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $res -}}

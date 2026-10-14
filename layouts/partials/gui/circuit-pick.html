@@ -1,0 +1,6 @@
+{{- /* 이 페이지의 기본 서킷 — 스크립트 없이도 보이는 트레이스 · 트랙 맵이 같은 서킷을 그리도록 주소로 정합니다
+     (페이지마다 다르고, 빌드마다 같음). 스크립트가 돌면 gui.js 가 열 때마다 무작위로 다시 고릅니다. 입력: 페이지 */ -}}
+{{- $list := (partialCached "gui/circuits.html" "circuits").list -}}
+{{- $c := dict -}}
+{{- with $list }}{{ $c = index . (mod (hash.FNV32a $.RelPermalink) (len .)) }}{{ end -}}
+{{- return $c -}}

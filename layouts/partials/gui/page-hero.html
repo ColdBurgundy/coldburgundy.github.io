@@ -1,19 +1,25 @@
-{{- /* 목록 페이지 상단 배너. 입력: dict "page" "eyebrow" "title" "desc" "color" "stats"(slice of dict label/value) */ -}}
+{{- /* 목록 페이지 상단 배너. 입력: dict "page" "eyebrow" "title" "desc" "color" "stats"(slice of dict label/value)
+     "extra"(선택: 설명 아래에 놓을 HTML — 책 목차의 책 이름 · 진행 계기판, gui/book-meter.html) */ -}}
 {{- $p := .page -}}
-<section class="page-hero" style="--cat: {{ .color | default "#db0a40" | safeCSS }}">
+<section class="page-hero{{ if not (or .stats .extra) }} page-hero--short{{ end }}" style="--cat: {{ .color | default "#db0a40" | safeCSS }}">
   <div class="page-hero__bg" aria-hidden="true"><div class="hero__grid"></div></div>
+  {{ partial "gui/sky.html" "page" }}
   <div class="container page-hero__inner">
     {{ partial "gui/breadcrumbs.html" $p }}
     {{- with .eyebrow }}
     <p class="eyebrow">{{ . }}</p>
     {{- end }}
-    <h1 class="page-hero__title">{{ .title }}</h1>
+    {{- $tok := 1 }}{{ range split (string .title) " " }}{{ $tok = math.Max $tok (strings.RuneCount .) }}{{ end }}
+    <h1 class="page-hero__title" style="--n: {{ $tok }}">{{ .title }}</h1>
     {{ with .desc }}<p class="page-hero__desc">{{ . }}</p>{{ end }}
     {{- with .stats }}
     <dl class="page-hero__stats">
       {{- range . }}<div><dt>{{ .label }}</dt><dd>{{ .value }}</dd></div>{{ end }}
     </dl>
     {{- end }}
+    {{- with .extra }}
+    {{ . }}
+    {{- end }}
   </div>
-  {{ partial "gui/trace.html" "thin" }}
+  {{ partial "gui/trace.html" (dict "variant" "thin" "page" $p) }}
 </section>

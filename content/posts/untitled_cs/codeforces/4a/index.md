@@ -1,10 +1,14 @@
-+++
-title = "$1. [CODEFORCES] A. Watermelon"
-date = "2024-01-04"
-description = "수박 무게 w를 두 개의 양의 짝수 부분으로 나눌 수 있는지를 w가 2보다 큰 짝수인지로 판별하는 풀이"
-tags = ["Codeforces", "브루트포스", "수학", "Rating800"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$1. [CODEFORCES] A. Watermelon"
+date: 2024-01-04
+description: "수박 무게 w를 두 개의 양의 짝수 부분으로 나눌 수 있는지를 w가 2보다 큰 짝수인지로 판별하는 풀이"
+tags:
+  - "Codeforces"
+  - "브루트포스"
+  - "수학"
+  - "Rating800"
+thumbnail: "images/cover.jpg"
+---
 
 ![Codeforces 4A A. Watermelon 문제 대표 이미지](images/cover.jpg)
 

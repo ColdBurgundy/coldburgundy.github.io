@@ -1,10 +1,15 @@
-+++
-title = "$15. [BOJ] 2504 괄호의 값"
-date = "2024-01-15"
-description = "스택으로 괄호열의 올바름을 검사하면서 소괄호는 2배, 대괄호는 3배로 중첩된 괄호값을 계산하는 풀이"
-tags = ["BOJ", "Gold5", "구현", "자료구조", "스택"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$15. [BOJ] 2504 괄호의 값"
+date: 2024-01-15
+description: "스택으로 괄호열의 올바름을 검사하면서 소괄호는 2배, 대괄호는 3배로 중첩된 괄호값을 계산하는 풀이"
+tags:
+  - "BOJ"
+  - "Gold5"
+  - "구현"
+  - "자료구조"
+  - "스택"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 2504 괄호의 값 문제 대표 이미지](images/cover.jpg)
 

@@ -1,10 +1,14 @@
-+++
-title = "$2. [CODEFORCES] A. Team"
-date = "2024-01-05"
-description = "세 친구 중 두 명 이상이 확신하는 문제의 수를 각 줄 0/1 세 값의 합이 2 이상인지로 세는 풀이"
-tags = ["Codeforces", "브루트포스", "그리디", "Rating800"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$2. [CODEFORCES] A. Team"
+date: 2024-01-05
+description: "세 친구 중 두 명 이상이 확신하는 문제의 수를 각 줄 0/1 세 값의 합이 2 이상인지로 세는 풀이"
+tags:
+  - "Codeforces"
+  - "브루트포스"
+  - "그리디"
+  - "Rating800"
+thumbnail: "images/cover.jpg"
+---
 
 ![Codeforces 231A A. Team 문제 대표 이미지](images/cover.jpg)
 

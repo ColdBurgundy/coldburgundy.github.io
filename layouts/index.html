@@ -13,6 +13,17 @@
     <span aria-hidden="true">▣</span> GUI
   </a>
 
+  {{- /* gui 명령의 pip 설치 화면(cli.js pipInstall)에 쓰는 값:
+         version — 빌드한 해.달 (PEP 440 처럼 달의 앞자리 0 없이, 예: 2026.10)
+         assets  — GUI 페이지가 받는 자산의 실제 크기(바이트). GUI 템플릿과 같은 처리(minify · fingerprint)라 주소가 같습니다.
+                   여기 없는 자산(글의 대표 이미지 등)은 cli.js 가 응답을 받으며 크기를 더합니다. */}}
+  {{- $pipAssets := slice }}
+  {{- range slice "css/gui.css" "js/gui.js" "data/circuits.json" }}
+    {{- with resources.Get . }}
+      {{- $r := . | minify | fingerprint }}
+      {{- $pipAssets = $pipAssets | append (dict "url" $r.RelPermalink "bytes" (len $r.Content)) }}
+    {{- end }}
+  {{- end }}
   {{- /* 터미널 설정은 JSON 으로 넘깁니다 (html/template 이 JS 문맥에 맞게 인코딩). */}}
   {{- $p := site.Params }}
   {{- $cfg := dict
@@ -28,6 +39,7 @@
       "exitLocation" ($p.exitLocation | default "")
       "exitMessage" ($p.exitMessage | default "")
       "author" ($p.author | default dict)
+      "pip" (dict "version" (now.Format "2006.1") "assets" $pipAssets)
   }}
   <script>window.DL_CLI = {{ $cfg }};</script>
   {{- $mac := resources.Get "js/mac-reader.js" | minify | fingerprint }}

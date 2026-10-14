@@ -1,17 +1,32 @@
 {{- $g := site.Params.gui | default dict -}}
 {{- $root := . -}}
 {{- $pages := (where site.RegularPages "Section" "posts").ByDate.Reverse -}}
+{{- /* 카테고리 = /posts 아래 두 단계(카테고리 › 하위 카테고리)까지. 그 아래(책의 챕터 등)는 카테고리로 세지 않습니다 */ -}}
 {{- $sections := slice -}}
 {{- range where site.Pages "Kind" "section" -}}
-  {{- if and (eq .Section "posts") (ne . $root) }}{{ $sections = $sections | append . }}{{ end -}}
+  {{- if and (eq .Section "posts") (ne . $root) (or (eq .Parent $root) (eq .Parent.Parent $root)) }}{{ $sections = $sections | append . }}{{ end -}}
 {{- end -}}
 {{- $tags := site.Taxonomies.tags -}}
-{{- $words := $g.heroWords | default (slice "Code") -}}
+{{- /* "Notes on ___" 단어: content/posts 아래 모든 카테고리의 _index.md 에 적힌 heroWords + config 의 params.gui.heroWords (중복 제거).
+     gui.js 가 열 때마다 섞어서 전부 한 번씩 돌고 나서야 다시 같은 단어가 나오게 합니다 (첫 단어도 무작위 — 아래 인라인 스크립트) */ -}}
+{{- $words := slice -}}
+{{- range where site.Pages "Kind" "section" -}}
+  {{- if eq .Section "posts" }}{{ with .Params.heroWords }}{{ $words = $words | append . }}{{ end }}{{ end -}}
+{{- end -}}
+{{- with $g.heroWords }}{{ $words = $words | append . }}{{ end -}}
+{{- $clean := slice -}}
+{{- range $words }}{{ with trim (string .) " " }}{{ $clean = $clean | append . }}{{ end }}{{ end -}}
+{{- $words = $clean | uniq | default (slice "Code") -}}
 {{- $prefix := $g.heroPrefix | default "Notes on" -}}
 {{- $heroTitle := $g.heroTitle | default "Hello World!" -}}
-{{- /* 타이핑 줄은 가장 긴 단어 기준으로 글자 크기를 정합니다 (좁은 화면에서 잘리지 않게) */ -}}
+{{- /* 타이핑 줄은 가장 긴 단어 기준으로 글자 크기를 정합니다 (어느 너비에서도 한 줄 — 좁은 화면은 낱말 단위 두 줄, gui.css).
+     $longest = 가장 긴 단어의 글자 수, $longTok = 띄어쓰기로 나눈 가장 긴 낱말의 글자 수 */ -}}
 {{- $longest := 1 -}}
-{{- range $words }}{{ $longest = math.Max $longest (strings.RuneCount .) }}{{ end -}}
+{{- $longTok := 1 -}}
+{{- range $words -}}
+  {{- $longest = math.Max $longest (strings.RuneCount .) -}}
+  {{- range split . " " }}{{ $longTok = math.Max $longTok (strings.RuneCount .) }}{{ end -}}
+{{- end -}}
 {{- $since := "" -}}
 {{- $days := 0 -}}
 {{- with $pages -}}
@@ -30,6 +45,7 @@
       <path class="hero__track-line" d="M-40 470 C 180 470 230 360 400 350 S 640 470 820 420 1010 180 1240 210" fill="none" stroke="currentColor" stroke-width="2"/>
     </svg>
     <div class="hero__bull">{{ partial "gui/bull.html" "" }}</div>
+    <div class="hero__sky">{{ partial "gui/sky.html" "home" }}</div>
   </div>
   <div class="hero__inner container">
     <button type="button" class="start-lights" data-start-lights aria-label="출발 신호 다시 보기">
@@ -41,8 +57,10 @@
     <h1 class="hero__title">
       <span class="hero__line hero__line--lead" style="--n: {{ math.Min (strings.RuneCount $heroTitle) 16 }}">{{ $heroTitle }}</span>
       <span class="hero__line hero__line--dim" style="--n: {{ strings.RuneCount $prefix }}">{{ $prefix }}</span>
-      <span class="hero__line hero__line--typed" style="--n: {{ $longest }}"><span class="hero__typed" data-typed="{{ $words | jsonify }}">{{ index $words 0 }}</span><span class="hero__caret" aria-hidden="true"></span></span>
+      <span class="hero__line hero__line--typed" style="--n: {{ $longest }}; --nt: {{ $longTok }}"><span class="hero__typed" data-typed="{{ $words | jsonify }}">{{ index $words 0 }}</span><span class="hero__caret" aria-hidden="true"></span></span>
     </h1>
+    {{- /* 첫 단어도 무작위로 — 첫 그림 전에 바꿔 두어 기본 단어가 보였다가 바뀌지 않게 (gui.js 가 이 단어부터 섞은 순서로 이어 갑니다) */}}
+    <script>(function(e){try{var w=JSON.parse(e.getAttribute('data-typed'));if(w.length>1)e.textContent=w[Math.floor(Math.random()*w.length)]}catch(x){}})(document.querySelector('.hero__typed'))</script>
     {{- with $g.heroSubtitle }}
     <p class="hero__sub">{{ . }}</p>
     {{- end }}
@@ -50,7 +68,7 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
   </div>
-  {{ partial "gui/trace.html" "hero" }}
+  {{ partial "gui/trace.html" (dict "variant" "hero" "page" $root) }}
 </section>
 
 {{/* ───────────── 환영 + 통계 ───────────── */}}
@@ -90,12 +108,13 @@
       <h2 class="section-title">카테고리</h2>
       <p class="section-desc">글이 많은 하위 카테고리 8개</p>
     </header>
-    {{- /* 큰 카테고리(untitled_cs, research …)는 빼고, 글이 실제로 쌓이는 하위 카테고리만 글 수로 줄 세웁니다.
+    {{- /* 큰 카테고리(untitled_cs, research …)는 빼고, 그 바로 아래 하위 카테고리(BOJ · COD · Goals …)만 글 수로 줄 세웁니다.
+         글 수는 그 아래 전부(책의 챕터 안 글까지), 챕터 자체는 줄에 서지 않습니다.
          글 수가 같으면 메뉴에 놓인 순서(상위 카테고리 weight → 하위 카테고리 weight)를 따릅니다. */}}
     {{- $max := 1 }}
     {{- $ranked := slice }}
     {{- range $sections }}
-      {{- if and .Parent (ne .Parent $root) (not .Sections) }}
+      {{- if and .Parent (ne .Parent $root) }}
         {{- $n := len .RegularPagesRecursive }}
         {{- $max = math.Max $max $n }}
         {{- $order := add (mul .Parent.Weight 100) .Weight }}

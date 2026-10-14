@@ -1,10 +1,13 @@
-+++
-title = "$6. [BOJ] 1018 체스판 다시 칠하기"
-date = "2024-01-06"
-description = "M×N 보드에서 잘라낸 8×8 체스판의 최소 덧칠 칸 수를 모든 위치와 두 색 패턴을 비교하는 브루트포스로 구하는 풀이"
-tags = ["BOJ", "Silver4", "브루트포스"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$6. [BOJ] 1018 체스판 다시 칠하기"
+date: 2024-01-06
+description: "M×N 보드에서 잘라낸 8×8 체스판의 최소 덧칠 칸 수를 모든 위치와 두 색 패턴을 비교하는 브루트포스로 구하는 풀이"
+tags:
+  - "BOJ"
+  - "Silver4"
+  - "브루트포스"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 1018 체스판 다시 칠하기 문제 대표 이미지](images/cover.jpg)
 

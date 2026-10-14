@@ -1,6 +1,9 @@
 {{- /*
   /index.json — CLI 가상 파일시스템과 GUI 검색이 함께 쓰는 데이터.
   path 는 /posts/ 기준 상대 경로입니다. (예: untitled_cs/boj/test)
+  책(data/books/*.yaml)의 챕터도 폴더(dirs)로 들어갑니다 (예: untitled_cs/cod/ch2 — chapter 에 챕터 번호, 책 폴더는 book 에 책 이름).
+  책의 글에는 num(절 번호, 예: "2.1") · order(책 순서, 0부터 — 발행된 절만)가 붙고, category 는 "COD · Ch.2" 처럼 (gui/cat-label.html).
+  books: 책마다 차례 전체(아직 안 쓴 절까지 — url 은 쓴 절에만). 초안은 어디에도 들어가지 않습니다(빌드에 없으므로).
 */ -}}
 {{- $root := site.GetPage "/posts" -}}
 {{- $prefix := $root.RelPermalink -}}
@@ -9,7 +12,7 @@
   {{- if and (eq .Section "posts") (ne .RelPermalink $prefix) -}}
     {{- $path := strings.TrimSuffix "/" (strings.TrimPrefix $prefix .RelPermalink) -}}
     {{- $color := partial "gui/cat-color.html" . -}}
-    {{- $dirs = $dirs | append (dict
+    {{- $dir := dict
         "path" $path
         "title" .Title
         "description" (.Description | default "")
@@ -18,7 +21,34 @@
         "color" $color
         "badge" (.Params.badge | default "")
         "url" .RelPermalink
-      ) -}}
+      -}}
+    {{- $sec := . -}}
+    {{- $bk := partialCached "gui/book.html" . .Path -}}
+    {{- if $bk.key -}}
+      {{- if eq $bk.root $sec }}{{ $dir = merge $dir (dict "book" $bk.book.title) }}{{ end -}}
+      {{- with $bk.chapterPage }}{{ if eq . $sec }}{{ $dir = merge $dir (dict "chapter" $bk.chapter.num) }}{{ end }}{{ end -}}
+    {{- end -}}
+    {{- $dirs = $dirs | append $dir -}}
+  {{- end -}}
+{{- end -}}
+{{- /* 책: 차례 + 책 순서 */ -}}
+{{- $books := slice -}}
+{{- $bookOrder := dict -}}
+{{- range $key, $b := site.Data.books -}}
+  {{- $bd := partialCached "gui/book-data.html" $key $key -}}
+  {{- with $bd.root -}}
+    {{- range $i, $q := $bd.order }}{{ $bookOrder = merge $bookOrder (dict $q.Path $i) }}{{ end -}}
+    {{- $chs := slice -}}
+    {{- range $bd.chapters -}}
+      {{- $secs := slice -}}
+      {{- range .sections -}}
+        {{- $sec := dict "num" .num "title" .title "titleKo" .titleKo "online" (.online | default false) -}}
+        {{- if .written }}{{ with .page }}{{ $sec = merge $sec (dict "url" .RelPermalink "date" (.Date.Format "2006-01-02")) }}{{ end }}{{ end -}}
+        {{- $secs = $secs | append $sec -}}
+      {{- end -}}
+      {{- $chs = $chs | append (dict "num" .num "path" (printf "%s/%s" $b.section .slug) "title" .title "titleKo" .titleKo "written" .written "total" .total "sections" $secs) -}}
+    {{- end -}}
+    {{- $books = $books | append (dict "path" $b.section "title" $b.title "titleKo" ($b.titleKo | default "") "edition" ($b.edition | default "") "written" $bd.written "total" $bd.total "chapters" $chs) -}}
   {{- end -}}
 {{- end -}}
 {{- $posts := slice -}}
@@ -27,7 +57,7 @@
   {{- /* 태그는 용어(term) 기준: tags = ["DP", "dp"] 처럼 대소문자만 다른 태그는 하나로 합쳐지고 이름은 태그 페이지와 같게 */ -}}
   {{- $tagNames := slice -}}
   {{- range .GetTerms "tags" }}{{ $tagNames = $tagNames | append .LinkTitle }}{{ end -}}
-  {{- $posts = $posts | append (dict
+  {{- $post := dict
       "path" $path
       "title" .Title
       "url" .RelPermalink
@@ -36,8 +66,15 @@
       "summary" (partial "common/excerpt.html" .)
       "words" .WordCount
       "readingTime" .ReadingTime
-      "category" .Parent.Title
-    ) -}}
+      "category" (partial "gui/cat-label.html" .Parent)
+    -}}
+  {{- $bk := partialCached "gui/book.html" .Parent .Parent.Path -}}
+  {{- if $bk.key -}}
+    {{- $bd := partialCached "gui/book-data.html" $bk.key $bk.key -}}
+    {{- with index $bd.num .Path }}{{ $post = merge $post (dict "num" .) }}{{ end -}}
+    {{- if isset $bookOrder .Path }}{{ $post = merge $post (dict "order" (index $bookOrder .Path)) }}{{ end -}}
+  {{- end -}}
+  {{- $posts = $posts | append $post -}}
 {{- end -}}
 {{- $tags := slice -}}
 {{- range site.Taxonomies.tags.ByCount -}}
@@ -49,4 +86,5 @@
     "dirs" $dirs
     "posts" $posts
     "tags" $tags
+    "books" $books
   | jsonify -}}

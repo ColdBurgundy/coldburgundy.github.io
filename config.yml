@@ -11,6 +11,12 @@ summaryLength: 40
 capitalizeListTitles: false   # 태그 이름을 적은 그대로 표시 (BOJ, DP …)
 enableRobotsTXT: true
 
+# content/posts 는 Obsidian 보관함이기도 합니다. Obsidian 전용 폴더(템플릿 · 안내)와 휴지통은 글로 읽지 않습니다.
+# (.obsidian 같은 점 폴더는 Hugo 가 원래 건너뜁니다)
+ignoreFiles:
+  - '(^|/)_obsidian/'
+  - '(^|/)\.trash/'
+
 # 카테고리는 content/posts/ 아래 폴더 구조로 표현하므로 태그만 사용합니다.
 taxonomies:
   tag: tags
@@ -124,10 +130,10 @@ params:
     heroBadge: ""              # 히어로 위 작은 문구 (비우면 표시하지 않음)
     heroTitle: "Hello World!"
     heroPrefix: "Notes on"
-    heroWords: ["C++", "Algorithms", "Operating Systems", "CS:APP", "Problem Solving"]
+    heroWords: ["C++"]   # 카테고리(_index.md 의 heroWords) 단어에 더해 무작위로 섞을 추가 단어
     heroSubtitle: "지금도 써 내려가고 있는 이야기의 제목을 정하기엔 아직 이르다."
-    welcomeTitle: "나중의 나를 위해 남기는 기록이다"
-    welcomeText: "알고리즘, 운영체제, 시스템 프로그래밍을 공부하며 정리한 것과 논문, 구현, 그리고 영화와 모터스포츠, 한 달의 끝을 적는다. 터미널로 보려면 오른쪽 위 Terminal 버튼을 누른다."
+    welcomeTitle: "untitled_"
+    welcomeText: "공부하고, 만들고, 좋아하는 것을 적는다."
 
 markup:
   highlight:

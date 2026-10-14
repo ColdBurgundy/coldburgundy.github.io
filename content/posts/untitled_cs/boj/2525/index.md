@@ -1,10 +1,14 @@
-+++
-title = "$10. [BOJ] 2525 오븐 시계"
-date = "2024-01-10"
-description = "현재 시각에 요리 시간(분)을 더해 끝나는 시각을 구하는 문제를 나눗셈과 나머지 연산으로 24시간 형식에 맞춰 계산하는 풀이"
-tags = ["BOJ", "Bronze3", "수학", "사칙연산"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$10. [BOJ] 2525 오븐 시계"
+date: 2024-01-10
+description: "현재 시각에 요리 시간(분)을 더해 끝나는 시각을 구하는 문제를 나눗셈과 나머지 연산으로 24시간 형식에 맞춰 계산하는 풀이"
+tags:
+  - "BOJ"
+  - "Bronze3"
+  - "수학"
+  - "사칙연산"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 2525 오븐 시계 문제 대표 이미지](images/cover.jpg)
 

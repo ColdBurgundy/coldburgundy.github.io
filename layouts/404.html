@@ -2,6 +2,7 @@
 <section class="dnf">
   <div class="hero__grid" aria-hidden="true"></div>
   <div class="dnf__bull" aria-hidden="true">{{ partial "gui/bull.html" "" }}</div>
+  {{ partial "gui/sky.html" "dnf" }}
   <div class="container dnf__inner">
     <p class="eyebrow">404</p>
     <h1 class="dnf__title">DNF</h1>
@@ -12,6 +13,6 @@
       <a class="btn btn--ghost" href="{{ "/" | relURL }}" data-mode-switch="cli">&gt;_ 터미널</a>
     </div>
   </div>
-  {{ partial "gui/trace.html" "hero" }}
+  {{ partial "gui/trace.html" (dict "variant" "hero" "page" .) }}
 </section>
 {{ end }}

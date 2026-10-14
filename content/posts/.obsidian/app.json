@@ -1,0 +1,9 @@
+{
+  "useMarkdownLinks": true,
+  "newLinkFormat": "relative",
+  "attachmentFolderPath": "./images",
+  "newFileLocation": "current",
+  "alwaysUpdateLinks": true,
+  "strictLineBreaks": true,
+  "trashOption": "system"
+}

@@ -1,0 +1,34 @@
+{{- /* 책 목차 머리(page-hero 의 extra): 책 이름(영어 · 한국어판) · 판, 그리고 진행 계기판 —
+     쓴 절 / 전체 절 · 챕터 수 · 마지막으로 쓴 날, 아래에 절마다 LED 하나(쓴 절은 켜짐, 챕터마다 한 무리 — 책 순서 그대로).
+     입력: gui/book-data.html 결과 */ -}}
+{{- $bd := . -}}
+{{- $b := $bd.book -}}
+{{- $latest := "" -}}
+{{- with $bd.order }}{{ with first 1 (sort . "Date" "desc") }}{{ with index . 0 }}{{ if not .Date.IsZero }}{{ $latest = . }}{{ end }}{{ end }}{{ end }}{{ end -}}
+<div class="book-meter">
+  <p class="book-meter__book">
+    <span class="book-meter__en" lang="en">{{ $b.title }}</span>
+    {{- with $b.edition }}<span class="book-meter__ed" lang="en">{{ . }} ed.</span>{{ end }}
+  </p>
+  {{- with $b.titleKo }}
+  <p class="book-meter__ko">{{ . }}</p>
+  {{- end }}
+  <dl class="page-hero__stats book-meter__stats">
+    <div><dt>Written</dt><dd><span aria-hidden="true">{{ $bd.written }}<span class="book-meter__of">/{{ $bd.total }}</span></span><span class="sr-only">{{ $bd.total }}절 중 {{ $bd.written }}절</span></dd></div>
+    <div><dt>Chapters</dt><dd>{{ len $bd.chapters }}</dd></div>
+    {{- with $latest }}
+    <div><dt>Latest</dt><dd class="book-meter__date"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time></dd></div>
+    {{- end }}
+  </dl>
+  <div class="book-meter__leds" aria-hidden="true">
+    {{- $k := 0 }}
+    {{- range $bd.chapters }}
+    <span class="book-meter__ch" style="--n: {{ .total }}">
+      <span class="book-meter__dots">
+        {{- range .sections }}<i{{ if .written }} class="is-on" style="--k: {{ $k }}"{{ $k = add $k 1 }}{{ else if .draft }} class="is-draft"{{ end }}></i>{{ end -}}
+      </span>
+      <small>CH{{ .num }}</small>
+    </span>
+    {{- end }}
+  </div>
+</div>

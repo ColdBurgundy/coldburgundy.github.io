@@ -1,10 +1,12 @@
-+++
-title = "1 The Role of Algorithms in Computing / 알고리즘의 역할 [CLRS]"
-date = "2024-01-06"
-description = "CLRS 1장의 알고리즘과 정렬 문제 정의, 삽입 정렬과 병합 정렬의 효율 비교, 연습문제 1.2와 문제 1-1 풀이를 담은 정리"
-tags = ["CLRS", "알고리즘"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "1 The Role of Algorithms in Computing / 알고리즘의 역할 [CLRS]"
+date: 2024-01-06
+description: "CLRS 1장의 알고리즘과 정렬 문제 정의, 삽입 정렬과 병합 정렬의 효율 비교, 연습문제 1.2와 문제 1-1 풀이를 담은 정리"
+tags:
+  - "CLRS"
+  - "알고리즘"
+thumbnail: "images/cover.jpg"
+---
 
 ![CLRS 1장 대표 이미지](images/cover.jpg)  
 

@@ -1,11 +1,17 @@
-+++
-title = "$12. [BOJ] 31095 등수"
-date = "2024-01-12"
-description = "동점을 허용할 때 N명 중 K등이 나오는 경우의 수를 DP 점화식과 파스칼의 삼각형 이항계수로 세는 풀이"
-tags = ["BOJ", "Platinum3", "수학", "DP", "조합론"]
-thumbnail = "images/cover.jpg"
-aliases = ["/posts/untitled_cs/boj/test/"]
-+++
+---
+title: "$12. [BOJ] 31095 등수"
+date: 2024-01-12
+description: "동점을 허용할 때 N명 중 K등이 나오는 경우의 수를 DP 점화식과 파스칼의 삼각형 이항계수로 세는 풀이"
+tags:
+  - "BOJ"
+  - "Platinum3"
+  - "수학"
+  - "DP"
+  - "조합론"
+thumbnail: "images/cover.jpg"
+aliases:
+  - "/posts/untitled_cs/boj/test/"
+---
 
 ![BOJ 31095 등수 문제 대표 이미지](images/cover.jpg)
 

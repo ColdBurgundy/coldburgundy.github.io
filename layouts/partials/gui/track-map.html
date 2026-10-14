@@ -1,22 +1,38 @@
 {{- /* 미니 트랙 맵 — 섹터 = 소제목, 읽은 만큼 차가 한 바퀴 돕니다 (gui.js).
-     서킷은 assets/data/circuits.json 에서 페이지를 열 때마다 무작위로 하나 고릅니다. gui.js 가 맵이 실제로 보일 때만
-     (지문 붙은 주소라 캐시가 잘 듣는) 이 파일을 불러와 경로 · 이름 · 위치를 바꿔 끼웁니다.
-     스키마: { source, license, circuits: [{ id, name, location, country, viewBox: "0 0 W H", d }] }
+     서킷은 assets/data/circuits.json 에서 페이지를 열 때마다 무작위로 하나 — 글 머리의 속도 트레이스 · 별자리와 같은 서킷입니다.
+     gui.js 가 (지문 붙은 주소라 캐시가 잘 듣는) 이 파일을 한 번 불러와 경로 · 이름 · 위치를 바꿔 끼웁니다.
+     스키마: { source, license, circuits: [{ id, name, location, country, viewBox: "0 0 W H", d, length, speed, apex }] }
      — d 는 그 viewBox 안의 닫힌 경로 하나, 출발선(S/F)에서 시작해 레이스 방향으로.
-     아래에 그려 둔 레드불 링(직접 그린 단순화 그림)은 내장 기본값: 파일을 못 불러오거나 서킷이 하나도 없으면 이것을 씁니다.
-     진행률은 텔레메트리 % 가 이미 읽어 주므로 그림은 낭독기에서 숨깁니다. */ -}}
+     빌드 때는 이 페이지의 기본 서킷(circuit-pick.html — 트레이스의 기본값과 같은 서킷)을 그려 둡니다: 스크립트가 없거나 파일을 못 불러오면 이것.
+     파일이 아예 없으면 아래에 직접 그린 레드불 링(단순화 그림). 진행률은 텔레메트리 % 가 이미 읽어 주므로 그림은 낭독기에서 숨깁니다. */ -}}
 {{- $d := "M110 128.3 L46 119 C26.2 116.1 18 94.6 30 90 L208 22 C221 17 233.3 33.6 220 38 L98 88 C85.5 93.1 81 107 94 107 C112 107 122 95 140 98 C157 101 157 115 173 115 C189 115 191 99 205 101 C221 103 226 120 216 130 C208 140 189.8 139.9 170 137 Z" -}}
-{{- $src := "" -}}
-{{- with resources.Get "data/circuits.json" }}{{ $src = (. | minify | fingerprint).RelPermalink }}{{ end -}}
+{{- $vb := "16 13 218 134" -}}
+{{- $name := "Red Bull Ring" }}{{ $loc := "Spielberg" }}{{ $cty := "Austria" -}}
+{{- $sf := dict "x1" 110.9 "y1" 121.9 "x2" 109.1 "y2" 134.7 "cx" 110 "cy" 128.3 -}}
+{{- $u := 0 -}}
+{{- $src := (partialCached "gui/circuits.html" "circuits").url -}}
+{{- with partial "gui/circuit-pick.html" . -}}
+  {{- $d = .d }}{{ $vb = .viewBox }}{{ $name = .name }}{{ $loc = .location }}{{ $cty = .country -}}
+  {{- /* 스크립트가 없을 때의 선 굵기 · 출발선: 레일의 맵 상자(약 256×110px) 기준으로 화면 1px 의 사용자 단위를 어림합니다 (gui.js 는 실제 크기로 다시 잼) */ -}}
+  {{- $v := split (trim $vb " ") " " -}}
+  {{- $u = math.Max (div (float (index $v 2)) 256) (div (float (index $v 3)) 110) -}}
+  {{- $p := findRE `-?[0-9.]+` .d 4 -}}
+  {{- if eq (len $p) 4 -}}
+    {{- $x1 := float (index $p 0) }}{{ $y1 := float (index $p 1) }}{{ $tx := sub (float (index $p 2)) $x1 }}{{ $ty := sub (float (index $p 3)) $y1 -}}
+    {{- $len := math.Max 0.001 (math.Sqrt (add (mul $tx $tx) (mul $ty $ty))) -}}
+    {{- $nx := mul (div (mul -1 $ty) $len) (mul 6.5 $u) }}{{ $ny := mul (div $tx $len) (mul 6.5 $u) -}}
+    {{- $sf = dict "x1" (sub $x1 $nx) "y1" (sub $y1 $ny) "x2" (add $x1 $nx) "y2" (add $y1 $ny) "cx" $x1 "cy" $y1 -}}
+  {{- end -}}
+{{- end -}}
 <div class="trackmap is-loading" data-trackmap{{ with $src }} data-circuits="{{ . }}"{{ end }} aria-hidden="true">
-  <p class="trackmap__name"><span class="trackmap__circuit" data-track-name>Red Bull Ring</span><span class="trackmap__loc"><span data-track-loc>Spielberg</span><span class="trackmap__country" data-track-country> · Austria</span></span></p>
-  <svg class="trackmap__svg" viewBox="16 13 218 134" preserveAspectRatio="xMidYMid meet" focusable="false" data-track-svg>
+  <p class="trackmap__name"><span class="trackmap__circuit" data-track-name>{{ $name }}</span><span class="trackmap__loc"><span data-track-loc>{{ $loc | default $cty }}</span><span class="trackmap__country" data-track-country>{{ if and $loc $cty (ne $loc $cty) }} · {{ $cty }}{{ end }}</span></span></p>
+  <svg class="trackmap__svg" viewBox="{{ $vb }}" preserveAspectRatio="xMidYMid meet" focusable="false" data-track-svg{{ with $u }} style="--u: {{ printf "%.3f" . }}"{{ end }}>
     <path class="trackmap__bed" d="{{ $d }}" data-track-bed/>
     <path class="trackmap__line" d="{{ $d }}" data-track-line/>
     <path class="trackmap__halo" d="{{ $d }}" data-track-halo/>
     <g data-track-sectors></g>
     <g class="trackmap__ticks" data-track-ticks></g>
-    <line class="trackmap__sf" x1="110.9" y1="121.9" x2="109.1" y2="134.7" data-track-sf/>
-    <circle class="trackmap__car" cx="110" cy="128.3" r="3.6" data-track-car/>
+    <line class="trackmap__sf" x1="{{ printf "%.1f" $sf.x1 }}" y1="{{ printf "%.1f" $sf.y1 }}" x2="{{ printf "%.1f" $sf.x2 }}" y2="{{ printf "%.1f" $sf.y2 }}" data-track-sf/>
+    <circle class="trackmap__car" cx="{{ printf "%.1f" $sf.cx }}" cy="{{ printf "%.1f" $sf.cy }}" r="{{ printf "%.1f" (mul 3.6 (cond (gt $u 0) $u 1)) }}" data-track-car/>
   </svg>
 </div>

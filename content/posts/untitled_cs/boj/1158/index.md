@@ -1,10 +1,15 @@
-+++
-title = "$4. [BOJ] 1158 요세푸스 문제"
-date = "2024-01-04"
-description = "N명이 원을 이룰 때 K번째마다 제거하는 요세푸스 순열을 큐에서 K-1번 앞 원소를 뒤로 옮긴 뒤 pop하는 방식으로 구하는 풀이"
-tags = ["BOJ", "Silver4", "구현", "자료구조", "큐"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$4. [BOJ] 1158 요세푸스 문제"
+date: 2024-01-04
+description: "N명이 원을 이룰 때 K번째마다 제거하는 요세푸스 순열을 큐에서 K-1번 앞 원소를 뒤로 옮긴 뒤 pop하는 방식으로 구하는 풀이"
+tags:
+  - "BOJ"
+  - "Silver4"
+  - "구현"
+  - "자료구조"
+  - "큐"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 1158 요세푸스 문제 대표 이미지](images/cover.jpg)
 

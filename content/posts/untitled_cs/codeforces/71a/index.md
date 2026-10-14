@@ -1,10 +1,13 @@
-+++
-title = "$4. [CODEFORCES] A. Way Too Long Words"
-date = "2024-01-07"
-description = "길이가 10자를 넘는 단어를 첫 글자, 사이 글자 수, 마지막 글자로 줄여 출력하는 문자열 구현 풀이"
-tags = ["Codeforces", "문자열", "Rating800"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$4. [CODEFORCES] A. Way Too Long Words"
+date: 2024-01-07
+description: "길이가 10자를 넘는 단어를 첫 글자, 사이 글자 수, 마지막 글자로 줄여 출력하는 문자열 구현 풀이"
+tags:
+  - "Codeforces"
+  - "문자열"
+  - "Rating800"
+thumbnail: "images/cover.jpg"
+---
 
 ![Codeforces 71A A. Way Too Long Words 문제 대표 이미지](images/cover.jpg)
 

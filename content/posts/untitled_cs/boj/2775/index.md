@@ -1,10 +1,15 @@
-+++
-title = "$2. [BOJ] 2775 부녀회장이 될테야"
-date = "2024-01-02"
-description = "0층 i호에 i명이 사는 아파트에서 k층 n호 인원을 map[i][j] = map[i][j-1] + map[i-1][j] 점화식의 DP 테이블로 구하는 풀이"
-tags = ["BOJ", "Bronze1", "수학", "구현", "DP"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$2. [BOJ] 2775 부녀회장이 될테야"
+date: 2024-01-02
+description: "0층 i호에 i명이 사는 아파트에서 k층 n호 인원을 map[i][j] = map[i][j-1] + map[i-1][j] 점화식의 DP 테이블로 구하는 풀이"
+tags:
+  - "BOJ"
+  - "Bronze1"
+  - "수학"
+  - "구현"
+  - "DP"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 2775 부녀회장이 될테야 문제 대표 이미지](images/cover.jpg)
 

@@ -2,8 +2,16 @@
 {{- $sec := cond .IsSection . .Parent -}}
 {{- $badge := partial "gui/badge.html" $sec -}}
 {{- $num := add (mod (hash.FNV32a .Title) 98) 1 -}}
+{{- /* 책(data/books)의 글: 배지는 책 이름(COD), 번호는 절 번호(2.3) */ -}}
+{{- if and $sec (not .IsSection) -}}
+  {{- $bk := partialCached "gui/book.html" $sec $sec.Path -}}
+  {{- with $bk.key -}}
+    {{- with index (partialCached "gui/book-data.html" . .).num $.Path }}{{ $num = . }}{{ end -}}
+    {{- $badge = partial "gui/badge.html" $bk.root -}}
+  {{- end -}}
+{{- end -}}
 <span class="livery" aria-hidden="true">
   <span class="livery__stripes"></span>
-  <span class="livery__num">{{ $num }}</span>
+  <span class="livery__num" style="--len: {{ strings.RuneCount (string $num) }}">{{ $num }}</span>
   <span class="livery__badge">{{ $badge }}</span>
 </span>

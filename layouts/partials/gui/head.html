@@ -2,6 +2,9 @@
 {{- $isGuiHome := eq . $postsRoot -}}
 {{- $isPost := and .IsPage (eq .Section "posts") -}}
 {{- $pageTitle := cond (eq .Kind "taxonomy") (title .Title) .Title -}}
+{{- /* 책(data/books) 화면: 목차 한 장이라 페이지를 나누지 않고, 챕터 페이지 제목은 책 이름과 함께 ("COD · Chapter 2") */ -}}
+{{- $book := partialCached "gui/book.html" . .Path -}}
+{{- with $book.chapterPage }}{{ if eq . $ }}{{ $pageTitle = printf "%s · %s" $book.root.Title $.Title }}{{ end }}{{ end -}}
 {{- $title := cond $isGuiHome site.Title (printf "%s · %s" $pageTitle site.Title) -}}
 {{- $canon := .Permalink -}}
 
@@ -14,7 +17,7 @@
 {{- end -}}
 
 {{- /* 페이지네이션: 2페이지 이후는 자기 URL 을 canonical 로 (본문과 같은 컬렉션으로 호출해야 캐시가 맞습니다) */ -}}
-{{- if and (or (eq .Kind "section") (eq .Kind "term")) (not $isGuiHome) -}}
+{{- if and (or (eq .Kind "section") (eq .Kind "term")) (not $isGuiHome) (not $book.key) -}}
   {{- $pg := .Paginate (cond (eq .Kind "term") .Pages.ByDate.Reverse .RegularPagesRecursive.ByDate.Reverse) -}}
   {{- if gt $pg.PageNumber 1 -}}
     {{- $canon = $pg.URL | absURL -}}
@@ -25,6 +28,27 @@
 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+{{- /* 페이지 이동 전환을 쓰겠다는 표시(@view-transition)는 head 맨 앞에 바로 — gui.css 보다 먼저 알려 두고,
+       새 페이지의 첫 그림은 휠과 본문 상자(#main)가 읽힌 뒤에 (rel=expect, 지원하는 브라우저만). 응답이 조각으로 늦게 오면
+       브라우저가 CSS 를 알기 전에 첫 그림을 그려 전환이 취소되고(콘솔 오류) 휠 없는 빈 화면이 찍힐 수 있어서 */}}
+<style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
+<link rel="expect" href="#main" blocking="render">
+{{- /* 페이지 이동: 뷰 전환(View Transitions)을 지원하지 않는 브라우저는 사이트 안에서 막 넘어온 페이지의 본문만 짧게 떠오르게 합니다
+       (gui.js 가 링크를 누를 때 남긴 dl-nav 시각이 8초 안이면 — CSS 애니메이션이라 스크립트가 멈춰도 0.34초 뒤에는 그대로 보임).
+       뷰 전환을 지원하면(pagereveal) 전환은 CSS(@view-transition)가 맡고, 여기서는 두 가지만 — 새 페이지의 첫 그림 전에 와야 해서 gui.js(defer)가 아니라 여기:
+       · 전환하는 동안만 휠에 이름을 붙임(html.vt-wheel — 늘 붙어 있으면 휠의 유리 흐림이 꺼짐). 떠나는 쪽은 pageswap, 오는 쪽은 pagereveal ~ 전환 끝
+       · 휠은 새 휠로 곧바로 바뀌므로(gui.css) 두 휠의 모양을 맞춤: 얇아진(.is-compact) 휠에서 떠나면 새 페이지도 얇은 휠로 시작하고(dl-wheel),
+         전환이 끝나면 지금 스크롤 위치대로 다시 정함(gui.js 와 같은 경계 24 · 72px — gui.js 가 늦게 와도 기다리지 않게 여기서, 그리고 dl:vt-end 로
+         gui.js 에도 알림) — 맨 위면 평소처럼 부드럽게 펴짐.
+         메뉴 아래 밑줄(.wheel__indicator)도 지난 페이지의 자리에서 시작해, 첫 그림 뒤 이 페이지의 메뉴로 미끄러지듯 옮김(dl-ind —
+         gui.js 의 moveIndicator 와 같은 계산. gui.js 가 늦게 와도 기다리지 않게 여기서)
+       · 뒤로 가기면 방향만 반대로(type back). 움직임 줄이기 설정이면 전환도 떠오름도 없음
+       · 터미널(CLI, 사이트 첫 주소)로 갈 때는 전환을 미리 건너뜀 — 그 페이지는 뷰 전환을 쓰지 않아서, 두면 브라우저가 중단 오류를 콘솔에 남김 */}}
+<script>(function(w,d,c){var S;try{S=w.sessionStorage;var t=+S.getItem('dl-nav');S.removeItem('dl-nav');if(t&&Date.now()-t<8000&&!('onpagereveal' in w)&&!matchMedia('(prefers-reduced-motion: reduce)').matches)c.add('dl-enter')}catch(e){}
+function off(){if(!c.contains('vt-wheel'))return;c.remove('vt-wheel');var n=d.querySelector('[data-nav]'),y=w.scrollY||0,k;if(n){k=n.classList.contains('is-compact');if(k?y<=24:y>72)n.classList.toggle('is-compact',!k)}try{w.dispatchEvent(new Event('dl:vt-end'))}catch(x){}}function quiet(v){[v.ready,v.finished,v.updateCallbackDone].forEach(function(p){if(p)p.catch(off)})}function hold(v){c.add('vt-wheel');quiet(v);v.finished.then(off,off)}
+w.addEventListener('pageswap',function(e){var v=e.viewTransition,a=e.activation;if(!v)return;try{if(a&&a.entry&&new URL(a.entry.url).pathname==={{ "/" | relURL }}){quiet(v);v.skipTransition();return}}catch(x){}try{var i=d.querySelector('.wheel__indicator.is-on');S.setItem('dl-wheel',d.querySelector('[data-nav].is-compact')?'c':'');S.setItem('dl-ind',i?['--ix','--iw','--ind'].map(function(p){return i.style.getPropertyValue(p)}).join('|'):'')}catch(x){}hold(v)});
+w.addEventListener('pageshow',function(e){if(e.persisted)off()});
+w.addEventListener('pagereveal',function(e){var v=e.viewTransition,a=w.navigation&&navigation.activation,k='',q='';try{k=S.getItem('dl-wheel');q=S.getItem('dl-ind')||'';S.removeItem('dl-wheel');S.removeItem('dl-ind')}catch(x){}if(!v)return;var n=d.querySelector('[data-nav]'),i=d.querySelector('.wheel__indicator');if(k==='c'&&n&&!n.classList.contains('is-compact')){n.classList.add('is-compact','is-instant');void n.offsetHeight;n.classList.remove('is-instant')}q=q.split('|');if(i&&q.length===3&&q[1]){i.style.transition='none';i.style.setProperty('--ix',q[0]);i.style.setProperty('--iw',q[1]);i.style.setProperty('--ind',q[2]);i.classList.add('is-on');void i.offsetWidth;i.style.transition='';requestAnimationFrame(function(){requestAnimationFrame(function(){var b=d.querySelector('[data-nav-btns] .wbtn.is-active'),r,o;if(!b){i.classList.remove('is-on');return}r=b.getBoundingClientRect();o=i.parentNode.getBoundingClientRect();i.style.setProperty('--ix',(r.left-o.left)+'px');i.style.setProperty('--iw',r.width+'px');i.style.setProperty('--ind',getComputedStyle(b).getPropertyValue('--led').trim()||'#db0a40')})})}hold(v);try{if(a&&a.navigationType==='traverse'&&a.from&&a.entry&&a.from.index>a.entry.index)v.types.add('back')}catch(x){}})})(window,document,document.documentElement.classList)</script>
 {{- if $isGuiHome }}
 <script>try{if(sessionStorage.getItem('dl-lights')!=='1'&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('dl-intro')}catch(e){}</script>
 {{- end }}
@@ -114,6 +138,13 @@
   html:root { --f-wide: "Formula1 Display Wide", "Michroma", "Pretendard Variable", Pretendard, sans-serif; --f-display: "Formula1 Display", "Saira", "Pretendard Variable", Pretendard, sans-serif; }
 </style>
 {{- end }}
+{{- /* 서킷 데이터(트레이스 · 별자리 · 트랙 맵이 함께 씀)를 CSS 와 나란히 미리 받아 둡니다 — 낮은 우선순위, gui.js 의 fetch 가 이 응답을 그대로 씀 */}}
+{{- with (partialCached "gui/circuits.html" "circuits").url }}
+<link rel="preload" href="{{ . }}" as="fetch" crossorigin fetchpriority="low">
+{{- end }}
+{{- /* 사이트 안 링크는 마우스를 올리거나 누르기 시작할 때 미리 받아 둡니다 (Speculation Rules — 지원하는 브라우저만, 나머지는 무시).
+       터미널(CLI) 전환 · 책 목차의 챕터 탭(같은 페이지에서 바뀜) · 새 탭 · 내려받기 링크는 빼고, 실행(prerender)은 하지 않고 받아 두기(prefetch)만 */}}
+<script type="speculationrules">{"prefetch":[{"where":{"and":[{"href_matches":"/*"},{"not":{"selector_matches":"[data-mode-switch], [data-book-link], [download], [target], [rel~=nofollow]"}}]},"eagerness":"moderate"}]}</script>
 {{- $css := resources.Get "css/gui.css" | minify | fingerprint }}
 <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}">
 {{- if .IsPage }}

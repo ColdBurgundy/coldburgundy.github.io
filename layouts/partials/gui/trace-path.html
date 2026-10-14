@@ -1,0 +1,28 @@
+{{- /* 속도 배열(한 바퀴를 같은 거리로 나눈 계산값, km/h) → 트레이스 경로 (viewBox 0 0 1200 60, 가로 = 랩 거리).
+     세로: 350 km/h = 8, 70 km/h = 52 — gui.js 의 speedY() 와 같은 식이라 마우스 읽음표가 경로에서 속도를 되읽습니다.
+     점과 점 사이는 Catmull-Rom 곡선(첫 구간은 C, 나머지는 앞 제어점을 되비추는 S)으로 매끄럽게 — gui.js 의 traceD() 와 같은 모양.
+     한 바퀴라 앞뒤 이웃은 반대쪽 끝의 값을 씁니다(첫 점 = 마지막 점). 입력: 속도 배열 (partialCached 로 서킷마다 한 번) */ -}}
+{{- $sp := . -}}
+{{- $n := len $sp -}}
+{{- $dx := div 1200.0 $n -}}
+{{- /* $Y[k] = 점 k-1 의 세로 (k = 0 … n+2 → 점 -1 … n+1) */ -}}
+{{- $Y := slice -}}
+{{- range $i := seq -1 (add $n 1) -}}
+  {{- $v := float (index $sp (mod (add $i $n) $n)) -}}
+  {{- $v = math.Max 70 (math.Min 350 $v) -}}
+  {{- $Y = $Y | append (add 8 (div (mul (sub 350 $v) 44) 280)) -}}
+{{- end -}}
+{{- $s := printf "M0 %s" (strings.TrimSuffix ".0" (printf "%.1f" (index $Y 1))) -}}
+{{- range $j := seq 0 (sub $n 1) -}}
+  {{- $ya := index $Y (add $j 1) }}{{ $yb := index $Y (add $j 2) }}{{ $yc := index $Y (add $j 3) -}}
+  {{- $x := mul (add $j 1) $dx -}}
+  {{- $c2 := printf "%s %s" (strings.TrimSuffix ".0" (printf "%.1f" (sub $x (div $dx 3)))) (strings.TrimSuffix ".0" (printf "%.1f" (sub $yb (div (sub $yc $ya) 6)))) -}}
+  {{- $p := printf "%s %s" (strings.TrimSuffix ".0" (printf "%.1f" $x)) (strings.TrimSuffix ".0" (printf "%.1f" $yb)) -}}
+  {{- if eq $j 0 -}}
+    {{- $c1 := printf "%s %s" (strings.TrimSuffix ".0" (printf "%.1f" (div $dx 3))) (strings.TrimSuffix ".0" (printf "%.1f" (add $ya (div (sub $yb (index $Y 0)) 6)))) -}}
+    {{- $s = printf "%sC%s %s %s" $s $c1 $c2 $p -}}
+  {{- else -}}
+    {{- $s = printf "%sS%s %s" $s $c2 $p -}}
+  {{- end -}}
+{{- end -}}
+{{- return $s -}}

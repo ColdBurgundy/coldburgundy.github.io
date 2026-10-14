@@ -1,10 +1,16 @@
-+++
-title = "$14. [BOJ] 1937 욕심쟁이 판다"
-date = "2024-01-14"
-description = "값이 커지는 방향으로만 상하좌우 이동할 때 판다가 방문할 수 있는 최대 칸 수를 DFS와 메모이제이션 DP로 구하는 풀이"
-tags = ["BOJ", "Gold3", "DP", "그래프이론", "그래프탐색", "깊이우선탐색"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$14. [BOJ] 1937 욕심쟁이 판다"
+date: 2024-01-14
+description: "값이 커지는 방향으로만 상하좌우 이동할 때 판다가 방문할 수 있는 최대 칸 수를 DFS와 메모이제이션 DP로 구하는 풀이"
+tags:
+  - "BOJ"
+  - "Gold3"
+  - "DP"
+  - "그래프이론"
+  - "그래프탐색"
+  - "깊이우선탐색"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 1937 욕심쟁이 판다 문제 대표 이미지](images/cover.jpg)
 

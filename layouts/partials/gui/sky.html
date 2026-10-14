@@ -1,0 +1,7 @@
+{{- /* 서킷 별자리 — 그 히어로의 트레이스와 같은 서킷을 옅은 별자리로 (코너 정점 = 밝은 별, 나머지 = 흐린 별, 출발선 = 붉은 별).
+     gui.js 가 서킷 데이터가 오면 별 · 연결선 · 이름을 그려 천천히 띄웁니다. 스크립트가 없으면 비어 있는 배경일 뿐.
+     입력: 놓이는 곳 이름 ("home" | "page" | "post" | "dnf") — 크기 · 자리는 gui.css 의 .sky--* */ -}}
+<div class="sky{{ with . }} sky--{{ . }}{{ end }}" aria-hidden="true" data-sky>
+  <svg class="sky__svg" focusable="false"></svg>
+  <p class="sky__name"></p>
+</div>

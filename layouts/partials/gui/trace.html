@@ -1,12 +1,22 @@
-{{- /* 연석 대신: 텔레메트리 속도 트레이스. 마우스를 올리면 그 지점의 섹터/속도를 보여줍니다. 입력: "hero" | "thin" */ -}}
+{{- /* 연석 대신: 텔레메트리 속도 트레이스 — 실제 서킷 한 바퀴의 (계산된) 속도. 가로 = 랩 거리, S1 · S2 · S3 = 랩 거리의 3등분.
+     빌드 때는 이 페이지의 기본 서킷(circuit-pick.html)으로 그려 두고(스크립트 없이도, 데이터가 오기 전에도 띠가 비지 않게),
+     gui.js 가 열 때마다 무작위 서킷으로 바꿉니다(글 페이지는 트랙 맵과 같은 서킷). 마우스를 트레이스 띠 위에 올리면 그 지점의 섹터 · 속도.
+     입력: dict "variant" ("hero" | "thin") "page" — 문자열 하나("hero")만 주면 기본 서킷 없이 예전 모양 */ -}}
+{{- $variant := . -}}
+{{- $page := false -}}
+{{- if reflect.IsMap . }}{{ $variant = .variant }}{{ $page = .page }}{{ end -}}
 {{- $d := "M0 22 L130 14 L210 12 C228 12 232 46 252 48 L268 48 C292 48 300 16 330 14 L470 10 C486 10 492 38 508 40 C526 42 532 20 556 18 L700 13 C716 13 720 50 738 52 L752 52 C776 52 786 18 812 16 L960 11 C978 11 984 34 1000 36 C1020 38 1028 18 1050 17 L1200 14" -}}
-<div class="trace{{ with . }} trace--{{ . }}{{ end }}" aria-hidden="true" data-trace>
-  <svg class="trace__svg" viewBox="0 0 1200 60" preserveAspectRatio="none">
+{{- $id := "" -}}
+{{- with $page }}{{ with partial "gui/circuit-pick.html" . }}{{ $d = partialCached "gui/trace-path.html" .speed .id }}{{ $id = .id }}{{ end }}{{ end -}}
+<div class="trace{{ with $variant }} trace--{{ . }}{{ end }}" aria-hidden="true" data-trace{{ with $id }} data-circuit="{{ . }}"{{ end }}>
+  <svg class="trace__svg" viewBox="0 0 1200 60" preserveAspectRatio="none" focusable="false">
     <path class="trace__ghost" d="{{ $d }}" pathLength="1000"/>
     <path class="trace__line" d="{{ $d }}" pathLength="1000"/>
     <path class="trace__pulse" d="{{ $d }}" pathLength="1000"/>
   </svg>
   <span class="trace__base"></span>
+  <span class="trace__splits"><i></i><i></i></span>
   <span class="trace__sectors"><i>S1</i><i>S2</i><i>S3</i></span>
+  <span class="trace__car"></span>
   <span class="trace__cursor"><span class="trace__dot"></span><span class="trace__read"></span></span>
 </div>

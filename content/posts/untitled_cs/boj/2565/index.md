@@ -1,10 +1,13 @@
-+++
-title = "$8. [BOJ] 2565 전깃줄"
-date = "2024-01-08"
-description = "교차하지 않도록 없애야 할 전깃줄의 최소 개수를 A쪽 위치로 정렬한 뒤 B쪽 위치의 LIS를 DP로 구해 계산하는 풀이"
-tags = ["BOJ", "Gold5", "DP"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$8. [BOJ] 2565 전깃줄"
+date: 2024-01-08
+description: "교차하지 않도록 없애야 할 전깃줄의 최소 개수를 A쪽 위치로 정렬한 뒤 B쪽 위치의 LIS를 DP로 구해 계산하는 풀이"
+tags:
+  - "BOJ"
+  - "Gold5"
+  - "DP"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 2565 전깃줄 문제 대표 이미지](images/cover.jpg)
 

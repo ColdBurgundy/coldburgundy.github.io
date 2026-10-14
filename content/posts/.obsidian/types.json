@@ -1,0 +1,15 @@
+{
+  "types": {
+    "title": "text",
+    "description": "text",
+    "date": "date",
+    "tags": "tags",
+    "thumbnail": "text",
+    "draft": "checkbox",
+    "aliases": "aliases",
+    "weight": "number",
+    "color": "text",
+    "badge": "text",
+    "heroWords": "multitext"
+  }
+}

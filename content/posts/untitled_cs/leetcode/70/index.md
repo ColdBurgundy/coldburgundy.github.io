@@ -1,10 +1,14 @@
-+++
-title = "$1. [LeetCode] 70. Climbing Stairs"
-date = "2024-01-05"
-description = "한 번에 1칸 또는 2칸씩 오를 때 n개의 계단을 오르는 방법의 수를 dp[i] = dp[i-1] + dp[i-2] 점화식으로 구하는 풀이"
-tags = ["LeetCode", "수학", "DP", "메모이제이션"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$1. [LeetCode] 70. Climbing Stairs"
+date: 2024-01-05
+description: "한 번에 1칸 또는 2칸씩 오를 때 n개의 계단을 오르는 방법의 수를 dp[i] = dp[i-1] + dp[i-2] 점화식으로 구하는 풀이"
+tags:
+  - "LeetCode"
+  - "수학"
+  - "DP"
+  - "메모이제이션"
+thumbnail: "images/cover.jpg"
+---
 
 ![LeetCode 70 70. Climbing Stairs 문제 대표 이미지](images/cover.jpg)
 

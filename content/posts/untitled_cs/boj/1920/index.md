@@ -1,10 +1,15 @@
-+++
-title = "$11. [BOJ] 1920 수 찾기"
-date = "2024-01-11"
-description = "정렬한 배열에서 이분 탐색으로 M개의 수가 주어진 N개의 정수 안에 있는지 판별하는 풀이"
-tags = ["BOJ", "Silver4", "자료구조", "정렬", "이분탐색"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$11. [BOJ] 1920 수 찾기"
+date: 2024-01-11
+description: "정렬한 배열에서 이분 탐색으로 M개의 수가 주어진 N개의 정수 안에 있는지 판별하는 풀이"
+tags:
+  - "BOJ"
+  - "Silver4"
+  - "자료구조"
+  - "정렬"
+  - "이분탐색"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 1920 수 찾기 문제 대표 이미지](images/cover.jpg)
 

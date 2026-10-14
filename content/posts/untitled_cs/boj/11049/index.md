@@ -1,10 +1,13 @@
-+++
-title = "$19. [BOJ] 11049 행렬 곱셈 순서"
-date = "2024-01-19"
-description = "행렬 N개를 곱할 때 필요한 최소 곱셈 횟수를 분할 지점마다 비용을 비교하는 구간 DP로 구하는 풀이"
-tags = ["BOJ", "Gold3", "DP"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$19. [BOJ] 11049 행렬 곱셈 순서"
+date: 2024-01-19
+description: "행렬 N개를 곱할 때 필요한 최소 곱셈 횟수를 분할 지점마다 비용을 비교하는 구간 DP로 구하는 풀이"
+tags:
+  - "BOJ"
+  - "Gold3"
+  - "DP"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 11049 행렬 곱셈 순서 문제 대표 이미지](images/cover.jpg)
 

@@ -25,7 +25,12 @@
   function strlen(s) { return typeof window.wcwidth === 'function' ? window.wcwidth(text(s)) : $.terminal.length(text(s)); }
   function pad(s, n) { var l = strlen(s); return l >= n ? s : s + new Array(n - l + 1).join(' '); }
   function storage(kind) { try { return window[kind]; } catch (e) { return null; } }
-  function setMode(mode) { var ls = storage('localStorage'); try { ls && ls.setItem('dl-mode', mode); } catch (e) {} }
+  // mode 가 없으면(null) 기록을 지웁니다 — 설치를 되돌릴 때 원래 값(없음 포함)으로 돌려놓기 위해
+  function getMode() { var ls = storage('localStorage'); try { return ls ? ls.getItem('dl-mode') : null; } catch (e) { return null; } }
+  function setMode(mode) {
+    var ls = storage('localStorage');
+    try { if (ls) { if (mode) ls.setItem('dl-mode', mode); else ls.removeItem('dl-mode'); } } catch (e) {}
+  }
 
   var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   function lsDate(iso) {
@@ -384,18 +389,481 @@
     out(hits.map(function (p) { return '  ' + dim(p.date) + '  ' + esc(p.title) + '  ' + fmt('', 'orange', '~/' + p.path); }));
   }
 
-  function goGUI(args) {
+  function goGUI(name, args) {
     var segs = args && args.length ? normalize(args[0]) : cwd;
     var node = lookup(segs);
-    if (args && args.length && !node) return err('gui', '그런 경로가 없습니다: ' + args[0]);
+    if (args && args.length && !node) return err(name, '그런 경로가 없습니다: ' + args[0]);
     var url = POSTS_URL;
     if (node && node.type === 'file') url = CFG.aboutURL || '/about/';
     else if (node && node.type === 'post') url = node.url;
     else if (node && node.type === 'dir' && segs.length) url = node.url || POSTS_URL + segs.join('/') + '/';
-    setMode('gui');
-    term.echo(dim('switching to GUI → ' + url));
-    setTimeout(function () { location.href = url; }, reduceMotion ? 0 : 250);
+    // (글 창의 File › Open in GUI 는 창을 닫고 'gui <그 글>' 을 쳐서 여기로 옵니다 — 아래 readerToGUI)
+    // 약속(Promise)을 돌려주면 jQuery Terminal 이 그동안 입력을 멈추고, 풀리면(Ctrl+C) 프롬프트를 다시 띄웁니다
+    return pipInstall(url);
   }
+
+  /* ------------------------------------------------------------------ *
+   * gui — pip install 처럼 GUI 를 받아 두고 넘어가기
+   * 막대가 차는 동안 갈 페이지의 HTML 과 그 페이지가 쓰는 CSS·JS·데이터를 실제로 받아 브라우저 캐시에 넣고
+   * (크기 · 속도 · eta 는 받은 바이트로 잰 실제 값), 설치(Installing) 단계에서 그 페이지 글자에 필요한 글꼴을 데워 둡니다.
+   * 아무 키나 누르거나 누르면(클릭·탭) 바로 넘어가고, Ctrl+C 는 pip 처럼 취소하고 터미널에 남습니다.
+   * ------------------------------------------------------------------ */
+  var PIP = CFG.pip || {};
+  var PIP_SIZES = {};   // 빌드 때 아는 자산 크기 (layouts/index.html): 경로 → 바이트
+  (PIP.assets || []).forEach(function (a) { if (a && a.url) PIP_SIZES[a.url] = +a.bytes || 0; });
+  var PKG = String(CFG.title || 'blog').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') + '-gui';
+  var PKG_VER = PIP.version || '0.1';
+  var WHEEL = PKG.replace(/-/g, '_') + '-' + PKG_VER + '-py3-none-any.whl';
+  // pip(rich) 의 색 배치를 사이트 색으로: 막대 = 레드불 빨강 → 끝나면 초록, 크기 초록, 속도 빨강, eta 파랑
+  var PC = { bar: '#db0a40', done: '#2bd67b', back: '#3a3a3a', size: '#2bd67b', speed: '#ff4062', eta: DIR, warn: '#ffd12e', error: 'red' };
+  var PIP_MIN_FILL = reduceMotion ? 0 : 1000;     // 빠른 연결에서도 막대가 차는 모습이 보이는 최소 시간
+  var PIP_TIMEOUT = 15000;                        // pip 의 기본 --timeout: 15초 동안 한 바이트도 오지 않으면 기다리지 않고 이동
+  var install = null;
+
+  function now() { return window.performance && performance.now ? performance.now() : Date.now(); }
+  function later(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function rep(c, n) { return n > 0 ? new Array(n + 1).join(c) : ''; }
+  function padStart(s, n) { s = String(s); return s.length >= n ? s : rep(' ', n - s.length) + s; }
+
+  // 단위 · 자릿수는 rich(pip 의 진행 막대)와 같게: 1000 단위, 소수 한 자리
+  var UNITS = ['bytes', 'kB', 'MB', 'GB'];
+  function unitOf(n) { var i = 0; while (i < UNITS.length - 1 && n >= Math.pow(1000, i + 1)) i++; return i; }
+  function inUnit(n, i) { return i ? (n / Math.pow(1000, i)).toFixed(1) : String(Math.round(n)); }
+  function sizeText(n) { var i = unitOf(n); return inUnit(n, i) + ' ' + UNITS[i]; }
+  // " 12.0/314.0 kB" — 받은 양을 전체 크기와 같은 폭으로 맞춰 숫자가 흔들리지 않게
+  function dlText(got, total) {
+    var i = unitOf(total), t = inUnit(total, i);
+    return padStart(inUnit(Math.min(got, total), i), t.length) + '/' + t + ' ' + UNITS[i];
+  }
+  function speedText(bps) {
+    if (!(bps > 0)) return '?';
+    var i = Math.max(1, unitOf(bps));
+    return (bps / Math.pow(1000, i)).toFixed(1) + ' ' + UNITS[i] + '/s';
+  }
+  function etaText(sec) {
+    if (sec == null || !isFinite(sec)) return '-:--:--';
+    sec = Math.max(0, Math.floor(sec));
+    var m = Math.floor(sec / 60) % 60, s = sec % 60;
+    return Math.floor(sec / 3600) + ':' + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  // rich 의 막대: 반 칸 단위로 차고, 끝은 ╸, 채워지지 않은 쪽은 ╺ 로 시작
+  function barText(w, frac, finished) {
+    var halves = Math.floor(w * 2 * Math.max(0, Math.min(1, frac)));
+    var full = halves >> 1, half = halves & 1, rest = w - full - half;
+    var col = finished ? PC.done : PC.bar, s = '';
+    if (full) s += fmt('b', col, rep('━', full));
+    if (half) s += fmt('b', col, '╸');
+    if (rest) s += fmt('b', PC.back, !half && full ? '╺' + rep('━', rest - 1) : rep('━', rest));
+    return s;
+  }
+
+  // 진행 줄. 화면 폭(칸)에 맞춰 막대 길이를 정하고(최대 40칸, pip 과 같음), 좁으면 eta → 속도 순으로 뺍니다.
+  // 막대 길이는 속도 칸을 가장 넓은 경우(10칸)로 잡아 계산하므로 숫자가 바뀌어도 줄이 흔들리지 않습니다.
+  function progressLine(st) {
+    var cols = term ? term.cols() : 80;
+    var dl = dlText(st.shown, st.total);
+    var sp = speedText(st.speed);
+    // 속도 칸은 흔한 'xx.x MB/s'(9칸) 폭에서 시작해 넓어지기만 합니다 (늘거나 줄며 eta 가 밀리지 않게)
+    st.spW = Math.max(st.spW || 9, sp.length);
+    var eta = etaText(st.eta);
+    var ind = 5, fixed = ind + 1 + dl.length;
+    var w = Math.min(40, cols - 1 - (fixed + 1 + 10 + 5 + eta.length)), parts = 3;
+    if (w < 20) { parts = 2; w = Math.min(40, cols - 1 - (fixed + 1 + 10)); }
+    if (w < 16) { parts = 1; w = Math.max(8, Math.min(40, cols - 1 - fixed)); }
+    var s = rep(' ', ind) + barText(w, st.total ? st.shown / st.total : 1, st.finished) + ' ' + fmt('', PC.size, dl);
+    if (parts > 1) s += ' ' + fmt('', PC.speed, padStart(sp, st.spW));
+    if (parts > 2) s += ' eta ' + fmt('', PC.eta, eta);
+    return s;
+  }
+
+  // 두 칸 들여 쓴 한 줄. 화면이 좁으면(휴대폰) 낱말 사이에서 끊고 이어지는 줄은 네 칸 들여 씁니다 —
+  // 크기 '(320.1 kB)' 만 맨 앞 칸에 홀로 떨어지지 않게. 함수 줄로 찍으므로 화면 폭이 바뀌면 다시 맞춰집니다.
+  function hangingLine(words, cols) {
+    var lines = [], cur = '  ' + words[0];
+    for (var i = 1; i < words.length; i++) {
+      if (strlen(cur) + 1 + strlen(words[i]) <= cols) cur += ' ' + words[i];
+      else { lines.push(cur); cur = '    ' + words[i]; }
+    }
+    lines.push(cur);
+    return lines.map(esc).join('\n');
+  }
+
+  // 응답을 조각마다 세어 st.got 에 더합니다 (막대의 실제 진행). 내용이 필요하면(text) 글자로 모아 둡니다.
+  // onHead: 응답 머리가 오면 크기를 알려 줌 — 압축하지 않은 응답(이미지 등)만 Content-Length 가 실제 크기라서 그때만, 아니면 null
+  function grab(st, url, wantText, onHead) {
+    return fetch(url, { credentials: 'same-origin', signal: st.ctl ? st.ctl.signal : undefined }).then(function (res) {
+      if (!res.ok) { var e = new Error('HTTP error ' + res.status); e.status = res.status; e.url = url; throw e; }
+      if (onHead) onHead(res.headers.get('content-encoding') ? null : +res.headers.get('content-length') || null);
+      var n = 0, text = '', dec = wantText && window.TextDecoder ? new TextDecoder() : null;
+      function seen(chunk) {
+        n += chunk.byteLength;
+        st.got += chunk.byteLength;
+        st.lastByte = now();
+        if (dec) text += dec.decode(chunk, { stream: true });
+      }
+      function done() { if (dec) text += dec.decode(); return { url: res.url || url, bytes: n, text: text }; }
+      if (!res.body || !res.body.getReader) {
+        return res.arrayBuffer().then(function (buf) { seen(new Uint8Array(buf)); return done(); });
+      }
+      var reader = res.body.getReader();
+      return (function pump() {
+        return reader.read().then(function (r) {
+          if (r.done) return done();
+          seen(r.value);
+          return pump();
+        });
+      })();
+    });
+  }
+
+  // 갈 페이지가 첫 그림에 쓰는 같은 사이트 자산: 스타일시트 · 스크립트 · 미리 받기, 그리고 페이지가 먼저 받으라고
+  // 표시해 둔 이미지(fetchpriority=high — 글의 대표 이미지). 아이콘 · 나중에 받는(lazy) 이미지는 빼고.
+  function pageAssets(doc, base) {
+    var seen = {}, list = [];
+    $(doc).find('link[href], script[src], img[fetchpriority="high"][src]').each(function () {
+      var el = this, rel = ' ' + (el.getAttribute('rel') || '').toLowerCase() + ' ';
+      var as = (el.getAttribute('as') || '').toLowerCase();
+      var isCSS = rel.indexOf(' stylesheet ') !== -1;
+      var ok = el.tagName === 'SCRIPT' || el.tagName === 'IMG' || isCSS || rel.indexOf(' modulepreload ') !== -1 ||
+        (rel.indexOf(' preload ') !== -1 && /^(fetch|script|style|image)$/.test(as) && !el.hasAttribute('imagesrcset'));
+      if (!ok) return;
+      var u;
+      try { u = new URL(el.getAttribute(el.tagName === 'LINK' ? 'href' : 'src'), base); } catch (e) { return; }
+      var key = u.href.replace(/#.*$/, '');
+      if (seen[key]) return;
+      seen[key] = true;
+      list.push({ url: key, path: u.pathname, same: u.origin === location.origin, css: isCSS || as === 'style' });
+    });
+    return list;
+  }
+
+  // ---- 글꼴 데우기 ----------------------------------------------------
+  // 갈 페이지의 글자(코드 포인트)를 모아, 그 글자를 그리는 데 쓰일 @font-face 만 골라 미리 받습니다.
+  function pageChars(doc) {
+    var body = doc.body;
+    if (!body) return [];
+    $(body).find('script, style, template, noscript').remove();
+    var s = (doc.title || '') + (body.textContent || ''), set = {}, list = [];
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      if (c >= 0xd800 && c <= 0xdbff && i + 1 < s.length) c = (c - 0xd800) * 0x400 + s.charCodeAt(++i) - 0xdc00 + 0x10000;
+      if (c > 32 && !set[c]) { set[c] = true; list.push(c); }
+    }
+    return list.sort(function (a, b) { return a - b; });
+  }
+
+  function rangeHits(range, chars) {
+    if (!range) return chars.length > 0;
+    return range.split(',').some(function (part) {
+      var m = /u\+([0-9a-f?]+)(?:-([0-9a-f]+))?/i.exec(part);
+      if (!m) return false;
+      var lo = parseInt(m[1].replace(/\?/g, '0'), 16), hi = m[2] ? parseInt(m[2], 16) : parseInt(m[1].replace(/\?/g, 'f'), 16);
+      // chars 는 정렬돼 있으므로 lo 이상인 첫 글자만 보면 됩니다
+      var a = 0, b = chars.length;
+      while (a < b) { var mid = (a + b) >> 1; if (chars[mid] < lo) a = mid + 1; else b = mid; }
+      return a < chars.length && chars[a] <= hi;
+    });
+  }
+
+  function fontFaces(css, base) {
+    var faces = [], re = /@font-face\s*\{([^}]*)\}/g, m;
+    while ((m = re.exec(css))) {
+      var d = {}, dm, dre = /([a-z-]+)\s*:\s*([^;]+)/gi;
+      while ((dm = dre.exec(m[1]))) d[dm[1].toLowerCase()] = dm[2].trim();
+      var src = /url\(\s*(['"]?)([^'")]+)\1\s*\)\s*(format\([^)]*\))?/i.exec(d.src || '');
+      if (!d['font-family'] || !src) continue;
+      try { faces.push({ family: d['font-family'].replace(/^['"]|['"]$/g, ''), url: new URL(src[2], base).href, format: src[3] || '', d: d }); } catch (e) {}
+    }
+    return faces;
+  }
+
+  function warmFonts(st) {
+    var fonts = st.fonts;
+    if (fonts.started) return fonts.started;
+    if (!window.FontFace) return (fonts.started = Promise.resolve());
+    fonts.started = Promise.all(fonts.sheets).then(function () {
+      var used = st.css.map(function (c) { return c.text; }).join('\n'), loads = [], urls = {};
+      var faces = fonts.faces;
+      st.css.forEach(function (c) { faces = faces.concat(fontFaces(c.text, c.url)); });
+      faces.forEach(function (f) {
+        // 그 페이지의 스타일시트가 실제로 부르는 글꼴 이름만 (KaTeX 처럼 글자만으로는 필요를 알 수 없는 글꼴은 빼고)
+        if (urls[f.url] || st.over || used.indexOf(f.family) === -1 || !rangeHits(f.d['unicode-range'], fonts.chars)) return;
+        urls[f.url] = true;
+        try {
+          var face = new FontFace(f.family, 'url("' + f.url + '") ' + f.format, {
+            style: f.d['font-style'] || 'normal',
+            weight: f.d['font-weight'] || 'normal',
+            stretch: f.d['font-stretch'] || 'normal',
+            unicodeRange: f.d['unicode-range'] || 'U+0-10FFFF'
+          });
+          loads.push(face.load().catch(function () {}));
+        } catch (e) {}
+      });
+      fonts.count = loads.length;
+      return Promise.all(loads);
+    });
+    return fonts.started;
+  }
+
+  // 다른 출처의 스타일시트(Google Fonts · Pretendard): 갈 페이지와 똑같은 요청(<link>)으로 받아 캐시에 넣고
+  // (media=print 라 이 화면에는 아무 영향 없음 — Google 은 요청 종류에 따라 응답을 달리 캐시하므로 fetch 로는 안 됨),
+  // 그 안의 글꼴 목록은 CORS 로 한 번 더 읽어서 고릅니다. 이 두 번째 요청은 캐시에 쓰지 않아야(no-store)
+  // <link> 로 받아 둔 캐시 항목을 덮어쓰지 않습니다.
+  function fontSheets(st, assets) {
+    assets.forEach(function (a) {
+      if (a.same || !a.css) return;
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.media = 'print';
+      link.href = a.url;
+      document.head.appendChild(link);
+      st.links.push(link);
+      st.fonts.sheets.push(fetch(a.url, { mode: 'cors', credentials: 'omit', cache: 'no-store', signal: st.ctl ? st.ctl.signal : undefined })
+        .then(function (r) { return r.ok ? r.text() : ''; })
+        .then(function (css) { st.fonts.faces = st.fonts.faces.concat(fontFaces(css, a.url)); }, function () {}));
+    });
+  }
+
+  // ---- 설치 흐름 -------------------------------------------------------
+  // 단계: Collecting(HTML 받고 필요한 자산 고르기) → Downloading(막대) → Installing(글꼴) → Launching(이동)
+  function pipInstall(url) {
+    autoTyping = false;
+    if (install) return;
+    var st = install = {
+      url: url, got: 0, total: 0, shown: 0, speed: 0, eta: null, spW: 0,
+      t0: now(), lastByte: 0, complete: false, finished: false,
+      over: false,        // 더 진행하지 않음 (취소 · 실패 · 건너뛰기 · 이동 중)
+      launching: false,   // Launching GUI ... 를 찍음
+      left: false,        // 이동을 시작함
+      css: [], links: [], fonts: { sheets: [], faces: [], chars: [] },
+      ctl: window.AbortController ? new AbortController() : null
+    };
+    var release;
+    var held = new Promise(function (r) { release = r; });
+    st.release = function () { if (release) { release(); release = null; } };
+
+    function echo(s) { term.echo(s, { keepWords: true }); }
+    var nav = window.navigation && window.navigation.addEventListener ? window.navigation : null;
+    function bind(on) {
+      var m = on ? 'addEventListener' : 'removeEventListener';
+      window[m]('keydown', onKey, true);
+      window[m]('click', onClick, true);
+      if (!on && nav) nav.removeEventListener('navigateerror', onNavError);
+    }
+    st.unbind = function () { bind(false); };
+    st.cancel = function () { cancel(); };
+
+    // 막 시작한 직후(Enter 를 두 번 누르는 버릇, 버튼 두 번 누르기)의 입력은 건너뛰기로 치지 않고 흘려보냅니다
+    var GRACE = reduceMotion ? 0 : 300;
+    function early() { return now() - st.t0 < GRACE; }
+
+    // 터미널보다 먼저(window 캡처 단계에서) 받아, 누른 키가 명령줄로 가지 않게 합니다
+    function onKey(e) {
+      var k = e.key || '';
+      var ctrlC = e.ctrlKey && !e.altKey && !e.metaKey && (k === 'c' || k === 'C' || e.keyCode === 67);
+      // 단축키(새로고침 · 복사 · 탭 전환 …)와 보조 키 · 기능 키 · 길게 누르기는 그대로 둡니다
+      if (!ctrlC && (e.ctrlKey || e.metaKey || e.altKey || e.repeat ||
+        /^(Shift|Control|Alt|AltGraph|Meta|OS|CapsLock|NumLock|ScrollLock|Fn|FnLock|Hyper|Super|Dead)$/.test(k) || /^F\d+$/.test(k))) return;
+      // 이동을 시작한 뒤의 Esc 는 브라우저에 맡깁니다 (불러오기 멈춤 → navigateerror 로 터미널에 돌아옴)
+      if (st.left && k === 'Escape') return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (ctrlC) {
+        // 이동을 시작한 뒤라도 아직 이 페이지에 있으면(느린 연결) 이동을 멈추고 터미널로 돌아옵니다
+        if (st.left) { try { window.stop(); } catch (x) {} }
+        cancel();
+      } else if (!early()) skip();
+    }
+    function onClick(e) {
+      if (e.button) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (!early()) skip();
+    }
+    // 이동이 멈춘 경우(브라우저의 정지 버튼 · Esc · 다른 이동이 끼어듦): 이 페이지가 그대로 남으므로 터미널을 되살립니다
+    function onNavError() { cancel(); }
+    function stop() {
+      st.over = true;
+      clearInterval(st.watch);
+      if (st.raf) cancelAnimationFrame(st.raf);
+    }
+    // 화면 폭이 바뀌면 jQuery Terminal 이 함수 줄을 다시 부르므로, 끝난 막대도 새 폭에 맞춰집니다
+    function barRow() { return progressLine(st); }
+    function render() {
+      var line = progressLine(st);
+      if (line !== st.drawn) { st.drawn = line; term.update(st.line, barRow); }
+    }
+
+    function launch() {
+      if (st.launching) return;
+      stop();
+      st.launching = true;
+      echo('Launching GUI ...');
+    }
+    function goLater(ms) { clearTimeout(st.goTimer); st.goTimer = setTimeout(go, ms); }
+    function go() {
+      if (st.left || install !== st) return;
+      st.left = true;
+      st.prevMode = getMode();
+      setMode('gui');
+      // 이동이 중간에 멈추면(navigateerror) 알 수 있게 — 이동이 끝나 이 페이지를 떠나면 불리지 않습니다
+      if (nav) nav.addEventListener('navigateerror', onNavError);
+      location.href = st.url;
+    }
+    function skip() {
+      if (st.left) return;
+      launch();
+      go();
+    }
+    // 취소: 받던 것을 멈추고 터미널에 남습니다. 이동을 시작한 뒤에 불리면(이동이 멈춘 경우) 고른 모드도 되돌립니다.
+    function cancel() {
+      if (install !== st) return;
+      if (st.left) { st.left = false; setMode(st.prevMode); }
+      st.launching = false;
+      clearTimeout(st.goTimer);
+      stop();
+      bind(false);
+      if (st.ctl) { try { st.ctl.abort(); } catch (e) {} }
+      st.links.forEach(function (l) { if (l.parentNode) l.parentNode.removeChild(l); });
+      echo(fmt('', PC.error, 'ERROR: Operation cancelled by user'));
+      install = null;
+      st.release();   // 약속이 풀리면 jQuery Terminal 이 입력을 되살리고 프롬프트를 다시 띄움
+    }
+    function fail(e) {
+      if (st.over) return;
+      stop();
+      if (st.ctl) { try { st.ctl.abort(); } catch (x) {} }
+      var why;
+      // pip 의 문구를 짧게: 무엇이 실패했는지 한 줄, 그래도 GUI 로는 넘어감
+      if (e && e.timeout) why = 'Read timed out. (read timeout=' + PIP_TIMEOUT / 1000 + ')';
+      else if (e && e.status) why = 'HTTP error ' + e.status + ' while getting ' + (e.url ? new URL(e.url, location.href).pathname : st.url) + '.';
+      else why = 'Connection failed' + (navigator.onLine === false ? ' (offline)' : '') + '.';
+      echo(fmt('', PC.warn, 'WARNING: ' + why + ' Skipping download.'));
+      launch();
+      goLater(reduceMotion ? 0 : 450);
+    }
+
+    bind(true);
+    echo('Collecting ' + PKG);
+    // 오래 아무것도 오지 않으면(pip 의 read timeout) 기다리지 않고 그냥 넘어갑니다
+    st.watch = setInterval(function () {
+      if (!st.complete && now() - (st.lastByte || st.t0) > PIP_TIMEOUT) fail({ timeout: true });
+    }, 500);
+
+    grab(st, url, true).then(function (page) {
+      if (st.over) return;
+      var doc = new DOMParser().parseFromString(page.text, 'text/html');
+      var assets = pageAssets(doc, page.url);
+      st.fonts.chars = pageChars(doc);
+      st.total = page.bytes;
+      var jobs = [], sizes = [];
+      assets.forEach(function (a) {
+        if (!a.same) return;
+        var size = PIP_SIZES[a.path], sized;
+        // 빌드 때 크기를 모르는 자산(대표 이미지, 개발 서버의 livereload 등)은 응답 머리의 크기로, 그것도 없으면 다 받은 뒤의 크기로
+        if (size == null) sizes.push(new Promise(function (r) { sized = r; }));
+        else st.total += size;
+        var job = grab(st, a.url, a.css, function (len) { if (sized && len != null) sized(len); }).then(function (r) {
+          if (a.css) st.css.push({ url: r.url, text: r.text });
+          if (sized) sized(r.bytes);
+          return r;
+        });
+        // 막대가 뜨기 전에 취소돼도 처리되지 않은 거부가 콘솔에 남지 않게 (실패 자체는 아래 Promise.all 이 받음)
+        job.catch(function () { if (sized) sized(0); });
+        jobs.push(job);
+      });
+      fontSheets(st, assets);
+      // 전체 크기를 알 때까지가 Collecting
+      return Promise.all([Promise.all(sizes), later(reduceMotion ? 0 : 200)]).then(function (res) {
+        if (st.over) return;
+        res[0].forEach(function (n) { st.total += n; });
+        download(Promise.all(jobs));
+      });
+    }).catch(fail);
+
+    function download(rest) {
+      var size = '(' + sizeText(st.total) + ')';
+      term.echo(function () { return hangingLine(['Downloading', WHEEL, size], term.cols()); }, { keepWords: true });
+      // 출력 영역은 role=log 라서, 막대 줄은 화면 낭독기가 바뀔 때마다 읽지 않게 숨깁니다 (앞뒤 줄로 진행을 알 수 있음)
+      term.echo(barRow, { finalize: function (div) { div.attr('aria-hidden', 'true'); } });
+      st.line = term.last_index();
+      st.tBar = now();
+      rest.then(function () {
+        if (st.over) return;
+        st.complete = true;
+        st.tDone = st.lastByte || now();
+        st.total = st.got;   // 빌드 때 크기와 실제 응답이 다르면(드묾) 실제로 받은 양이 기준
+        warmFonts(st);       // 글꼴은 HTML · CSS · JS 를 다 받은 뒤에 (막대 쪽이 대역폭을 먼저 쓰도록), 막대가 마저 차는 동안 받습니다
+      }, fail);
+      var last = 0;
+      (function frame() {
+        if (st.over) return;
+        var t = now();
+        var timeFrac = PIP_MIN_FILL ? Math.min(1, (t - st.tBar) / PIP_MIN_FILL) : 1;
+        // 시간 곡선: 출발은 살짝 느리게, 이후 고르게 — 실제 내려받기처럼
+        var eased = timeFrac * (0.45 + 0.55 * timeFrac);
+        var real = st.total ? Math.min(1, st.got / st.total) : 1;
+        st.finished = st.complete && timeFrac >= 1;
+        var frac = st.finished ? 1 : Math.min(real, eased);
+        st.shown = Math.round(frac * st.total);
+        // 속도 = 받은 양 ÷ 실제로 받는 데 걸린 시간. 마지막 바이트 이후 기다린 시간(Collecting 의 짧은 대기,
+        // 다 받았는데 아직 완료 처리 전인 첫 프레임)은 빼되, 1초 넘게 끊기면 그만큼 속도가 서서히 떨어집니다
+        var tEnd = st.complete ? st.tDone : Math.max(st.lastByte || t, t - 1000);
+        var dt = (tEnd - st.t0) / 1000;
+        st.speed = st.got && dt > 0.001 ? st.got / dt : 0;
+        // 남은 시간 = 막대가 다 차기까지 (rich 처럼 올림 — 조금이라도 남으면 0:00:01)
+        var left = Math.max(0, PIP_MIN_FILL - (t - st.tBar)) / 1000;
+        if (!st.complete) left = st.speed ? Math.max(left, (st.total - st.got) / st.speed) : null;
+        st.eta = st.finished ? 0 : left == null ? null : Math.ceil(left);
+        // 터미널처럼 초당 30번 정도만 다시 그립니다
+        if (st.finished || t - last >= 32) { last = t; render(); }
+        if (st.finished) installStep();
+        else st.raf = requestAnimationFrame(frame);
+      })();
+    }
+
+    function installStep() {
+      clearInterval(st.watch);
+      echo('Installing collected packages: ' + PKG);
+      // 글꼴은 너무 오래 기다리지 않습니다 (못 받은 글꼴은 GUI 페이지가 이어서 받음)
+      Promise.all([
+        Promise.race([warmFonts(st), later(reduceMotion ? 150 : 1500)]),
+        later(reduceMotion ? 40 : 240)
+      ]).then(function () {
+        if (st.over) return;
+        echo('Successfully installed ' + PKG + '-' + PKG_VER);
+        return later(reduceMotion ? 0 : 140);
+      }).then(function () {
+        if (st.over) return;
+        launch();
+        goLater(reduceMotion ? 0 : 180);
+      });
+    }
+
+    return held;
+  }
+
+  // 설치 도중에 다른 페이지로 떠나면(뒤로 가기 등) 터미널을 닫은 것처럼 취소해 둡니다 — 돌아왔을 때 이어서 넘어가지 않게
+  window.addEventListener('pagehide', function () {
+    if (install && !install.left) install.cancel();
+  });
+
+  // 뒤로 · 앞으로 가기로 돌아왔을 때(bfcache): GUI 로 넘어가며 멈춰 둔 터미널을 풀고,
+  // 페이지를 떠나며 꺼진 명령줄을 다시 켭니다 (그대로 두면 클릭하기 전까지 입력이 되지 않음)
+  window.addEventListener('pageshow', function (e) {
+    if (!e.persisted) return;
+    var st = install;
+    if (st && st.left) {
+      install = null;
+      st.unbind();
+      st.links.forEach(function (l) { if (l.parentNode) l.parentNode.removeChild(l); });
+      st.release();
+    }
+    // 모바일은 키보드가 튀어나오지 않게 그대로, 글 창이 떠 있으면 창이 키를 받으므로 그대로
+    if (!term || isTouch || (window.MacReader && window.MacReader.isOpen())) return;
+    setTimeout(function () { if (!install) { term.enable(); term.focus(); } }, 0);
+  });
 
   function cmdHistory() {
     var data = term.history().data() || [];
@@ -445,7 +913,7 @@
       case 'search': case 'grep': case 'find': return cmdSearch(name, args);
       case 'tags': case 'tag': return cmdTags(args);
       case 'about': case 'whoami': return cmdAbout();
-      case 'gui': case 'startx': return goGUI(args);
+      case 'gui': case 'startx': return goGUI(name, args);
       case 'history': return cmdHistory();
       // term.clear() 는 터미널 객체를 돌려주는데, 인터프리터가 값을 돌려주면 jQuery Terminal 이 그것을 출력하려다 깨집니다
       case 'clear': term.clear(); return;
@@ -635,8 +1103,11 @@
     art.forEach(function (l) { term.echo(fmt('b', color, l.replace(/\s+$/, '') || ' '), { finalize: artLine }); });
     rest.forEach(function (l) { term.echo(l.trim() ? fmt('b', color, l) : ''); });
     if (isTouch || cols < 60) {
+      // 안내 속 gui 는 누르면 그대로 실행됩니다 (cli.css .cli-run)
+      var tip = '#ffd12e';
       term.echo('');
-      term.echo(fmt('', '#ffd12e', '모바일에서는 그래픽 모드가 더 편하다 → gui 입력 또는 오른쪽 위 [GUI] 버튼'));
+      term.echo(fmt('', tip, '모바일에서는 그래픽 모드가 더 편하다 → ') + '[[;' + tip + ';;cli-run]gui]' +
+        fmt('', tip, ' 입력 또는 오른쪽 위 [GUI] 버튼'), { keepWords: true });
     }
     term.echo('');
   }
@@ -708,8 +1179,54 @@
     return d.promise();
   }
 
+  // [GUI] 버튼 · 모바일 안내의 gui: 명령줄에 gui 를 쳐 보인 뒤 같은 설치 과정으로 갑니다.
+  // 처리했으면 true (링크 기본 동작을 막음), 터미널이 아직 준비되지 않았거나 다른 화면(less · 글 창)이 떠 있으면 false.
+  var booted = false, pendingRun = null, autoTyping = false;
+  function runCommand(cmd) {
+    if (install || autoTyping) return true;      // 이미 치는 중 · 설치 중 (설치 중 클릭은 window 캡처에서 건너뛰기로 처리됨)
+    if (!term) return false;
+    if (!booted) { pendingRun = cmd; return true; }   // 부팅 글이 끝나면 이어서
+    if (term.paused() || (term.level && term.level() > 1) || (window.MacReader && window.MacReader.isOpen())) return false;
+    term.set_command('');
+    try { term.history().append(cmd); } catch (e) {}
+    // typing: jQuery Terminal 이 프롬프트에 한 글자씩 쳐 넣은 뒤 Enter 처럼 실행 (움직임 줄이기 설정이면 바로).
+    // 글 경로처럼 긴 명령은 한 글자 간격을 줄여 전체가 0.6초 안팎에 끝나게 합니다
+    autoTyping = true;
+    var delay = Math.max(18, Math.min(70, Math.round(600 / cmd.length)));
+    term.exec(cmd, reduceMotion ? {} : { typing: true, delay: delay }).always(function () { autoTyping = false; });
+    return true;
+  }
+
+  // 글 창의 File › Open in GUI: 창을 닫고(#/경로 기록도 정리) 'gui <그 글>' 을 쳐서 같은 설치 과정으로 넘어갑니다.
+  // 지금 디렉터리 아래의 글이면 상대 경로로 짧게.
+  function readerToGUI(e) {
+    var reader = window.MacReader;
+    if (e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || !reader || !reader.isOpen()) return;
+    var a = e.target.closest && e.target.closest('.mac-overlay .mac-menubar a[href]');
+    var path = reader.currentPath();
+    if (!a || !path || !booted || install || autoTyping) return;
+    try { if (new URL(a.href).pathname !== new URL(postURL(path), location.href).pathname) return; } catch (x) { return; }
+    var here = cwd.join('/');
+    var arg = here && path.indexOf(here + '/') === 0 ? path.slice(here.length + 1) : '~/' + path;
+    if (/\s/.test(arg)) arg = '"' + arg.replace(/"/g, '\\"') + '"';
+    e.preventDefault();
+    e.stopPropagation();
+    reader.close();
+    if (!runCommand('gui ' + arg)) location.href = a.href;
+  }
+
   $(function () {
     $(document).on('click', '[data-mode-switch]', function () { setMode($(this).data('mode-switch')); });
+    document.addEventListener('click', readerToGUI, true);
+    // 버튼을 누를 때 터미널(body)이 명령줄에 포커스를 가져가지 않게 (모바일에서 키보드가 뜨지 않도록).
+    // 키보드로 버튼에 와서 Enter 를 누를 때도 터미널이 그 Enter 를 가로채지 않게 (그래야 링크가 눌림)
+    $('.cli-mode-btn').on('mousedown mouseup touchstart touchend keydown keypress', function (e) { e.stopPropagation(); })
+      .on('click', function (e) {
+        e.stopPropagation();
+        // 새 탭 · 보조 클릭은 원래 링크 그대로
+        if (e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || !runCommand('gui')) { setMode('gui'); return; }
+        e.preventDefault();
+      });
 
     $.when(fontsReady(), loadFS()).always(function () {
       term = $('body').terminal(interpreter, {
@@ -725,9 +1242,18 @@
           boot(function () {
             greet();
             routeFromHash();
+            booted = true;
+            if (pendingRun) { var c = pendingRun; pendingRun = null; runCommand(c); }
           });
         }
       });
+      term.find('.terminal-output')
+        .on('mousedown mouseup touchstart touchend', '.cli-run', function (e) { e.stopPropagation(); })
+        .on('click', '.cli-run', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          runCommand('gui');
+        });
       // 글 안의 링크로 다른 글(또는 같은 글의 #앵커)로 갈 때
       window.MacReader.onNavigate = function (path, hash) {
         var n = lookup(path.split('/'));

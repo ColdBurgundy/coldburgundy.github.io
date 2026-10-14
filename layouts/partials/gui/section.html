@@ -1,4 +1,8 @@
-{{- /* 카테고리(섹션) 페이지 */ -}}
+{{- /* 카테고리(섹션) 페이지 — 책(data/books/*.yaml 의 section 과 경로가 같은 카테고리)과 그 챕터는 책 목차 화면으로 */ -}}
+{{- $bk := partialCached "gui/book.html" . .Path -}}
+{{- if $bk.key -}}
+{{- partial "gui/book-toc.html" (dict "page" . "ctx" $bk) -}}
+{{- else -}}
 {{- $color := partial "gui/cat-color.html" . -}}
 {{- $all := .RegularPagesRecursive.ByDate.Reverse -}}
 {{- $subs := .Sections.ByWeight -}}
@@ -36,3 +40,4 @@
   {{ partial "gui/empty.html" "이 카테고리에는 아직 게시물이 없습니다." }}
   {{- end }}
 </div>
+{{- end -}}

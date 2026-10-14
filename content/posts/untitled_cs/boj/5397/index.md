@@ -1,10 +1,15 @@
-+++
-title = "$9. [BOJ] 5397 키로거"
-date = "2024-01-09"
-description = "화살표와 백스페이스가 섞인 키 입력에서 비밀번호를 복원하는 문제를 string 풀이의 시간 초과 이후 list와 반복자로 해결한 풀이"
-tags = ["BOJ", "Silver2", "자료구조", "스택", "연결 리스트"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$9. [BOJ] 5397 키로거"
+date: 2024-01-09
+description: "화살표와 백스페이스가 섞인 키 입력에서 비밀번호를 복원하는 문제를 string 풀이의 시간 초과 이후 list와 반복자로 해결한 풀이"
+tags:
+  - "BOJ"
+  - "Silver2"
+  - "자료구조"
+  - "스택"
+  - "연결 리스트"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 5397 키로거 문제 대표 이미지](images/cover.jpg)
 

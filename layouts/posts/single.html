@@ -45,7 +45,9 @@
       <h1 class="post-hero__title" data-post-title>{{ .Title }}</h1>
       <ul class="post-hero__meta">
         <li>{{ .Params.author | default site.Params.author.name }}</li>
+        {{- if not .Date.IsZero }}
         <li><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time></li>
+        {{- end }}
         {{- if $hasEn }}
         <li><span data-lang-only="ko">{{ $rtKo }}분 분량</span><span data-lang-only="en">{{ $rtEn }}분 분량</span></li>
         {{- /* 도구 막대가 없는 화면(<1280px)의 읽는 언어 스위치: 같은 동작, 옆으로 미끄러짐 */}}
@@ -58,7 +60,8 @@
       <div class="post-hero__tags">{{ range . }}{{ partial "gui/tyre.html" . }}{{ end }}</div>
       {{- end }}
     </div>
-    {{ partial "gui/trace.html" "hero" }}
+    {{ partial "gui/sky.html" "post" }}
+    {{ partial "gui/trace.html" (dict "variant" "hero" "page" .) }}
   </header>
 
   {{- /* 세 칸 그리드: 가운데 읽기 열은 언제나 화면 정중앙, 양옆 칸은 같은 너비라 레일이 열을 밀지 않습니다.
@@ -143,17 +146,34 @@
         </div>
       </footer>
 
-      {{- /* 최신순 목록에서 Prev = 더 오래된 글, Next = 더 최근 글 (같은 날짜도 순서대로) */ -}}
+      {{- /* 최신순 목록에서 Prev = 더 오래된 글, Next = 더 최근 글 (같은 날짜도 순서대로).
+             책(data/books)의 글은 날짜 대신 책 순서로 (발행된 글만, 챕터를 넘어 이어짐 — gui/book-data.html).
+             이 글과 이웃이 둘 다 차례의 절이면 '이전 절 · 다음 절', 하나라도 차례 밖의 노트면 '이전 글 · 다음 글' */ -}}
       {{- $pages := (where site.RegularPages "Section" "posts").ByDate.Reverse -}}
       {{- $older := $pages.Prev . -}}
       {{- $newer := $pages.Next . -}}
+      {{- $olderWord := "글" -}}
+      {{- $newerWord := "글" -}}
+      {{- $bk := partialCached "gui/book.html" .Parent .Parent.Path -}}
+      {{- if $bk.key -}}
+        {{- $bd := partialCached "gui/book-data.html" $bk.key $bk.key -}}
+        {{- $ord := cond .Draft $bd.orderAll $bd.order -}}
+        {{- $at := -1 }}{{ range $k, $q := $ord }}{{ if eq $q.RelPermalink $.RelPermalink }}{{ $at = $k }}{{ end }}{{ end -}}
+        {{- $older = false }}{{ $newer = false -}}
+        {{- if gt $at 0 }}{{ $older = index $ord (sub $at 1) }}{{ end -}}
+        {{- if and (ge $at 0) (lt (add $at 1) (len $ord)) }}{{ $newer = index $ord (add $at 1) }}{{ end -}}
+        {{- if index $bd.num .Path -}}
+          {{- with $older }}{{ if index $bd.num .Path }}{{ $olderWord = "절" }}{{ end }}{{ end -}}
+          {{- with $newer }}{{ if index $bd.num .Path }}{{ $newerWord = "절" }}{{ end }}{{ end -}}
+        {{- end -}}
+      {{- end -}}
       {{- if or $older $newer }}
-      <nav class="laps" aria-label="이전/다음 글">
+      <nav class="laps" aria-label="이전/다음 {{ if eq $olderWord $newerWord }}{{ $olderWord }}{{ else }}글{{ end }}">
         {{- with $older }}
-        <a class="lap lap--prev" href="{{ .RelPermalink }}"><span class="lap__dir">이전 글</span><span class="lap__title">{{ .Title }}</span></a>
+        <a class="lap lap--prev" href="{{ .RelPermalink }}"><span class="lap__dir">이전 {{ $olderWord }}</span><span class="lap__title">{{ .Title }}</span></a>
         {{- else }}<span class="lap lap--empty"></span>{{ end }}
         {{- with $newer }}
-        <a class="lap lap--next" href="{{ .RelPermalink }}"><span class="lap__dir">다음 글</span><span class="lap__title">{{ .Title }}</span></a>
+        <a class="lap lap--next" href="{{ .RelPermalink }}"><span class="lap__dir">다음 {{ $newerWord }}</span><span class="lap__title">{{ .Title }}</span></a>
         {{- end }}
       </nav>
       {{- end }}
@@ -167,7 +187,7 @@
       <section class="related" aria-labelledby="related-title">
         <header class="section-head section-head--row">
           <div><h2 class="section-title" id="related-title">함께 보면 좋은 글</h2></div>
-          {{ with $.Parent }}<a class="link-more" href="{{ .RelPermalink }}">{{ .Title }} 전체 보기 →</a>{{ end }}
+          {{ with $.Parent }}<a class="link-more" href="{{ .RelPermalink }}">{{ partial "gui/cat-label.html" . }} 전체 보기 →</a>{{ end }}
         </header>
         {{- $v := cond (eq (len .) 1) "row" "grid" }}
         <div class="{{ if eq $v "row" }}post-list{{ else }}grid-cards grid-cards--2{{ end }}">

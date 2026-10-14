@@ -71,6 +71,58 @@
     }, 1600);
   }
 
+  /* ---------- 서킷 데이터: 텔레메트리 트레이스 · 별자리 · 트랙 맵이 함께 쓰는 한 바퀴 ----------
+     assets/data/circuits.json (지문 붙은 주소 — head.html 이 CSS 와 나란히 미리 받아 둠)을 페이지마다 한 번만 불러와
+     서킷 하나를 무작위로 고릅니다(방금 본 페이지의 서킷은 빼고 — sessionStorage dl-circuit). 글 페이지에서는 머리의 트레이스 · 별자리와
+     레일의 트랙 맵이 같은 서킷이라 한 페이지가 한 바퀴 이야기를 합니다.
+     4초 안에 오지 않거나 실패하면 null — 모두 빌드 때 그려 둔 기본 서킷 그대로 (늦게 온 응답으로 바꿔 끼우지 않음). */
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  function circuitOK(c) {
+    if (!c || typeof c.d !== 'string' || !/^\s*[Mm]/.test(c.d) || typeof c.viewBox !== 'string') return false;
+    var v = c.viewBox.trim().split(/[\s,]+/).map(Number);
+    return v.length === 4 && v.every(isFinite) && v[2] > 0 && v[3] > 0;
+  }
+  function speedOK(c) {
+    return Array.isArray(c.speed) && c.speed.length >= 24 && c.speed.every(function (v) { return typeof v === 'number' && v > 0 && isFinite(v); });
+  }
+  var circuitsP = null, pickP = null;
+  function loadCircuits() {
+    if (circuitsP) return circuitsP;
+    circuitsP = new Promise(function (res) {
+      var src = CFG.circuitsURL;
+      if (!src || !w.fetch) { res([]); return; }
+      var done = false;
+      var timer = setTimeout(function () { fin([]); }, 4000);
+      function fin(list) { if (!done) { done = true; clearTimeout(timer); res(list); } }
+      fetch(src).then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
+        fin(data && Array.isArray(data.circuits) ? data.circuits.filter(circuitOK) : []);
+      }).catch(function () { fin([]); });
+    });
+    return circuitsP;
+  }
+  function pickCircuit() {
+    if (!pickP) pickP = loadCircuits().then(function (list) {
+      if (!list.length) return null;
+      // 트레이스 · 별자리 · 트랙 맵이 언제나 같은 서킷이도록, 속도 자료가 있는 서킷만 (하나도 없으면 모양만이라도)
+      var withSpeed = list.filter(speedOK);
+      if (withSpeed.length) list = withSpeed;
+      var last = store('sessionStorage', 'dl-circuit');
+      var pool = list.filter(function (c) { return String(c.id) !== last; });
+      if (!pool.length) pool = list;
+      var c = pool[Math.floor(Math.random() * pool.length)];
+      store('sessionStorage', 'dl-circuit', String(c.id));
+      return c;
+    });
+    return pickP;
+  }
+  // 경로 문자열(M · L · Z 만 쓰는 꺾은선)의 점들
+  function pathPts(dStr) {
+    var m = String(dStr).match(/-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi) || [], pts = [];
+    for (var i = 0; i + 1 < m.length; i += 2) pts.push([+m[i], +m[i + 1]]);
+    return pts;
+  }
+  function r1(v) { return String(Math.round(v * 10) / 10); }
+
   /* ---------- 모드 전환 기억 ---------- */
   d.addEventListener('click', function (e) {
     var a = e.target.closest('[data-mode-switch]');
@@ -80,7 +132,8 @@
   /* ---------- nav ---------- */
   var nav = $('[data-nav]');
   var toTop = $('[data-to-top]');
-  var lastY = -1, compact = false;
+  var lastY = -1;
+  var rootCls = d.documentElement.classList;
   // 아래 scroll loop 의 rAF 한 번 안에서 호출됩니다 (스크롤 리스너는 하나뿐)
   function onScrollBase() {
     var y = w.scrollY || d.documentElement.scrollTop;
@@ -91,10 +144,15 @@
     /* ---------- 휠 컴팩트 모드: 스크롤하면 상단바가 살짝 올라가며 얇아집니다 ----------
        내려갈 때는 72px 를 넘어야 켜지고, 올라올 때는 24px 위로 와야 꺼집니다(히스테리시스 → 경계에서 깜빡임 없음).
        움직임은 CSS(.wheel.is-compact)가 담당 — 고정 헤더 안에서만 바뀌어 본문은 밀리지 않고,
-       prefers-reduced-motion 이면 전환 시간이 사실상 0 입니다. 시프트 라이트는 두 상태 모두 그대로 동작. */
-    var next = compact ? y > 24 : y > 72;
-    if (nav && next !== compact) { compact = next; nav.classList.toggle('is-compact', compact); }
+       prefers-reduced-motion 이면 전환 시간이 사실상 0 입니다. 시프트 라이트는 두 상태 모두 그대로 동작.
+       상태는 클래스 그대로 읽습니다 — 페이지 전환으로 넘어올 때 head.html 이 지난 페이지의 얇은 휠을 이어 붙여 두기 때문.
+       전환하는 동안(html.vt-wheel)은 바꾸지 않고, 끝나면(dl:vt-end) 지금 위치로 다시 정합니다 */
+    if (nav && !rootCls.contains('vt-wheel')) {
+      var cur = nav.classList.contains('is-compact'), next = cur ? y > 24 : y > 72;
+      if (next !== cur) nav.classList.toggle('is-compact', next);
+    }
   }
+  w.addEventListener('dl:vt-end', function () { lastY = -1; onScrollBase(); });
   if (toTop) toTop.addEventListener('click', function () { w.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); });
 
   $$('[data-drop]').forEach(function (item) {
@@ -121,6 +179,12 @@
     d.addEventListener('click', function (e) { if (!item.contains(e.target)) set(false); });
     item.addEventListener('focusout', function (e) { if (!item.contains(e.relatedTarget)) set(false); });
     item.addEventListener('keydown', function (e) { if (e.key === 'Escape') { set(false); btn.focus(); } });
+    // 메뉴에서 다른 페이지로 떠날 때 닫아 둡니다 — 뒤로 가기로 이 페이지가 그대로 돌아와도(bfcache) 열린 채로 남지 않게.
+    // 전환이 있으면 떠나는 순간(pageswap — 마지막 그림이 닫힌 모습이 되게), 없으면 pagehide 에서
+    function shut() { clearTimeout(timer); item.classList.add('is-leaving'); set(false); }
+    w.addEventListener('pageswap', shut);
+    w.addEventListener('pagehide', shut);
+    w.addEventListener('pageshow', function () { item.classList.remove('is-leaving'); });
   });
 
   /* ---------- mobile drawer ---------- */
@@ -143,8 +207,16 @@
     d.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !drawer.hidden) setDrawer(false); });
   }
 
-  /* ---------- hero: 출발 신호 + 타이핑 ---------- */
+  /* ---------- hero: 출발 신호 + 타이핑 ----------
+     "Notes on ___" 의 단어는 카테고리마다 적어 둔 heroWords 전부 + config 의 추가 단어 (home.html). 첫 단어는 home.html 의 인라인 스크립트가
+     첫 그림 전에 무작위로 골라 두었고, 그다음부터는 열 때마다 새로 섞은 순서로 한 바퀴 — 모든 단어가 한 번씩 나오기 전에는 같은 단어가
+     다시 나오지 않습니다. 한 바퀴가 끝나면 다시 섞되 방금 나온 단어가 곧바로 이어지지 않게.
+     움직임 줄이기 설정이면 타이핑 없이 그 무작위 단어 하나만. 히어로가 화면 밖이거나 탭이 숨어 있으면 쉬었다가 이어 갑니다. */
   var hero = $('[data-hero]');
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
   function startTyping() {
     var el = $('.hero__typed', hero);
     if (!el) return;
@@ -157,16 +229,26 @@
     said.className = 'sr-only';
     said.textContent = words.join(', ');
     el.parentNode.insertBefore(said, el);
-    var wi = 0, ci = words[0].length, deleting = true;
+    var word = el.textContent;
+    if (words.indexOf(word) === -1) word = words[0];
+    // 첫 바퀴: 지금 보이는 단어를 뺀 나머지를 섞어서. 다음 바퀴부터는 전부 섞되 방금 단어로 시작하지 않게
+    var bag = shuffle(words.filter(function (x) { return x !== word; }));
+    function nextWord() {
+      if (!bag.length) {
+        bag = shuffle(words.slice());
+        if (bag[0] === word) bag.push(bag.shift());
+      }
+      return bag.shift();
+    }
+    var ci = word.length, deleting = true;
     (function tick() {
-      var word = words[wi];
+      if (d.hidden || hero.classList.contains('is-offscreen')) return setTimeout(tick, 400);
       if (deleting) {
         ci--;
         el.textContent = word.slice(0, ci);
-        if (ci <= 0) { deleting = false; wi = (wi + 1) % words.length; }
+        if (ci <= 0) { deleting = false; word = nextWord(); }
         return setTimeout(tick, ci <= 0 ? 260 : 38);
       }
-      word = words[wi];
       ci++;
       el.textContent = word.slice(0, ci);
       if (ci >= word.length) { deleting = true; return setTimeout(tick, 1900); }
@@ -221,8 +303,223 @@
     });
   }
 
-  if (hero && 'IntersectionObserver' in w) {
-    new IntersectionObserver(function (en) { hero.classList.toggle('is-offscreen', !en[0].isIntersecting); }).observe(hero);
+  /* ---------- 텔레메트리 트레이스 + 서킷 별자리 ----------
+     히어로마다(홈 · 목록 · 글 · 404) 맨 아래의 속도 트레이스와 옅은 서킷 별자리는 같은 서킷 한 바퀴입니다 (글 페이지는 트랙 맵까지).
+     트레이스: 가로 = 랩 거리(같은 거리 간격의 계산된 속도 240점), 세로 = 속도 (350 km/h = 8, 70 km/h = 52 — trace-path.html 과 같은 식).
+       빌드 때 이 페이지의 기본 서킷으로 그려 둔 것을 무작위 서킷으로 바꿉니다: 선이 그려지기 시작하기 전(0.3초)이면 그대로 바꿔 끼우고,
+       이미 그리는 중이면 살짝 흐렸다가 새 서킷을 처음부터 다시 그립니다.
+       흰 점(차)은 실제 속도대로 달립니다 — 브레이킹에서 느려지고 탈출에서 빨라짐. 위치는 화면 px 로 계산한 transform 키프레임이라
+       컴포지터가 돌리고(메인 스레드 일 없음), 창 크기가 바뀌면 키프레임만 다시 씁니다. (스크립트가 없으면 CSS 의 흰 펄스)
+     별자리: 윤곽의 꺾이는 곳(단순화한 정점) · 코너 정점(apex) · 긴 직선 사이에 별을 두고, 레이스 방향 순서로 옅게 잇습니다. 출발선은 붉은 별.
+     화면 밖 히어로는 반짝임 · 펄스를 멈춥니다(.is-offscreen). 움직임 줄이기 설정이면 펄스 없음 · 반짝임은 CSS 가 멈춤. */
+  var TRACE_HOSTS = '.hero, .page-hero, .post-hero, .dnf';
+  var traceItems = $$('[data-trace]').map(function (tr) {
+    return { trace: tr, host: tr.closest(TRACE_HOSTS) || tr.parentNode, svg: $('.trace__svg', tr), ghost: $('.trace__ghost', tr),
+      line: $('.trace__line', tr), pulse: $('.trace__pulse', tr), car: $('.trace__car', tr), anim: null, lap: null, samples: null };
+  });
+  var skies = $$('[data-sky]');
+  function speedY(v) { return 8 + (350 - Math.max(70, Math.min(350, v))) / 280 * 44; }
+  function ySpeed(y) { return 350 - (y - 8) / 44 * 280; }
+  // 점 사이는 Catmull-Rom 곡선 (첫 구간 C, 나머지는 앞 제어점을 되비추는 S) — trace-path.html 과 같은 모양. 한 바퀴라 끝의 이웃은 반대쪽 값
+  function traceD(sp) {
+    var n = sp.length, dx = 1200 / n;
+    function y(i) { return speedY(sp[((i % n) + n) % n]); }
+    var out = 'M0 ' + r1(y(0));
+    for (var j = 0; j < n; j++) {
+      var x = (j + 1) * dx, c2 = r1(x - dx / 3) + ' ' + r1(y(j + 1) - (y(j + 2) - y(j)) / 6), pt = r1(x) + ' ' + r1(y(j + 1));
+      out += j ? 'S' + c2 + ' ' + pt : 'C' + r1(dx / 3) + ' ' + r1(y(0) + (y(1) - y(-1)) / 6) + ' ' + c2 + ' ' + pt;
+    }
+    return out;
+  }
+  // 흰 점(차): 같은 거리마다 걸린 시간(거리 / 평균 속도)을 쌓아 시간 비율 → 그 자리의 화면 좌표(px) 키프레임 (2점마다 하나).
+  // 트레이스 상자 크기가 바뀌면 carFrames 만 다시 — 달리던 자리 · 박자는 그대로
+  function carFrames(it) {
+    var lp = it.lap, tr = it.trace.getBoundingClientRect(), sv = it.svg.getBoundingClientRect(), frames = [];
+    for (var k = 0; k < lp.T.length; k += 2) {
+      var i = Math.min(k, lp.n);
+      frames.push({ offset: lp.T[i], transform: 'translate(' + (i / lp.n * tr.width).toFixed(1) + 'px,' + (speedY(lp.sp[i % lp.n]) / 60 * sv.height).toFixed(1) + 'px)' });
+    }
+    if (frames[frames.length - 1].offset < 1) frames.push({ offset: 1, transform: 'translate(' + tr.width.toFixed(1) + 'px,' + (speedY(lp.sp[0]) / 60 * sv.height).toFixed(1) + 'px)' });
+    return frames;
+  }
+  function startCar(it, c, delay) {
+    if (reduce || !it.car || !it.car.animate) return;
+    var sp = c.speed, n = sp.length, t = 0, T = [0];
+    for (var i = 1; i <= n; i++) { t += 2 / (sp[i - 1] + sp[i % n]); T.push(t); }
+    it.lap = { sp: sp, n: n, T: T.map(function (v) { return v / t; }) };
+    // 실제 랩 타임(길이 / 평균 속도)을 13배 빠르게, 5.5 ~ 9초 사이로
+    var lapS = (+c.length || 5000) / n * 3.6 * t;
+    if (it.anim) it.anim.cancel();
+    it.trace.classList.add('is-data');
+    it.anim = it.car.animate(carFrames(it), { duration: Math.max(5500, Math.min(9000, lapS / 13 * 1000)), delay: delay, iterations: Infinity, fill: 'backwards' });
+    if (it.host.classList.contains('is-offscreen')) it.anim.pause();
+  }
+  var carFitT = 0;
+  w.addEventListener('resize', function () {
+    clearTimeout(carFitT);
+    carFitT = setTimeout(function () {
+      traceItems.forEach(function (it) { if (it.anim && it.lap && it.anim.effect && it.anim.effect.setKeyframes) it.anim.effect.setKeyframes(carFrames(it)); });
+    }, 150);
+  }, { passive: true });
+  // 선 그리기(CSS trace-draw, 0.3초 뒤 시작)가 얼마나 지났는지
+  function drawElapsed(it) {
+    try { var an = it.line.getAnimations()[0]; if (an && an.currentTime != null) return an.currentTime; } catch (e) {}
+    return performance.now();
+  }
+  function applyTrace(it, c) {
+    var dStr = traceD(c.speed);
+    function put() {
+      [it.ghost, it.line, it.pulse].forEach(function (p) { if (p) p.setAttribute('d', dStr); });
+      it.samples = null;
+      it.trace.setAttribute('data-circuit', c.id || '');
+    }
+    var t = drawElapsed(it);
+    if (reduce || t < 240) { put(); startCar(it, c, Math.max(0, 2600 - t)); return; }
+    it.trace.classList.add('is-swap');
+    setTimeout(function () {
+      put();
+      it.line.style.animation = 'none';
+      void it.line.getBoundingClientRect();
+      it.line.style.animation = '';
+      it.line.style.animationDelay = '.08s';
+      it.trace.classList.remove('is-swap');
+      startCar(it, c, 2400);
+    }, 200);
+  }
+
+  // 별자리 도우미: 선분까지 거리 · 단순화(Ramer–Douglas–Peucker) · 서킷마다 같은 난수(먼지 별 자리 · 반짝임 박자)
+  function dist2(p, q) { var x = p[0] - q[0], y = p[1] - q[1]; return x * x + y * y; }
+  function segDist(p, a, b) {
+    var l2 = dist2(a, b);
+    if (!l2) return Math.sqrt(dist2(p, a));
+    var t = Math.max(0, Math.min(1, ((p[0] - a[0]) * (b[0] - a[0]) + (p[1] - a[1]) * (b[1] - a[1])) / l2));
+    return Math.sqrt(dist2(p, [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])]));
+  }
+  function rdp(pts, eps) {
+    var keep = [0, pts.length - 1], stack = [[0, pts.length - 1]];
+    while (stack.length) {
+      var ab = stack.pop(), a = ab[0], b = ab[1], far = -1, fd = eps;
+      for (var i = a + 1; i < b; i++) { var dd = segDist(pts[i], pts[a], pts[b]); if (dd > fd) { fd = dd; far = i; } }
+      if (far !== -1) { keep.push(far); stack.push([a, far], [far, b]); }
+    }
+    return keep.sort(function (x, y) { return x - y; });
+  }
+  function seeded(str) {
+    var h = 1779033703 ^ str.length;
+    for (var i = 0; i < str.length; i++) { h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = h << 13 | h >>> 19; }
+    return function () {
+      h = Math.imul(h ^ h >>> 16, 2246822507); h = Math.imul(h ^ h >>> 13, 3266489909); h ^= h >>> 16;
+      return (h >>> 0) / 4294967296;
+    };
+  }
+  var STAR = [['dust', 1], ['3', 1.1], ['2', 1.6], ['1', 2.4], ['eye', 2.1]];   // k → [bull__star 모양, 반지름 px]
+  function drawSky(sky, c) {
+    var svg = $('.sky__svg', sky), nameEl = $('.sky__name', sky);
+    var pts = pathPts(c.d);
+    if (pts.length < 4) return;
+    var p0 = pts[0], pl = pts[pts.length - 1];
+    if (p0[0] !== pl[0] || p0[1] !== pl[1]) pts.push([p0[0], p0[1]]);   // 닫힌 한 바퀴
+    var cum = [0], x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    pts.forEach(function (p, i) {
+      if (i) cum.push(cum[i - 1] + Math.sqrt(dist2(p, pts[i - 1])));
+      x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]);
+    });
+    var L = cum[cum.length - 1], size = Math.max(x1 - x0, y1 - y0);
+    if (!(L > 0) || !(size > 0)) return;
+    function at(f) {   // 랩 비율 f 의 자리
+      var s = (f - Math.floor(f)) * L, lo = 0, hi = cum.length - 1;
+      while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (cum[mid] <= s) lo = mid; else hi = mid; }
+      var k = (s - cum[lo]) / (cum[hi] - cum[lo] || 1);
+      return [pts[lo][0] + (pts[hi][0] - pts[lo][0]) * k, pts[lo][1] + (pts[hi][1] - pts[lo][1]) * k];
+    }
+    // 1) 별 후보: 출발선(4) · 코너 정점(3) · 윤곽이 꺾이는 곳(2)
+    var cand = [{ f: 0, k: 4 }];
+    (Array.isArray(c.apex) ? c.apex : []).forEach(function (f) { if (isFinite(f)) cand.push({ f: f - Math.floor(f), k: 3 }); });
+    rdp(pts, size * 0.016).forEach(function (i) { cand.push({ f: cum[i] / L, k: 2 }); });
+    cand.forEach(function (st) { st.p = at(st.f); });
+    // 2) 너무 가까운 별은 하나로 — 밝은 별부터 자리를 잡습니다
+    var minD = size * 0.034, kept = [];
+    cand.sort(function (a, b) { return b.k - a.k || a.f - b.f; }).forEach(function (st) {
+      var lim = (st.k >= 3 ? minD * 0.62 : minD);
+      for (var j = 0; j < kept.length; j++) if (dist2(kept[j].p, st.p) < lim * lim) return;
+      kept.push(st);
+    });
+    kept.sort(function (a, b) { return a.f - b.f; });
+    // 3) 긴 직선: 이웃 별 사이가 멀면 흐린 별(1)을 고르게
+    var gap = size * 0.13, stars = [];
+    kept.forEach(function (st, i) {
+      stars.push(st);
+      var nx = kept[(i + 1) % kept.length], df = (nx.f - st.f + 1) % 1 || 1, m = Math.floor(df * L / gap);
+      for (var q = 1; q <= m; q++) { var f = (st.f + df * q / (m + 1)) % 1; stars.push({ f: f, k: 1, p: at(f) }); }
+    });
+    // 4) 둘레의 먼지 별(0) — 서킷마다 같은 자리, 선 · 별과 겹치지 않게
+    var rnd = seeded(String(c.id || c.name || 'circuit')), pad = size * 0.07, dust = [];
+    for (var tries = 0; tries < 60 && dust.length < 7; tries++) {
+      var dp = [x0 - pad + rnd() * (x1 - x0 + 2 * pad), y0 - pad + rnd() * (y1 - y0 + 2 * pad)], ok = true;
+      for (var z = 0; z < stars.length && ok; z++) if (dist2(stars[z].p, dp) < size * size * 0.006) ok = false;
+      if (ok) dust.push({ k: 0, p: dp });
+    }
+    // 상자 비율 = 서킷 비율 (CSS 가 --sky-w × --sky-h 안에 맞춤). 별 크기 · 빛 번짐은 화면 px 기준 (--u = 사용자 단위/px)
+    var vb = [x0 - pad, y0 - pad, x1 - x0 + 2 * pad, y1 - y0 + 2 * pad];
+    sky.style.setProperty('--ar', (vb[2] / vb[3]).toFixed(4));
+    sky.classList.toggle('is-narrow', vb[2] / vb[3] < 0.42);   // 아주 길쭉한 서킷 — 좁은 화면에선 띄우지 않음 (gui.css)
+    svg.setAttribute('viewBox', vb.map(r1).join(' '));
+    var box = svg.getBoundingClientRect();
+    var u = box.width > 0 ? Math.max(vb[2] / box.width, vb[3] / box.height) : size / 300;
+    sky.style.setProperty('--u', u.toFixed(3));
+    var frag = d.createDocumentFragment();
+    var line = d.createElementNS(SVGNS, 'path');
+    line.setAttribute('class', 'sky__line');
+    line.setAttribute('d', 'M' + stars.map(function (st) { return r1(st.p[0]) + ' ' + r1(st.p[1]); }).join('L') + 'Z');
+    frag.appendChild(line);
+    // 반짝임은 별마다가 아니라 네 무리로 (별들을 번갈아 나눠 담음) — 움직이는 요소가 넷뿐이라 매 프레임 스타일 계산이 가볍습니다
+    var tw = [3.4, 4.3, 5.2, 6.3].map(function (dur) {
+      var g = d.createElementNS(SVGNS, 'g');
+      g.setAttribute('class', 'sky__tw');
+      g.setAttribute('style', '--d:' + dur + 's;--t:' + (-rnd() * 6).toFixed(2) + 's');
+      frag.appendChild(g);
+      return g;
+    });
+    dust.concat(stars).sort(function (a, b) { return a.k - b.k; }).forEach(function (st, i) {
+      var el = d.createElementNS(SVGNS, 'circle'), sh = STAR[st.k];
+      el.setAttribute('class', 'bull__star bull__star--' + sh[0]);
+      el.setAttribute('cx', r1(st.p[0]));
+      el.setAttribute('cy', r1(st.p[1]));
+      el.setAttribute('r', (sh[1] * (st.k ? 1 : 0.7 + rnd() * 0.6) * u).toFixed(2));
+      tw[i % tw.length].appendChild(el);
+    });
+    svg.textContent = '';
+    svg.appendChild(frag);
+    if (nameEl) {
+      nameEl.textContent = '';
+      var nm = d.createElement('span');
+      nm.textContent = String(c.name || '');
+      nameEl.appendChild(nm);
+      if (+c.length > 0) {
+        var km = d.createElement('small');
+        km.textContent = (c.length / 1000).toFixed(3) + ' km';
+        nameEl.appendChild(km);
+      }
+    }
+    requestAnimationFrame(function () { sky.classList.add('is-in'); });
+  }
+  if (traceItems.length || skies.length) {
+    pickCircuit().then(function (c) {
+      if (!c) return;
+      if (speedOK(c)) traceItems.forEach(function (it) { applyTrace(it, c); });
+      skies.forEach(function (sk) { try { drawSky(sk, c); } catch (e) {} });
+    });
+  }
+  // 화면 밖 히어로: 반짝임 · 트레이스 · 타이핑을 쉬게 합니다
+  if ('IntersectionObserver' in w) {
+    var hostIO = new IntersectionObserver(function (en) {
+      en.forEach(function (e) {
+        var off = !e.isIntersecting;
+        e.target.classList.toggle('is-offscreen', off);
+        traceItems.forEach(function (it) { if (it.host === e.target && it.anim) { if (off) it.anim.pause(); else it.anim.play(); } });
+      });
+    });
+    $$(TRACE_HOSTS).forEach(function (h) { hostIO.observe(h); });
   }
 
   /* ---------- 카운터 / reveal ---------- */
@@ -841,10 +1138,9 @@
      섹터 n 은 그 섹터 첫 소제목부터 다음 섹터 첫 소제목까지의 본문 구간(첫 섹터는 글 첫머리부터). 경계는 경로 길이의 비율.
      색은 위 타이밍 규칙(보라 · 초록 · 노랑, 한 번 칠하면 유지), 지금 섹터는 마지막 색 + 숨 쉬는 테두리.
      차는 같은 스크롤 rAF 에서 목표를 받고 부드럽게 따라가며(트랙 위로만), 움직임 줄이기 설정이면 곧바로 그 자리에 섭니다.
-     서킷: data-circuits(assets/data/circuits.json, 지문 붙은 주소)를 맵이 실제로 보일 때 한 번 불러와 무작위로 하나.
-     실패하거나 서킷이 없으면 템플릿에 그려 둔 기본 서킷. 선 굵기 · 차 · 눈금은 화면 px 기준(--u = 사용자 단위/px)이라 서킷 크기와 무관. */
+     서킷: 페이지가 고른 서킷(pickCircuit — 글 머리의 트레이스 · 별자리와 같은 한 바퀴)을 맵이 실제로 보일 때 그려 넣습니다.
+     데이터를 못 받으면 템플릿에 그려 둔 기본 서킷(트레이스의 기본값과 같은 서킷). 선 굵기 · 차 · 눈금은 화면 px 기준(--u = 사용자 단위/px)이라 서킷 크기와 무관. */
   var tmap = body && $('[data-trackmap]');
-  var SVGNS = 'http://www.w3.org/2000/svg';
   var tm = null;
   if (tmap) {
     tm = { svg: $('[data-track-svg]', tmap), bed: $('[data-track-bed]', tmap), line: $('[data-track-line]', tmap), halo: $('[data-track-halo]', tmap),
@@ -942,11 +1238,6 @@
     if (reduce) { tm.at = tm.to; drawMap(); return; }
     if (!tm.raf) carStep();   // 이번 프레임에 한 걸음, 남은 거리는 다음 프레임들에서
   }
-  function circuitOK(c) {
-    if (!c || typeof c.d !== 'string' || !/^\s*[Mm]/.test(c.d) || typeof c.viewBox !== 'string') return false;
-    var v = c.viewBox.trim().split(/[\s,]+/).map(Number);
-    return v.length === 4 && v.every(isFinite) && v[2] > 0 && v[3] > 0;
-  }
   // 이름 · 도시 · 나라 (나라는 도시와 같으면 생략, 좁은 레일에선 CSS 가 숨김)
   function label(c) {
     var a = String(c.location || '').trim(), b = String(c.country || '').trim(), nm = String(c.name || '').trim();
@@ -979,17 +1270,10 @@
     tmap.classList.remove('is-loading');
     onScroll();
   }
+  // 서킷은 페이지가 고른 것(pickCircuit — 글 머리의 트레이스 · 별자리와 같은 서킷). 못 고르면(null) 빌드 때 그려 둔 기본 서킷
   function loadCircuit() {
     tm.asked = true;
-    var src = tmap.getAttribute('data-circuits');
-    if (!src || !w.fetch) { useCircuit(null); return; }
-    var settled = false;
-    function settle(c) { if (settled) return; settled = true; clearTimeout(timer); useCircuit(c); }
-    var timer = setTimeout(function () { settle(null); }, 4000);   // 느린 망: 기본 서킷으로 (늦게 온 응답으로 바꿔 끼우지 않음)
-    fetch(src).then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
-      var list = data && Array.isArray(data.circuits) ? data.circuits.filter(circuitOK) : [];
-      settle(list.length ? list[Math.floor(Math.random() * list.length)] : null);
-    }).catch(function () { settle(null); });
+    pickCircuit().then(useCircuit);
   }
   // 맵이 실제로 보일 때만 서킷을 고릅니다: 펼쳐져 있고, 레일 화면이거나 목차 서랍이 열려 있을 때
   function ensureMap() {
@@ -1381,11 +1665,8 @@
     /* 히어로: 패럴랙스 · 스포트라이트는 히어로 위에서만, 속도 트레이스의 커서/읽음표는 트레이스 띠 위에서만.
        판정은 포인터 아래 '맨 위' 요소로 합니다 → 히어로를 덮는 고정 헤더(휠)·드롭다운·서랍·검색창 위에서는
        아무것도 반응하지 않습니다. 화면을 가로질러 커서를 따라다니는 것은 없습니다. */
-    var HOSTS = '.hero, .page-hero, .post-hero, .dnf';
-    var traceHosts = $$(HOSTS).map(function (host) {
-      var tr = $('[data-trace]', host);
-      return tr ? { host: host, trace: tr, samples: null } : null;
-    }).filter(Boolean);
+    var HOSTS = TRACE_HOSTS;
+    var traceHosts = traceItems;   // 서킷이 바뀌면 applyTrace 가 samples 를 비워 다시 잽니다
     var liveHost = null;
     function sampleTrace(item) {
       var path = $('.trace__line', item.trace);
@@ -1432,7 +1713,7 @@
       var Y = traceY(item, f * 1200);
       item.trace.style.setProperty('--tx', (f * trr.width).toFixed(1) + 'px');
       item.trace.style.setProperty('--ty', (Y / 60 * svgH).toFixed(1) + 'px');
-      var kmh = Math.round(345 - (Y - 10) / 42 * 263);
+      var kmh = Math.round(ySpeed(Y));   // 트레이스 세로 = 속도 (trace-path.html 과 같은 식을 거꾸로)
       $('.trace__read', item.trace).textContent = 'S' + (f < 1 / 3 ? 1 : f < 2 / 3 ? 2 : 3) + ' · ' + kmh + ' KM/H';
       item.trace.classList.toggle('is-flip', f > 0.8);
       item.trace.classList.add('is-live');
@@ -1609,6 +1890,258 @@
     } catch (err) {}
   });
   syncSwitches();
+
+  /* ---------- 책 목차 (partials/gui/book-toc.html) ----------
+     챕터 고르개를 탭(role=tablist)으로 바꿉니다. 고르면 같은 페이지에서 그 챕터의 절 목록으로 바꾸고 주소를 그 챕터 페이지로(pushState) —
+     뒤로 · 앞으로(popstate) · 새로 고침 · 공유가 모두 그 챕터를 엽니다(챕터 페이지는 그 챕터가 열린 같은 화면). 경로 줄의 책 이름을 누르면 책 첫 화면으로.
+     키보드: 화살표 · Home · End 로 옮기면 곧바로 그 챕터(처음 한 번만 기록에 쌓고, 이어지는 키 이동은 그 기록을 고쳐 씀 — 뒤로 가기 한 번이면 고르기 전으로),
+     Enter · Space 는 누른 것과 같음. 새 탭으로 열기(Ctrl · ⌘ · Shift · 가운데 클릭)는 그대로 링크.
+     고른 판은 받침(.book__pill)이 미끄러져 옮겨 가고, 새 목록은 짧게 떠오릅니다(움직임 줄이기 설정이면 곧바로).
+     휠 LCD · 경로 줄 · 문서 제목도 그 챕터로 맞추고, 긴 목록을 내려 읽던 중이었다면 새 챕터의 머리로 올려 줍니다 */
+  var book = $('[data-book]');
+  var bookList = book && $('[data-book-tabs]', book);
+  if (bookList) (function () {
+    var tabs = $$('[data-book-tab]', book);
+    var keys = tabs.map(function (t) { return t.getAttribute('data-book-tab'); });
+    var panels = {};
+    $$('[data-book-panel]', book).forEach(function (p) { panels[p.getAttribute('data-book-panel')] = p; });
+    var onTab = tabs.filter(function (t) { return t.classList.contains('is-on'); })[0] || tabs[0];
+    var cur = onTab.getAttribute('data-book-tab');
+    var rootURL = book.getAttribute('data-root');
+    var rootTitle = book.getAttribute('data-root-title') || '';
+    var defKey = book.getAttribute('data-default') || keys[0];
+    var wide = w.matchMedia('(min-width: 900px)');   // gui.css 와 같은 경계: 넓으면 세로 목록, 좁으면 가로 한 줄
+    function pathOf(u) { try { return decodeURI(new URL(u, location.href).pathname); } catch (e) { return ''; } }
+    var rootPath = pathOf(rootURL);
+
+    bookList.setAttribute('role', 'tablist');
+    bookList.setAttribute('aria-labelledby', 'book-nav-title');
+    $$(':scope > li', bookList).forEach(function (li) { li.setAttribute('role', 'presentation'); });
+    tabs.forEach(function (t) {
+      var p = panels[t.getAttribute('data-book-tab')];
+      t.setAttribute('role', 'tab');
+      t.removeAttribute('aria-current');
+      if (!p) return;
+      t.setAttribute('aria-controls', p.id);
+      p.setAttribute('role', 'tabpanel');
+      p.setAttribute('aria-labelledby', t.id);
+      p.tabIndex = 0;   // 판의 첫머리는 글자(챕터 제목)뿐 — 탭에서 Tab 한 번이면 목록으로 (쓴 절이 없어 링크가 하나도 없는 챕터도 건너뛰지 않게)
+    });
+    var pill = d.createElement('li');
+    pill.className = 'book__pill is-instant';
+    pill.setAttribute('role', 'presentation');
+    pill.setAttribute('aria-hidden', 'true');
+    bookList.insertBefore(pill, bookList.firstChild);
+    book.classList.add('is-live');
+
+    function tabOf(k) { return tabs[keys.indexOf(k)]; }
+    function paint() {
+      tabs.forEach(function (t) {
+        var on = t.getAttribute('data-book-tab') === cur;
+        t.classList.toggle('is-on', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+      });
+      bookList.setAttribute('aria-orientation', wide.matches ? 'vertical' : 'horizontal');
+    }
+    // 받침 자리 = 고른 탭의 상자 (목록 안 좌표 — 가로 한 줄이 스크롤되면 함께 움직임)
+    function placePill(instant) {
+      var t = tabOf(cur);
+      if (!t) return;
+      var r = t.getBoundingClientRect(), o = bookList.getBoundingClientRect();
+      if (instant) pill.classList.add('is-instant');
+      pill.style.setProperty('--px', (r.left - o.left - bookList.clientLeft + bookList.scrollLeft) + 'px');
+      pill.style.setProperty('--py', (r.top - o.top - bookList.clientTop + bookList.scrollTop) + 'px');
+      pill.style.setProperty('--pw', r.width + 'px');
+      pill.style.setProperty('--ph', r.height + 'px');
+      if (instant) { void pill.offsetWidth; pill.classList.remove('is-instant'); }
+    }
+    // 경로 줄: 책 첫 화면이면 '… / COD', 챕터면 '… / COD / Chapter 2' (서버가 그리는 것과 같게)
+    var crumbs = $('.page-hero .crumbs ol');
+    var rootItem = null;
+    if (crumbs) $$(':scope > li', crumbs).forEach(function (li) {
+      var a = $('a[href]', li);
+      if (a && pathOf(a.href) === rootPath) rootItem = li;
+    });
+    if (crumbs && !rootItem && pathOf(location.href) === rootPath) rootItem = $(':scope > li:last-child', crumbs);
+    function setCrumbs(chapter) {
+      if (!rootItem) return;
+      while (rootItem.nextSibling) crumbs.removeChild(rootItem.nextSibling);
+      rootItem.textContent = '';
+      if (chapter) {
+        rootItem.removeAttribute('aria-current');
+        var a = d.createElement('a');
+        a.href = rootURL;
+        a.textContent = rootTitle;
+        rootItem.appendChild(a);
+        var li = d.createElement('li'), sp = d.createElement('span');
+        li.setAttribute('aria-current', 'page');
+        sp.textContent = chapter;
+        li.appendChild(sp);
+        crumbs.appendChild(li);
+      } else {
+        rootItem.setAttribute('aria-current', 'page');
+        var s = d.createElement('span');
+        s.textContent = rootTitle;
+        rootItem.appendChild(s);
+      }
+    }
+    // 두 칸(챕터 고르개 + 목록)의 머리가 휠 아래로 지나갔는지 · 지나갔다면 그 머리를 휠 아래(scroll-padding 자리)에 두는 스크롤 위치
+    var layout = $('.book__layout', book);
+    function headY() {
+      var cs = getComputedStyle(d.documentElement);
+      var navH = parseInt(cs.getPropertyValue('--nav-h'), 10) || 84;
+      var pad = parseFloat(cs.scrollPaddingTop) || navH + 20;
+      var top = layout.getBoundingClientRect().top;
+      return top < navH ? Math.max(0, Math.round(top + w.scrollY - pad)) : null;
+    }
+    // k 챕터를 보여 줍니다. opt.history: 'push' | 'replace' | 없음(뒤로 · 앞으로) · opt.root: 책 첫 화면 주소로 · opt.scroll: false 면 스크롤은 그대로
+    function show(k, opt) {
+      opt = opt || {};
+      var next = panels[k];
+      if (!next) return;
+      if (k !== cur) {
+        var prev = panels[cur];
+        // 긴 목록을 내려 읽던 중이면 새 챕터의 머리로 — 바꾸기 전에 자리를 재고, 바꾼 그 순간 곧바로 옮깁니다.
+        // 부드럽게 굴리면 짧은 챕터로 바뀐 첫 프레임에 페이지가 바닥(푸터)까지 당겨졌다가 먼 길을 거슬러 올라오므로,
+        // 움직임은 새 목록이 떠오르는 것만으로. 속도계 · 시프트 라이트가 이 점프를 '달린 것'으로 세지 않게 기준점도 함께 옮김
+        var y = opt.scroll === false ? null : headY();
+        cur = k;
+        paint();
+        placePill(false);
+        if (prev) prev.hidden = true;
+        next.hidden = false;
+        if (y != null) {
+          jumpTo(function () { w.scrollTo(0, y); });
+          lastSY = w.scrollY;
+          lastST = performance.now();
+        }
+        if (!reduce) restartAnim(next, 'is-entering', 800);
+        var t = tabOf(k);
+        if (t && bookList.scrollWidth > bookList.clientWidth + 1) {
+          var tr = t.getBoundingClientRect(), lr = bookList.getBoundingClientRect();
+          bookList.scrollTo({ left: bookList.scrollLeft + tr.left - lr.left - (lr.width - tr.width) / 2, behavior: reduce ? 'auto' : 'smooth' });
+        }
+      }
+      var url = opt.root ? rootURL : next.getAttribute('data-url');
+      if (opt.history && pathOf(url) !== pathOf(location.href)) {
+        try {
+          // 쌓을 때는 떠나온 주소(dlFrom)를 함께 적어 둡니다 — 키로 옮겨 다니다 그 자리로 돌아오면 기록을 고쳐 쓰는 대신 한 칸 되돌아가게(아래 keydown)
+          var st = history.state && typeof history.state === 'object' ? history.state : {};
+          if (opt.history === 'replace') history.replaceState(Object.assign({}, st, { dlBook: k }), '', url);
+          else history.pushState({ dlBook: k, dlFrom: pathOf(location.href) }, '', url);
+        } catch (e) {}
+      }
+      d.title = opt.root ? book.getAttribute('data-root-doc') : next.getAttribute('data-doc');
+      setDisplay('Category', opt.root ? rootTitle : next.getAttribute('data-label'));
+      setCrumbs(opt.root ? '' : next.getAttribute('data-crumb'));
+    }
+    function plain(e) { return !(e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey); }
+    // 챕터 탭 · 목록 끝의 이전/다음 챕터
+    book.addEventListener('click', function (e) {
+      var a = e.target.closest('[data-book-tab], [data-book-go]');
+      if (!a || !plain(e)) return;
+      var k = a.getAttribute('data-book-tab') || a.getAttribute('data-book-go');
+      if (!panels[k]) return;
+      e.preventDefault();
+      show(k, { history: 'push' });
+      if (a.hasAttribute('data-book-go')) tabOf(k).focus({ preventScroll: true });
+    });
+    // 경로 줄의 책 이름 → 책 첫 화면 (그 화면이 처음 여는 챕터로)
+    if (crumbs) crumbs.addEventListener('click', function (e) {
+      var a = e.target.closest('a[href]');
+      if (!a || !plain(e) || !rootItem || !rootItem.contains(a)) return;
+      e.preventDefault();
+      show(defKey, { history: 'push', root: true, scroll: false });
+    });
+    bookList.addEventListener('keydown', function (e) {
+      var i = tabs.indexOf(e.target.closest('[role="tab"]'));
+      if (i < 0) return;
+      var n = tabs.length, j, space = e.key === ' ' || e.key === 'Spacebar';
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') j = (i + 1) % n;
+      else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') j = (i - 1 + n) % n;
+      else if (e.key === 'Home') j = 0;
+      else if (e.key === 'End') j = n - 1;
+      else if (space) j = i;
+      else return;
+      e.preventDefault();
+      tabs[j].focus();
+      var st = history.state;
+      var stacked = !space && st && st.dlBook;
+      // 키로 쌓은 기록에서 떠나온 챕터로 되돌아옴(책 첫 화면에서 왔다면 그 화면이 여는 챕터): 같은 주소가 두 번 쌓이지 않게 한 칸 되돌아갑니다
+      if (stacked && st.dlFrom && (st.dlFrom === rootPath ? keys[j] === defKey : pathOf(panels[keys[j]] && panels[keys[j]].getAttribute('data-url')) === st.dlFrom)) {
+        show(keys[j], { root: st.dlFrom === rootPath });
+        history.back();   // popstate 가 주소에 맞춰 한 번 더 그리지만 이미 그 챕터라 그대로
+        return;
+      }
+      show(keys[j], { history: stacked ? 'replace' : 'push' });
+    });
+    w.addEventListener('popstate', function () {
+      var path = pathOf(location.href);
+      if (path === rootPath) { show(defKey, { root: true, scroll: false }); return; }
+      keys.forEach(function (k) { if (pathOf(panels[k] && panels[k].getAttribute('data-url')) === path) show(k, { scroll: false }); });
+    });
+    paint();
+    placePill(true);
+    var refit = function () { placePill(true); };
+    if ('ResizeObserver' in w) { var ro = new ResizeObserver(refit); tabs.forEach(function (t) { ro.observe(t); }); }
+    else w.addEventListener('resize', refit, { passive: true });
+    if (wide.addEventListener) wide.addEventListener('change', function () { paint(); refit(); });
+    if (d.fonts && d.fonts.ready) d.fonts.ready.then(refit);
+  })();
+
+  /* ---------- 페이지 이동 ----------
+     전환 자체는 CSS(@view-transition — 휠은 제자리, 본문만 바뀜)가 맡고, 여기서는 '가는 중' 신호만:
+     다음 페이지가 150ms 안에 뜨지 않으면 시프트 라이트가 양 끝에서 가운데로 차오르기를 되풀이합니다(.is-loading) — 빠른 이동에는 아무것도 없음.
+     새 페이지가 뜰 때까지 이어지고(전환 중 지난 휠 그림은 보이지 않으므로 떠나는 순간에 끄지 않음 — 끄면 읽던 자리의 LED 가 잠깐 되살아남),
+     새 페이지에선 처음부터 꺼져 있습니다. 뒤로 가기 복원(pageshow) · 멈춘 이동(Esc · navigateerror) · 10초가 지나도 남아 있으면(내려받기 등) 끕니다.
+     Navigation API 가 없는 브라우저는 주소창의 '중지'를 알 길이 없으므로 6초면 끄고, 1.5초가 지난 뒤 다시 누르면(클릭 · 터치) 이동을 그만둔 것으로 봅니다.
+     사이트 안의 다른 페이지로 가는 같은 탭 이동만 — #앵커 · 같은 페이지 · 새 탭(Ctrl/⌘/Shift/가운데 클릭) · 다른 사이트 · 내려받기는 건드리지 않고,
+     기본 동작은 막지 않고 지켜보기만 합니다. 뷰 전환이 없는 브라우저를 위해 떠나는 시각을 남겨 둡니다(dl-nav → head.html 의 .dl-enter). */
+  leds.forEach(function (l, i) { l.style.setProperty('--e', Math.min(i, leds.length - 1 - i)); });
+  var navT = 0, navSafe = 0, navBusy = false, navAt = 0;
+  function navOff() {
+    clearTimeout(navT); clearTimeout(navSafe);
+    navT = navSafe = 0;
+    navBusy = false;
+    if (ledBox) ledBox.classList.remove('is-loading');
+  }
+  function navStart() {
+    if (navBusy) return;
+    navBusy = true;
+    navAt = Date.now();
+    store('sessionStorage', 'dl-nav', String(navAt));
+    navT = setTimeout(function () {
+      if (!ledBox) return;
+      ledBox.classList.remove('is-rev');
+      ledBox.classList.add('is-loading');
+    }, 150);
+    navSafe = setTimeout(navOff, w.navigation ? 10000 : 6000);
+  }
+  if (!w.navigation) d.addEventListener('pointerdown', function () { if (navBusy && Date.now() - navAt > 1500) navOff(); }, true);
+  function leavesPage(u) {
+    return /^https?:$/.test(u.protocol) && u.origin === location.origin && !(u.pathname === location.pathname && u.search === location.search);
+  }
+  // 다른 처리(서랍 바깥 클릭 등)가 모두 끝난 뒤에 보도록 window 에서 — 막힌 클릭(defaultPrevented)은 이동이 아님
+  w.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download')) return;
+    var u;
+    try { u = new URL(a.href, location.href); } catch (x) { return; }
+    if (leavesPage(u)) navStart();
+  });
+  // Navigation API 가 있으면 링크 밖의 이동(검색 결과에서 Enter, 뒤로 · 앞으로)도 — 내려받기 · 새로 고침 · 같은 문서 안 이동은 빼고
+  var navApi = w.navigation;
+  if (navApi && navApi.addEventListener) {
+    navApi.addEventListener('navigate', function (e) {
+      if (e.hashChange || e.downloadRequest || e.navigationType === 'reload' || !e.destination || e.destination.sameDocument) return;
+      try { if (leavesPage(new URL(e.destination.url))) navStart(); } catch (x) {}
+    });
+    navApi.addEventListener('navigateerror', navOff);
+  }
+  w.addEventListener('pageshow', function (e) { if (e.persisted) navOff(); });
+  d.addEventListener('keydown', function (e) { if (e.key === 'Escape' && navBusy) navOff(); });
 
   /* ---------- scroll loop ----------
      스크롤 리스너는 이것 하나(passive). 속도계만 이벤트마다 재고, 나머지(시프트 라이트 · 기어 · 섹터 ·

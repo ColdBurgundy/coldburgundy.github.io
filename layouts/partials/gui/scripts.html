@@ -13,6 +13,6 @@
 </div>
 {{- /* 복사 결과 등 짧은 알림을 화면 낭독기에 읽어 주는 곳 (gui.js announce) */}}
 <p class="sr-only" aria-live="polite" data-announce></p>
-<script>window.DL_GUI = {{ dict "indexURL" ("index.json" | relURL) }};</script>
+<script>window.DL_GUI = {{ dict "indexURL" ("index.json" | relURL) "circuitsURL" (partialCached "gui/circuits.html" "circuits").url }};</script>
 {{- $js := resources.Get "js/gui.js" | minify | fingerprint }}
 <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>

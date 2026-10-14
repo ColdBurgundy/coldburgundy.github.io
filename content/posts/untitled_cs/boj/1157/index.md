@@ -1,10 +1,14 @@
-+++
-title = "$7. [BOJ] 1157 단어 공부"
-date = "2024-01-07"
-description = "대소문자 구분 없이 단어에서 가장 많이 쓰인 알파벳을 찾고 동률이면 ?를 출력하는 문제를 빈도 배열로 푸는 풀이"
-tags = ["BOJ", "Bronze1", "구현", "문자열"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$7. [BOJ] 1157 단어 공부"
+date: 2024-01-07
+description: "대소문자 구분 없이 단어에서 가장 많이 쓰인 알파벳을 찾고 동률이면 ?를 출력하는 문제를 빈도 배열로 푸는 풀이"
+tags:
+  - "BOJ"
+  - "Bronze1"
+  - "구현"
+  - "문자열"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 1157 단어 공부 문제 대표 이미지](images/cover.jpg)
 

@@ -4,12 +4,25 @@
      · 같은 카테고리 글이 이 글 하나뿐이면 한 단계 위 카테고리로 넓힙니다 (글 목록 맨 위 /posts 는 제외)
      · 최대 7줄 — 글이 많으면 지금 글이 가운데 오도록 앞뒤 3편씩. 낮은 창의 레일에선 목차 자리를 위해 gui.js(fitRail)가
        가운데 5줄(is-extra 숨김) → 3줄(is-far 도 숨김) → 레일에서 빼고 글 끝 사본으로 순서대로 줄입니다
-     · 제목 앞의 번호 · [분류] 머리(예: '$12. [BOJ] ')는 레일에서 접어 짧은 제목만 — 글 끝 사본은 전체 제목 */ -}}
+     · 제목 앞의 번호 · [분류] 머리(예: '$12. [BOJ] ')는 레일에서 접어 짧은 제목만 — 글 끝 사본은 전체 제목
+     · 책(data/books)의 글은 날짜 대신 책 순서(절 번호)로, 발행된 절만 — 순위 칸에는 절 번호(2.1), 제목 앞의 번호는 빼고
+       뒤의 [COD] 꼬리는 레일에서 접습니다. 같은 챕터에 이 글뿐이면 책 전체로 넓힙니다 */ -}}
 {{- $p := .page -}}
 {{- $root := site.GetPage "/posts" -}}
 {{- $cat := $p.Parent -}}
-{{- if and $cat (lt (len $cat.RegularPagesRecursive) 2) $cat.Parent (ne $cat.Parent $root) (not $cat.Parent.IsHome) }}{{ $cat = $cat.Parent }}{{ end -}}
-{{- $list := $cat.RegularPagesRecursive.ByDate.Reverse -}}
+{{- $bk := partialCached "gui/book.html" $cat $cat.Path -}}
+{{- $bd := dict -}}
+{{- $list := slice -}}
+{{- if $bk.key -}}
+  {{- $bd = partialCached "gui/book-data.html" $bk.key $bk.key -}}
+  {{- /* 발행된 절만 (hugo -D 로 초안을 미리 보는 중이면 초안까지) */ -}}
+  {{- $pool := cond $p.Draft $bd.orderAll $bd.order -}}
+  {{- range $pool }}{{ if .IsDescendant $cat }}{{ $list = $list | append . }}{{ end }}{{ end -}}
+  {{- if and (lt (len $list) 2) (ne $cat $bk.root) }}{{ $cat = $bk.root }}{{ $list = $pool }}{{ end -}}
+{{- else -}}
+  {{- if and $cat (lt (len $cat.RegularPagesRecursive) 2) $cat.Parent (ne $cat.Parent $root) (not $cat.Parent.IsHome) }}{{ $cat = $cat.Parent }}{{ end -}}
+  {{- $list = $cat.RegularPagesRecursive.ByDate.Reverse -}}
+{{- end -}}
 {{- $n := len $list -}}
 {{- $max := 7 -}}
 {{- $idx := 0 -}}
@@ -33,11 +46,11 @@
   {{- if lt $start3 0 }}{{ $start3 = 0 }}{{ end -}}
   {{- if gt (add $start3 3) $n }}{{ $start3 = sub $n 3 }}{{ end -}}
 {{- end -}}
-<section class="tower{{ with .class }} {{ . }}{{ end }}" aria-labelledby="{{ .id }}" style="--cat: {{ partial "gui/cat-color.html" $cat | safeCSS }}">
+<section class="tower{{ with .class }} {{ . }}{{ end }}{{ if $bk.key }} tower--book{{ end }}" aria-labelledby="{{ .id }}" style="--cat: {{ partial "gui/cat-color.html" $cat | safeCSS }}">
   <header class="tower__head">
     <h2 class="tower__title" id="{{ .id }}">같은 카테고리</h2>
     {{- if ne $cat $root }}
-    <a class="tower__cat" href="{{ $cat.RelPermalink }}"><span class="tower__cat-name">{{ $cat.Title }}</span><span class="tower__count">{{ $n }}</span></a>
+    <a class="tower__cat" href="{{ $cat.RelPermalink }}"><span class="tower__cat-name">{{ partial "gui/cat-label.html" $cat }}</span><span class="tower__count">{{ $n }}</span></a>
     {{- end }}
   </header>
   <ol class="tower__list" start="{{ add $start 1 }}">
@@ -46,15 +59,29 @@
     {{- $cur := eq $q.RelPermalink $p.RelPermalink }}
     {{- $pre := index (findRE `^\s*(?:\$\d+\.\s*)?(?:\[[^\]]+\]\s*)?` $q.LinkTitle 1 | default (slice "")) 0 }}
     {{- if eq $pre $q.LinkTitle }}{{ $pre = "" }}{{ end }}
+    {{- $name := strings.TrimPrefix $pre $q.LinkTitle }}
+    {{- $tail := "" }}
+    {{- $pos := string (add $k 1) }}
+    {{- if $bk.key }}
+      {{- /* 책: 순위 대신 절 번호, 제목 앞 번호('2.1 ')는 빼고 꼬리('[COD]')는 접는 자리로 */}}
+      {{- with index $bd.num $q.Path }}{{ $pos = . }}{{ end }}
+      {{- $pre = "" }}
+      {{- $name = replaceRE `^\s*\d+(?:\.\d+)*\.?\s+` "" $q.LinkTitle }}
+      {{- with index (findRE `\s*\[[^\]]+\]\s*$` $name 1 | default (slice "")) 0 }}{{ $tail = . }}{{ $name = strings.TrimSuffix . $name }}{{ end }}
+    {{- end }}
     {{- $cls := slice }}
     {{- if or (lt $k $start5) (ge $k (add $start5 5)) }}{{ $cls = $cls | append "is-extra" }}{{ end }}
     {{- if or (lt $k $start3) (ge $k (add $start3 3)) }}{{ $cls = $cls | append "is-far" }}{{ end }}
     <li{{ with $cls }} class="{{ delimit . " " }}"{{ end }}>
       <a class="tower__row" href="{{ $q.RelPermalink }}" title="{{ $q.LinkTitle }}"{{ if $cur }} aria-current="page"{{ end }} style="--cat: {{ partial "gui/cat-color.html" $q | safeCSS }}">
-        <span class="tower__pos" aria-hidden="true">{{ add $k 1 }}</span>
+        <span class="tower__pos"{{ if not $bk.key }} aria-hidden="true"{{ end }}>{{ $pos }}</span>
         <i class="tower__led" aria-hidden="true"></i>
-        <span class="tower__name">{{ with $pre }}<span class="tower__pre">{{ . }}</span>{{ end }}{{ strings.TrimPrefix $pre $q.LinkTitle }}</span>
+        <span class="tower__name">{{ with $pre }}<span class="tower__pre">{{ . }}</span>{{ end }}{{ $name }}{{ with $tail }}<span class="tower__pre">{{ . }}</span>{{ end }}</span>
+        {{- if not $q.Date.IsZero }}
         <time class="tower__date" datetime="{{ $q.Date.Format "2006-01-02" }}"><span class="tower__yr">{{ $q.Date.Format "2006." }}</span>{{ $q.Date.Format "01.02" }}</time>
+        {{- else }}
+        <span class="tower__date">{{ if $q.Draft }}Draft{{ end }}</span>
+        {{- end }}
       </a>
     </li>
     {{- end }}

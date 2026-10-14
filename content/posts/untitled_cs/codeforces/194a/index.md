@@ -1,10 +1,14 @@
-+++
-title = "$3. [CODEFORCES] A. Exams"
-date = "2024-01-06"
-description = "n개 시험의 점수 합이 정확히 k일 때 2점 시험의 최소 개수를 남는 점수 k-2n과 n을 비교해 구하는 풀이"
-tags = ["Codeforces", "구현", "수학", "Rating900"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$3. [CODEFORCES] A. Exams"
+date: 2024-01-06
+description: "n개 시험의 점수 합이 정확히 k일 때 2점 시험의 최소 개수를 남는 점수 k-2n과 n을 비교해 구하는 풀이"
+tags:
+  - "Codeforces"
+  - "구현"
+  - "수학"
+  - "Rating900"
+thumbnail: "images/cover.jpg"
+---
 
 ![Codeforces 194A A. Exams 문제 대표 이미지](images/cover.jpg)
 

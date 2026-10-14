@@ -1,0 +1,80 @@
+{{- /* 책 한 권의 차례 + 이 빌드에 있는 글을 맞춰 둔 것. 입력: data/books 의 yaml 이름(예: "cod") — partialCached 로 한 번만 계산합니다.
+     절의 글 = content/posts/<section>/<챕터 slug>/<절 slug>/ 의 글. 그 글이 발행돼 있으면(초안 아님) '쓴 절'.
+     초안은 hugo -D 로 미리 볼 때만 빌드에 있으므로, 그때는 링크는 걸되 쓴 절로 세지 않습니다(draft).
+     차례에 없는 글(챕터 폴더에 따로 둔 노트 등)은 그 챕터의 extras, 챕터 밖(책 폴더 바로 아래)의 글은 책의 extras.
+     책 순서(order) = 챕터 밖의 글(머리말 자리, 날짜순) → 챕터마다 절 번호순 → 그 챕터의 extras(날짜순).
+     돌려줌: dict
+       "book" yaml · "root" 책 섹션 · "total" 절 수 · "written" 쓴 절 수 · "latest" 가장 최근에 쓴 절이 든 챕터의 slug(없으면 "")
+       "chapters" [dict num slug title titleKo page total written online extras sections[dict num slug title titleKo online page written draft]]
+       "order" 책 순서의 발행된 글 · "orderAll" 초안까지 (-D 미리보기의 초안 글에서만 씀) · "num" 글 경로(.Path) → 절 번호 */ -}}
+{{- $b := index site.Data.books . -}}
+{{- $root := site.GetPage (printf "/posts/%s" $b.section) -}}
+{{- $chapters := slice -}}
+{{- $total := 0 -}}
+{{- $written := 0 -}}
+{{- $order := slice -}}
+{{- $orderAll := slice -}}
+{{- $num := dict -}}
+{{- $seen := slice -}}
+{{- $latest := "" -}}
+{{- $latestAt := 0 -}}
+{{- range $c := $b.chapters -}}
+  {{- $cp := site.GetPage (printf "/posts/%s/%s" $b.section $c.slug) -}}
+  {{- $secs := slice -}}
+  {{- $cw := 0 -}}
+  {{- $online := 0 -}}
+  {{- range $c.sections -}}
+    {{- $pg := site.GetPage (printf "/posts/%s/%s/%s" $b.section $c.slug .slug) -}}
+    {{- $isW := false -}}
+    {{- $isD := false -}}
+    {{- $sn := .num -}}
+    {{- with $pg -}}
+      {{- $seen = $seen | append .Path -}}
+      {{- $num = merge $num (dict .Path $sn) -}}
+      {{- $orderAll = $orderAll | append . -}}
+      {{- if .Draft -}}
+        {{- $isD = true -}}
+      {{- else -}}
+        {{- $isW = true -}}
+        {{- $order = $order | append . -}}
+        {{- if gt .Date.Unix $latestAt }}{{ $latestAt = .Date.Unix }}{{ $latest = $c.slug }}{{ end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if $isW }}{{ $cw = add $cw 1 }}{{ end -}}
+    {{- if .online }}{{ $online = add $online 1 }}{{ end -}}
+    {{- $secs = $secs | append (dict "num" .num "slug" .slug "title" .title "titleKo" .titleKo "online" .online "page" $pg "written" $isW "draft" $isD) -}}
+  {{- end -}}
+  {{- /* 차례에 없는 글: 그 챕터 안에서 날짜순으로, 챕터의 절들 뒤에 */ -}}
+  {{- $extras := slice -}}
+  {{- with $cp -}}
+    {{- range .RegularPagesRecursive.ByDate -}}
+      {{- if not (in $seen .Path) -}}
+        {{- $extras = $extras | append . -}}
+        {{- $seen = $seen | append .Path -}}
+        {{- $orderAll = $orderAll | append . -}}
+        {{- if not .Draft }}{{ $order = $order | append . }}{{ end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $total = add $total (len $c.sections) -}}
+  {{- $written = add $written $cw -}}
+  {{- $chapters = $chapters | append (dict "num" $c.num "slug" $c.slug "title" $c.title "titleKo" $c.titleKo "page" $cp "total" (len $c.sections) "written" $cw "online" $online "extras" $extras "sections" $secs) -}}
+{{- end -}}
+{{- /* 챕터 밖(책 폴더 바로 아래)의 글은 책의 머리말처럼 책 순서의 맨 앞에(날짜순) — 이전 · 다음이 챕터 6 뒤로 밀리지 않게 */ -}}
+{{- $rootExtras := slice -}}
+{{- $headAll := slice -}}
+{{- $head := slice -}}
+{{- with $root -}}
+  {{- range .RegularPagesRecursive.ByDate -}}
+    {{- if not (in $seen .Path) -}}
+      {{- $rootExtras = $rootExtras | append . -}}
+      {{- $headAll = $headAll | append . -}}
+      {{- if not .Draft }}{{ $head = $head | append . }}{{ end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- range $orderAll }}{{ $headAll = $headAll | append . }}{{ end -}}
+{{- range $order }}{{ $head = $head | append . }}{{ end -}}
+{{- $orderAll = $headAll -}}
+{{- $order = $head -}}
+{{- return dict "book" $b "root" $root "chapters" $chapters "total" $total "written" $written "latest" $latest "order" $order "orderAll" $orderAll "num" $num "extras" $rootExtras -}}

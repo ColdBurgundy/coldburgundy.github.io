@@ -1,8 +1,8 @@
-+++
-title = "About"
-description = "Draktharr Lab을 운영하는 사람"
-layout = "about"
-+++
+---
+title: "About"
+description: "Draktharr Lab을 운영하는 사람"
+layout: "about"
+---
 
 ColdBurgundy's Blog.
 

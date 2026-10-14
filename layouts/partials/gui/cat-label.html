@@ -1,0 +1,16 @@
+{{- /* 카테고리 이름표 (카드 칩 · 타이밍 타워 · 휠 LCD · 검색 · '전체 보기' 링크): 보통은 섹션 제목 그대로.
+     책의 챕터(data/books — 예: COD 의 Chapter 2)는 책 이름과 함께 짧게 "COD · Ch.2",
+     그 밖의 3단계 섹션(카테고리 › 하위 카테고리 › 그 아래)은 "상위 · 제목". 입력: 섹션 페이지 */ -}}
+{{- $s := . -}}
+{{- $label := "" -}}
+{{- if $s -}}
+  {{- $label = $s.Title -}}
+  {{- $root := site.GetPage "/posts" -}}
+  {{- $bk := partialCached "gui/book.html" $s $s.Path -}}
+  {{- if and $bk.chapterPage (eq $bk.chapterPage $s) -}}
+    {{- $label = printf "%s · Ch.%v" $bk.root.Title $bk.chapter.num -}}
+  {{- else if and $s.IsSection $s.Parent $s.Parent.Parent (ne $s.Parent $root) (ne $s.Parent.Parent $root) (not $s.Parent.Parent.IsHome) -}}
+    {{- $label = printf "%s · %s" $s.Parent.Title $s.Title -}}
+  {{- end -}}
+{{- end -}}
+{{- return $label -}}

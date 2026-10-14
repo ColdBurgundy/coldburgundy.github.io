@@ -1,6 +1,6 @@
-{{- /* 카테고리 칩. 입력: 섹션 페이지 */ -}}
+{{- /* 카테고리 칩. 입력: 섹션 페이지 — 책의 챕터는 "COD · Ch.2" 처럼 (gui/cat-label.html) */ -}}
 {{- if and . .IsSection (ne .RelPermalink (site.GetPage "/posts").RelPermalink) -}}
 <a class="chip" href="{{ .RelPermalink }}" style="--cat: {{ partial "gui/cat-color.html" . | safeCSS }}">
-  <span class="chip__bar" aria-hidden="true"></span>{{ .Title }}
+  <span class="chip__bar" aria-hidden="true"></span>{{ partial "gui/cat-label.html" . }}
 </a>
 {{- end -}}

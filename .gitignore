@@ -8,3 +8,7 @@
 
 # Claude Code 로컬 설정 (데모 서버 실행 정보)
 /.claude/
+
+# Obsidian (content/posts 보관함): 창 배치 · 휴지통은 기기마다 달라서 올리지 않음
+content/posts/.obsidian/workspace*.json
+content/posts/.trash/

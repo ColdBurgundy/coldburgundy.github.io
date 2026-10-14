@@ -1,10 +1,14 @@
-+++
-title = "$13. [BOJ] 1074 Z"
-date = "2024-01-13"
-description = "Z 모양 순회에서 r행 c열의 방문 순서를 행과 열의 2진수 비트를 번갈아 끼워 넣는 비트 연산으로 구하는 풀이"
-tags = ["BOJ", "Silver1", "분할정복", "재귀"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$13. [BOJ] 1074 Z"
+date: 2024-01-13
+description: "Z 모양 순회에서 r행 c열의 방문 순서를 행과 열의 2진수 비트를 번갈아 끼워 넣는 비트 연산으로 구하는 풀이"
+tags:
+  - "BOJ"
+  - "Silver1"
+  - "분할정복"
+  - "재귀"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 1074 Z 문제 대표 이미지](images/cover.jpg)
 

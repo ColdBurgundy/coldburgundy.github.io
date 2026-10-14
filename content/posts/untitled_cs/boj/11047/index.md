@@ -1,10 +1,13 @@
-+++
-title = "$5. [BOJ] 11047 동전 0"
-date = "2024-01-05"
-description = "각 동전 가치가 이전 동전의 배수일 때 큰 동전부터 몫과 나머지를 취하는 그리디로 K원을 만드는 최소 동전 개수를 구하는 풀이"
-tags = ["BOJ", "Silver4", "그리디"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$5. [BOJ] 11047 동전 0"
+date: 2024-01-05
+description: "각 동전 가치가 이전 동전의 배수일 때 큰 동전부터 몫과 나머지를 취하는 그리디로 K원을 만드는 최소 동전 개수를 구하는 풀이"
+tags:
+  - "BOJ"
+  - "Silver4"
+  - "그리디"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 11047 동전 0 문제 대표 이미지](images/cover.jpg)
 

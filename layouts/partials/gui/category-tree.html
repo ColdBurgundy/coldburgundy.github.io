@@ -1,4 +1,6 @@
-{{- /* 재귀 카테고리 트리. 입력: dict "section" 섹션 "current" 현재 페이지 "depth" 깊이 */ -}}
+{{- /* 카테고리 트리 (드로어 · 푸터). 입력: dict "section" 섹션 "current" 현재 페이지 "depth" 깊이
+     두 단계(카테고리 › 하위 카테고리)까지만 — 그 아래(책의 챕터 등)는 트리에 늘어놓지 않고, 하위 카테고리의 글 수에 함께 셉니다.
+     그 안의 페이지에 있으면 하위 카테고리가 밝게(is-active) */ -}}
 {{- $current := .current -}}
 {{- $depth := .depth -}}
 {{- with .section.Sections.ByWeight -}}
@@ -12,7 +14,7 @@
       <span class="cat-tree__name">{{ .Title }}</span>
       <span class="cat-tree__count">{{ $n }}</span>
     </a>
-    {{- partial "gui/category-tree.html" (dict "section" . "current" $current "depth" (add $depth 1)) }}
+    {{- if lt $depth 1 }}{{ partial "gui/category-tree.html" (dict "section" . "current" $current "depth" (add $depth 1)) }}{{ end }}
   </li>
   {{- end }}
 </ul>

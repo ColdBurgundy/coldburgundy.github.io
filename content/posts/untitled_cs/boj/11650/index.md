@@ -1,10 +1,13 @@
-+++
-title = "$3. [BOJ] 11650 좌표 정렬하기"
-date = "2024-01-03"
-description = "2차원 점들을 x좌표 오름차순, x가 같으면 y좌표 오름차순으로 정렬하도록 비교 함수를 만들어 sort에 넘기는 풀이"
-tags = ["BOJ", "Silver5", "정렬"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$3. [BOJ] 11650 좌표 정렬하기"
+date: 2024-01-03
+description: "2차원 점들을 x좌표 오름차순, x가 같으면 y좌표 오름차순으로 정렬하도록 비교 함수를 만들어 sort에 넘기는 풀이"
+tags:
+  - "BOJ"
+  - "Silver5"
+  - "정렬"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 11650 좌표 정렬하기 문제 대표 이미지](images/cover.jpg)
 

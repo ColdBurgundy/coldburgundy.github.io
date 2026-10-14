@@ -1,10 +1,13 @@
-+++
-title = "$17. [BOJ] 17069 파이프 옮기기 2"
-date = "2024-01-17"
-description = "N×N 격자에서 파이프 한쪽 끝을 (N, N)으로 옮기는 방법의 수를 가로·세로·대각선 세 상태의 DP로 세는 풀이"
-tags = ["BOJ", "Gold4", "DP"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$17. [BOJ] 17069 파이프 옮기기 2"
+date: 2024-01-17
+description: "N×N 격자에서 파이프 한쪽 끝을 (N, N)으로 옮기는 방법의 수를 가로·세로·대각선 세 상태의 DP로 세는 풀이"
+tags:
+  - "BOJ"
+  - "Gold4"
+  - "DP"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 17069 파이프 옮기기 2 문제 대표 이미지](images/cover.jpg)
 

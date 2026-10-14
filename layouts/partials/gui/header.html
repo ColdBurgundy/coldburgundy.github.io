@@ -11,7 +11,7 @@
 {{- else if eq .Kind "taxonomy" }}{{ $label = "Tags" }}{{ $ctx = "All tags" }}
 {{- else if eq .Kind "term" }}{{ $label = "Tag" }}{{ $ctx = printf "#%s" .Title }}
 {{- else if eq .Kind "404" }}{{ $label = "Status" }}{{ $ctx = "404 Not found" }}
-{{- else if .IsSection }}{{ $label = "Category" }}{{ end -}}
+{{- else if .IsSection }}{{ $label = "Category" }}{{ $ctx = partial "gui/cat-label.html" . }}{{ end -}}
 {{- /* 현재 위치에 불이 들어오는 휠 버튼: 홈 · 카테고리(카테고리/글) · 태그 · 소개 */ -}}
 {{- $active := "" -}}
 {{- if eq . $postsRoot }}{{ $active = "home" }}

@@ -39,7 +39,14 @@ html::-webkit-scrollbar-button { display: none; }
   text-decoration: none;
   transition: color .15s, border-color .15s, background .15s;
 }
-.cli-mode-btn:hover,
+/* 터치 화면에서는 누른 뒤에도 hover 가 남아(설치하는 동안 위쪽 띠가 빨갛게 남음) 마우스가 있을 때만 */
+@media (hover: hover) {
+  .cli-mode-btn:hover {
+    color: #fff;
+    border-color: #e10600;
+    background: #1a0000;
+  }
+}
 .cli-mode-btn:focus-visible {
   color: #fff;
   border-color: #e10600;
@@ -59,6 +66,17 @@ body.cli-booting .cmd .cmd-prompt { visibility: hidden !important; }
 .terminal .terminal-output > div.cli-logo [data-text] {
   padding: calc(var(--size, 1) * 4px) 1ch;
   border: calc(var(--size, 1) * 3px) double currentColor;
+}
+
+/* 모바일 안내 속 gui — 누르면 그 명령을 쳐서 실행 (cli.js runCommand). 같은 색의 점선 밑줄 하나로만 표시 */
+.terminal .terminal-output .cli-run { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.terminal .terminal-output .cli-run > span {
+  text-decoration: underline dotted;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .28em;
+}
+@media (hover: hover) {
+  .terminal .terminal-output .cli-run:hover > span { text-decoration-style: solid; }
 }
 
 /* jquery.terminal 이 한글 단어를 폭 지정 없이 감쌀 때 inline-block 이 늘어나 빈칸이 생기는 문제 */

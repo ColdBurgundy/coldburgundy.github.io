@@ -1,0 +1,129 @@
+# 「Computer Organization and Design RISC-V Edition, 2nd ed.」 / 「컴퓨터 구조 및 설계 RISC-V 2판」(한티미디어, 2022) 차례.
+# COD 카테고리의 책 목차 화면이 이 순서대로 챕터와 절을 보여 줍니다. slug = content/posts/untitled_cs/cod/<챕터>/<slug>/ 의 글 폴더 이름.
+# 한국어 제목은 한국어판 차례(xv–xx쪽)에 인쇄된 그대로입니다. online: 책 차례에 지구본 표시가 있는 온라인 전용 절.
+title: "Computer Organization and Design RISC-V Edition"
+titleKo: "컴퓨터 구조 및 설계 RISC-V 2판"
+edition: "2nd"
+section: "untitled_cs/cod"
+chapters:
+  - num: 2
+    slug: "ch2"
+    title: "Instructions: Language of the Computer"
+    titleKo: "명령어: 컴퓨터 언어"
+    sections:
+      - { num: "2.1", slug: "2-01-introduction", title: "Introduction", titleKo: "서론", online: false }
+      - { num: "2.2", slug: "2-02-operations-computer-hardware", title: "Operations of the Computer Hardware", titleKo: "하드웨어 연산", online: false }
+      - { num: "2.3", slug: "2-03-operands-computer-hardware", title: "Operands of the Computer Hardware", titleKo: "피연산자", online: false }
+      - { num: "2.4", slug: "2-04-signed-unsigned-numbers", title: "Signed and Unsigned Numbers", titleKo: "부호있는 수와 부호없는 수", online: false }
+      - { num: "2.5", slug: "2-05-representing-instructions-computer", title: "Representing Instructions in the Computer", titleKo: "명령어의 컴퓨터 내부 표현", online: false }
+      - { num: "2.6", slug: "2-06-logical-operations", title: "Logical Operations", titleKo: "논리 연산 명령어", online: false }
+      - { num: "2.7", slug: "2-07-instructions-making-decisions", title: "Instructions for Making Decisions", titleKo: "판단을 위한 명령어", online: false }
+      - { num: "2.8", slug: "2-08-procedures", title: "Supporting Procedures in Computer Hardware", titleKo: "하드웨어의 프로시저 지원", online: false }
+      - { num: "2.9", slug: "2-09-communicating-people", title: "Communicating with People", titleKo: "문자와 문자열", online: false }
+      - { num: "2.10", slug: "2-10-wide-immediates-addresses", title: "RISC-V Addressing for Wide Immediates and Addresses", titleKo: "긴 수치와 주소를 위한 RISC-V의 주소지정 방식", online: false }
+      - { num: "2.11", slug: "2-11-synchronization", title: "Parallelism and Instructions: Synchronization", titleKo: "병렬성과 명령어: 동기화", online: false }
+      - { num: "2.12", slug: "2-12-translating-starting-program", title: "Translating and Starting a Program", titleKo: "프로그램 번역과 실행", online: false }
+      - { num: "2.13", slug: "2-13-c-sort-example", title: "A C Sort Example to Put it All Together", titleKo: "종합: C 정렬 프로그램", online: false }
+      - { num: "2.14", slug: "2-14-arrays-pointers", title: "Arrays versus Pointers", titleKo: "배열과 포인터", online: false }
+      - { num: "2.15", slug: "2-15-compiling-c-interpreting-java", title: "Advanced Material: Compiling C and Interpreting Java", titleKo: "고급 자료: C 컴파일과 Java 인터프리트", online: true }
+      - { num: "2.16", slug: "2-16-mips-instructions", title: "Real Stuff: MIPS Instructions", titleKo: "실례: MIPS 명령어", online: false }
+      - { num: "2.17", slug: "2-17-armv7-instructions", title: "Real Stuff: ARMv7 (32-bit) Instructions", titleKo: "실례: ARMv7(32비트) 명령어", online: false }
+      - { num: "2.18", slug: "2-18-armv8-instructions", title: "Real Stuff: ARMv8 (64-bit) Instructions", titleKo: "실례: ARMv8(64비트) 명령어", online: false }
+      - { num: "2.19", slug: "2-19-x86-instructions", title: "Real Stuff: x86 Instructions", titleKo: "실례: x86 명령어", online: false }
+      - { num: "2.20", slug: "2-20-rest-of-risc-v-isa", title: "Real Stuff: The Rest of the RISC-V Instruction Set", titleKo: "실례: RISC-V 명령어 집합의 나머지 부분", online: false }
+      - { num: "2.21", slug: "2-21-matrix-multiply-in-c", title: "Going Faster: Matrix Multiply in C", titleKo: "더 빠르게: C로 작성한 행렬 곱셈 프로그램", online: false }
+      - { num: "2.22", slug: "2-22-fallacies-pitfalls", title: "Fallacies and Pitfalls", titleKo: "오류 및 함정", online: false }
+      - { num: "2.23", slug: "2-23-concluding-remarks", title: "Concluding Remarks", titleKo: "결론", online: false }
+      - { num: "2.24", slug: "2-24-historical-perspective-further-reading", title: "Historical Perspective and Further Reading", titleKo: "역사적 고찰 및 참고문헌", online: true }
+      - { num: "2.25", slug: "2-25-self-study", title: "Self-Study", titleKo: "자습", online: false }
+      - { num: "2.26", slug: "2-26-exercises", title: "Exercises", titleKo: "연습문제", online: false }
+  - num: 3
+    slug: "ch3"
+    title: "Arithmetic for Computers"
+    titleKo: "컴퓨터 연산"
+    sections:
+      - { num: "3.1", slug: "3-01-introduction", title: "Introduction", titleKo: "서론", online: false }
+      - { num: "3.2", slug: "3-02-addition-subtraction", title: "Addition and Subtraction", titleKo: "덧셈과 뺄셈", online: false }
+      - { num: "3.3", slug: "3-03-multiplication", title: "Multiplication", titleKo: "곱셈", online: false }
+      - { num: "3.4", slug: "3-04-division", title: "Division", titleKo: "나눗셈", online: false }
+      - { num: "3.5", slug: "3-05-floating-point", title: "Floating Point", titleKo: "부동 소수점", online: false }
+      - { num: "3.6", slug: "3-06-subword-parallelism", title: "Parallelism and Computer Arithmetic: Subword Parallelism", titleKo: "병렬성과 컴퓨터 연산: 서브워드 병렬성", online: false }
+      - { num: "3.7", slug: "3-07-x86-sse-avx", title: "Real Stuff: Streaming SIMD Extensions and Advanced Vector Extensions in x86", titleKo: "실례: x86의 SSE와 AVX", online: false }
+      - { num: "3.8", slug: "3-08-subword-parallelism-matrix-multiply", title: "Going Faster: Subword Parallelism and Matrix Multiply", titleKo: "더 빠르게: 서브워드 병렬성과 행렬 곱셈", online: false }
+      - { num: "3.9", slug: "3-09-fallacies-pitfalls", title: "Fallacies and Pitfalls", titleKo: "오류 및 함정", online: false }
+      - { num: "3.10", slug: "3-10-concluding-remarks", title: "Concluding Remarks", titleKo: "결론", online: false }
+      - { num: "3.11", slug: "3-11-historical-perspective-further-reading", title: "Historical Perspective and Further Reading", titleKo: "역사적 고찰 및 참고문헌", online: true }
+      - { num: "3.12", slug: "3-12-self-study", title: "Self-Study", titleKo: "자습", online: false }
+      - { num: "3.13", slug: "3-13-exercises", title: "Exercises", titleKo: "연습문제", online: false }
+  - num: 4
+    slug: "ch4"
+    title: "The Processor"
+    titleKo: "프로세서"
+    sections:
+      - { num: "4.1", slug: "4-01-introduction", title: "Introduction", titleKo: "서론", online: false }
+      - { num: "4.2", slug: "4-02-logic-design-conventions", title: "Logic Design Conventions", titleKo: "논리 설계 관례", online: false }
+      - { num: "4.3", slug: "4-03-building-datapath", title: "Building a Datapath", titleKo: "데이터패스 만들기", online: false }
+      - { num: "4.4", slug: "4-04-simple-implementation-scheme", title: "A Simple Implementation Scheme", titleKo: "단순한 구현", online: false }
+      - { num: "4.5", slug: "4-05-multicycle-implementation", title: "A Multicycle Implementation", titleKo: "멀티사이클 구현", online: true }
+      - { num: "4.6", slug: "4-06-overview-pipelining", title: "An Overview of Pipelining", titleKo: "파이프라이닝에 대한 개관", online: false }
+      - { num: "4.7", slug: "4-07-pipelined-datapath-control", title: "Pipelined Datapath and Control", titleKo: "파이프라인 데이터패스 및 제어", online: false }
+      - { num: "4.8", slug: "4-08-data-hazards-forwarding-stalling", title: "Data Hazards: Forwarding versus Stalling", titleKo: "데이터 해저드: 전방전달 대 지연", online: false }
+      - { num: "4.9", slug: "4-09-control-hazards", title: "Control Hazards", titleKo: "제어 해저드", online: false }
+      - { num: "4.10", slug: "4-10-exceptions", title: "Exceptions", titleKo: "예외", online: false }
+      - { num: "4.11", slug: "4-11-parallelism-via-instructions", title: "Parallelism via Instructions", titleKo: "명령어를 통한 병렬성", online: false }
+      - { num: "4.12", slug: "4-12-core-i7-6700-cortex-a53", title: "Putting it All Together: The Intel Core i7 6700 and ARM Cortex-A53", titleKo: "실례: Intel Core i7 6700과 ARM Cortex-A53", online: false }
+      - { num: "4.13", slug: "4-13-ilp-matrix-multiply", title: "Going Faster: Instruction-Level Parallelism and Matrix Multiply", titleKo: "더 빠르게: 명령어 수준 병렬성과 행렬 곱셈", online: false }
+      - { num: "4.14", slug: "4-14-hdl-pipeline-modeling", title: "Advanced Topic: An Introduction to Digital Design Using a Hardware Design Language to Describe and Model a Pipeline and More Pipelining Illustrations", titleKo: "고급 주제: 파이프라인을 서술하고 모델링하기 위해 하드웨어 설계 언어를 사용하여 논리 회로 설계하기에 대한 소개 및 좀 더 다양한 파이프라인 그림들", online: true }
+      - { num: "4.15", slug: "4-15-fallacies-pitfalls", title: "Fallacies and Pitfalls", titleKo: "오류 및 함정", online: false }
+      - { num: "4.16", slug: "4-16-concluding-remarks", title: "Concluding Remarks", titleKo: "결론", online: false }
+      - { num: "4.17", slug: "4-17-historical-perspective-further-reading", title: "Historical Perspective and Further Reading", titleKo: "역사적 고찰 및 참고문헌", online: true }
+      - { num: "4.18", slug: "4-18-self-study", title: "Self-Study", titleKo: "자습", online: false }
+      - { num: "4.19", slug: "4-19-exercises", title: "Exercises", titleKo: "연습문제", online: false }
+  - num: 5
+    slug: "ch5"
+    title: "Large and Fast: Exploiting Memory Hierarchy"
+    titleKo: "메모리 계층구조"
+    sections:
+      - { num: "5.1", slug: "5-01-introduction", title: "Introduction", titleKo: "서론", online: false }
+      - { num: "5.2", slug: "5-02-memory-technologies", title: "Memory Technologies", titleKo: "메모리 기술", online: false }
+      - { num: "5.3", slug: "5-03-basics-caches", title: "The Basics of Caches", titleKo: "캐시의 기본", online: false }
+      - { num: "5.4", slug: "5-04-cache-performance", title: "Measuring and Improving Cache Performance", titleKo: "캐시 성능의 측정 및 향상", online: false }
+      - { num: "5.5", slug: "5-05-dependable-memory-hierarchy", title: "Dependable Memory Hierarchy", titleKo: "신용도 있는 메모리 계층구조", online: false }
+      - { num: "5.6", slug: "5-06-virtual-machines", title: "Virtual Machines", titleKo: "가상 머신", online: false }
+      - { num: "5.7", slug: "5-07-virtual-memory", title: "Virtual Memory", titleKo: "가상 메모리", online: false }
+      - { num: "5.8", slug: "5-08-common-framework-memory-hierarchy", title: "A Common Framework for Memory Hierarchy", titleKo: "메모리 계층을 위한 공통 프레임워크", online: false }
+      - { num: "5.9", slug: "5-09-fsm-simple-cache", title: "Using a Finite-State Machine to Control a Simple Cache", titleKo: "간단한 캐시 제어를 위한 유한상태기", online: false }
+      - { num: "5.10", slug: "5-10-cache-coherence", title: "Parallelism and Memory Hierarchy: Cache Coherence", titleKo: "병렬성과 메모리 계층구조: 캐시 일관성", online: false }
+      - { num: "5.11", slug: "5-11-raid", title: "Parallelism and Memory Hierarchy: Redundant Arrays of Inexpensive Disks", titleKo: "병렬성과 메모리 계층구조: RAID", online: true }
+      - { num: "5.12", slug: "5-12-cache-controllers", title: "Advanced Material: Implementing Cache Controllers", titleKo: "고급 자료: 캐시 제어기 구현", online: true }
+      - { num: "5.13", slug: "5-13-cortex-a53-core-i7-memory", title: "Real Stuff: The ARM Cortex-A53 and Intel Core i7 Memory Hierarchies", titleKo: "실례: ARM Cortex-A53과 Intel Core i7의 메모리 계층구조", online: false }
+      - { num: "5.14", slug: "5-14-rest-of-risc-v-system", title: "Real Stuff: The Rest of the RISC-V System and Special Instructions", titleKo: "실례: 나머지 RISC-V 시스템과 특수 명령어", online: false }
+      - { num: "5.15", slug: "5-15-cache-blocking-matrix-multiply", title: "Going Faster: Cache Blocking and Matrix Multiply", titleKo: "더 빠르게: 캐시 블로킹과 행렬 곱셈", online: false }
+      - { num: "5.16", slug: "5-16-fallacies-pitfalls", title: "Fallacies and Pitfalls", titleKo: "오류 및 함정", online: false }
+      - { num: "5.17", slug: "5-17-concluding-remarks", title: "Concluding Remarks", titleKo: "결론", online: false }
+      - { num: "5.18", slug: "5-18-historical-perspective-further-reading", title: "Historical Perspective and Further Reading", titleKo: "역사적 고찰 및 참고문헌", online: true }
+      - { num: "5.19", slug: "5-19-self-study", title: "Self-Study", titleKo: "자습", online: false }
+      - { num: "5.20", slug: "5-20-exercises", title: "Exercises", titleKo: "연습문제", online: false }
+  - num: 6
+    slug: "ch6"
+    title: "Parallel Processors from Client to Cloud"
+    titleKo: "병렬 프로세서: 클라이언트에서 클라우드까지"
+    sections:
+      - { num: "6.1", slug: "6-01-introduction", title: "Introduction", titleKo: "서론", online: false }
+      - { num: "6.2", slug: "6-02-difficulty-parallel-programs", title: "The Difficulty of Creating Parallel Processing Programs", titleKo: "병렬 처리 프로그램 개발의 어려움", online: false }
+      - { num: "6.3", slug: "6-03-sisd-mimd-simd-spmd-vector", title: "SISD, MIMD, SIMD, SPMD, and Vector", titleKo: "SISD, MIMD, SIMD, SPMD와 벡터", online: false }
+      - { num: "6.4", slug: "6-04-hardware-multithreading", title: "Hardware Multithreading", titleKo: "하드웨어 멀티스레딩", online: false }
+      - { num: "6.5", slug: "6-05-multicore-shared-memory-multiprocessors", title: "Multicore and Other Shared Memory Multiprocessors", titleKo: "멀티코어와 기타 공유 메모리 멀티프로세서", online: false }
+      - { num: "6.6", slug: "6-06-gpus", title: "Introduction to Graphics Processing Units", titleKo: "그래픽 처리 유닛의 기초", online: false }
+      - { num: "6.7", slug: "6-07-domain-specific-architectures", title: "Domain-Specific Architectures", titleKo: "도메인에 특화된 구조", online: false }
+      - { num: "6.8", slug: "6-08-clusters-wsc-message-passing", title: "Clusters, Warehouse Scale Computers, and Other Message-Passing Multiprocessors", titleKo: "클러스터, 창고 규모의 컴퓨터와 기타 메시지 전달 멀티프로세서", online: false }
+      - { num: "6.9", slug: "6-09-multiprocessor-network-topologies", title: "Introduction to Multiprocessor Network Topologies", titleKo: "멀티프로세서 네트워크 위상의 기초", online: false }
+      - { num: "6.10", slug: "6-10-cluster-networking", title: "Communicating to the Outside World: Cluster Networking", titleKo: "외부 세계와의 통신: 클러스터 네트워킹", online: true }
+      - { num: "6.11", slug: "6-11-benchmarks-performance-models", title: "Multiprocessor Benchmarks and Performance Models", titleKo: "멀티프로세서 벤치마크와 성능 모델", online: false }
+      - { num: "6.12", slug: "6-12-tpuv3-volta-benchmarks", title: "Real Stuff: Benchmarking the Google TPUv3 Supercomputer and an NVIDIA Volta GPU Cluster", titleKo: "실례: Google TPUv3 수퍼컴퓨터와 NVIDIA Volta GPU 클러스터의 벤치마킹", online: false }
+      - { num: "6.13", slug: "6-13-multiple-processors-matrix-multiply", title: "Going Faster: Multiple Processors and Matrix Multiply", titleKo: "더 빠르게: 복수의 프로세서와 행렬 곱셈", online: false }
+      - { num: "6.14", slug: "6-14-fallacies-pitfalls", title: "Fallacies and Pitfalls", titleKo: "오류 및 함정", online: false }
+      - { num: "6.15", slug: "6-15-concluding-remarks", title: "Concluding Remarks", titleKo: "결론", online: false }
+      - { num: "6.16", slug: "6-16-historical-perspective-further-reading", title: "Historical Perspective and Further Reading", titleKo: "역사적 고찰 및 참고문헌", online: true }
+      - { num: "6.17", slug: "6-17-self-study", title: "Self-Study", titleKo: "자습", online: false }
+      - { num: "6.18", slug: "6-18-exercises", title: "Exercises", titleKo: "연습문제", online: false }

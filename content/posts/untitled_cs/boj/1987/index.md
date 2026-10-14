@@ -1,10 +1,16 @@
-+++
-title = "$18. [BOJ] 1987 알파벳"
-date = "2024-01-18"
-description = "같은 알파벳을 두 번 지나지 않고 말이 지날 수 있는 최대 칸 수를 DFS 백트래킹과 알파벳 방문 배열로 구하는 풀이"
-tags = ["BOJ", "Gold4", "그래프이론", "그래프탐색", "깊이우선탐색", "백트래킹"]
-thumbnail = "images/cover.jpg"
-+++
+---
+title: "$18. [BOJ] 1987 알파벳"
+date: 2024-01-18
+description: "같은 알파벳을 두 번 지나지 않고 말이 지날 수 있는 최대 칸 수를 DFS 백트래킹과 알파벳 방문 배열로 구하는 풀이"
+tags:
+  - "BOJ"
+  - "Gold4"
+  - "그래프이론"
+  - "그래프탐색"
+  - "깊이우선탐색"
+  - "백트래킹"
+thumbnail: "images/cover.jpg"
+---
 
 ![BOJ 1987 알파벳 문제 대표 이미지](images/cover.jpg)
 
