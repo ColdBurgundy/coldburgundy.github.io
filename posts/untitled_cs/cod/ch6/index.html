@@ -1,0 +1,525 @@
+<!doctype html><html lang=ko class=gui><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>@media(prefers-reduced-motion:no-preference){@view-transition{navigation: auto; }}</style><link rel=expect href=#main blocking=render><script>(function(e,t,n){try{s=e.sessionStorage;var s,i=+s.getItem("dl-nav");s.removeItem("dl-nav"),i&&Date.now()-i<8e3&&!("onpagereveal"in e)&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&n.add("dl-enter")}catch{}function o(){if(!n.contains("vt-wheel"))return;n.remove("vt-wheel");var o,s=t.querySelector("[data-nav]"),i=e.scrollY||0;s&&(o=s.classList.contains("is-compact"),(o?i<=24:i>72)&&s.classList.toggle("is-compact",!o));try{e.dispatchEvent(new Event("dl:vt-end"))}catch{}}function a(e){[e.ready,e.finished,e.updateCallbackDone].forEach(function(e){e&&e.catch(o)})}function r(e){n.add("vt-wheel"),a(e),e.finished.then(o,o)}e.addEventListener("pageswap",function(e){var i,n=e.viewTransition,o=e.activation;if(!n)return;try{if(o&&o.entry&&new URL(o.entry.url).pathname==="/"){a(n),n.skipTransition();return}}catch{}try{i=t.querySelector(".wheel__indicator.is-on"),s.setItem("dl-wheel",t.querySelector("[data-nav].is-compact")?"c":""),s.setItem("dl-ind",i?["--ix","--iw","--ind"].map(function(e){return i.style.getPropertyValue(e)}).join("|"):"")}catch{}r(n)}),e.addEventListener("pageshow",function(e){e.persisted&&o()}),e.addEventListener("pagereveal",function(n){var o,c,l=n.viewTransition,a=e.navigation&&navigation.activation,d="",i="";try{d=s.getItem("dl-wheel"),i=s.getItem("dl-ind")||"",s.removeItem("dl-wheel"),s.removeItem("dl-ind")}catch{}if(!l)return;c=t.querySelector("[data-nav]"),o=t.querySelector(".wheel__indicator"),d==="c"&&c&&!c.classList.contains("is-compact")&&(c.classList.add("is-compact","is-instant"),void c.offsetHeight,c.classList.remove("is-instant")),i=i.split("|"),o&&i.length===3&&i[1]&&(o.style.transition="none",o.style.setProperty("--ix",i[0]),o.style.setProperty("--iw",i[1]),o.style.setProperty("--ind",i[2]),o.classList.add("is-on"),void o.offsetWidth,o.style.transition="",requestAnimationFrame(function(){requestAnimationFrame(function(){var n,s,e=t.querySelector("[data-nav-btns] .wbtn.is-active");if(!e){o.classList.remove("is-on");return}n=e.getBoundingClientRect(),s=o.parentNode.getBoundingClientRect(),o.style.setProperty("--ix",n.left-s.left+"px"),o.style.setProperty("--iw",n.width+"px"),o.style.setProperty("--ind",getComputedStyle(e).getPropertyValue("--led").trim()||"#db0a40")})})),r(l);try{a&&a.navigationType==="traverse"&&a.from&&a.entry&&a.from.index>a.entry.index&&l.types.add("back")}catch{}})})(window,document,document.documentElement.classList)</script><title>COD · Chapter 6 · Draktharr Lab</title><meta name=description content="병렬 프로세서: 클라이언트에서 클라우드까지"><link rel=canonical href=https://coldburgundy.github.io/posts/untitled_cs/cod/ch6/><meta name=robots content="noindex,follow"><meta name=theme-color content="#070b18"><meta property="og:site_name" content="Draktharr Lab"><meta property="og:locale" content="ko_KR"><meta property="og:title" content="COD · Chapter 6"><meta property="og:description" content="병렬 프로세서: 클라이언트에서 클라우드까지"><meta property="og:url" content="https://coldburgundy.github.io/posts/untitled_cs/cod/ch6/"><meta property="og:type" content="website"><meta property="og:image" content="https://coldburgundy.github.io/images/og-default.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Draktharr Lab"><meta name=twitter:card content="summary_large_image"><link rel=alternate type=application/rss+xml href=/index.xml title="Draktharr Lab"><link rel=sitemap type=application/xml href=/sitemap.xml><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preconnect href=https://cdn.jsdelivr.net crossorigin><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Saira:ital,wdth,wght@0,100..125,400..900;1,100..125,400..900&family=Michroma&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"><link rel=stylesheet href=https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css><link rel=preload href=/data/circuits.min.b601a46107a6dfd94dc0dbbc22382b15a7824c3c6f43febd133e28306b90f7b5.json as=fetch crossorigin fetchpriority=low><script type=speculationrules>{"prefetch":[{"where":{"and":[{"href_matches":"/*"},{"not":{"selector_matches":"[data-mode-switch], [data-book-link], [download], [target], [rel~=nofollow]"}}]},"eagerness":"moderate"}]}</script><link rel=stylesheet href=/css/gui.min.fbdc622bbcc4d3895a86c32c0ba8bb03dc85d73838e0e4bac6c10e47f608de03.css integrity="sha256-+9xiK7zE04lahsMsC6i7A9yF1zg44OS6xsEOR/YI3gM="></head><body class="gui kind-section sec-posts"><a class=skip-link href=#main>본문으로 건너뛰기</a><header class=wheel data-nav><div class=wheel__frame><span class=wheel__shell aria-hidden=true></span>
+<span class="wheel__paddle wheel__paddle--l" aria-hidden=true data-paddle=down></span>
+<span class="wheel__paddle wheel__paddle--r" aria-hidden=true data-paddle=up></span><div class=wheel__left><button type=button class="rotary wheel__search--compact" data-search-open aria-label="검색 (Ctrl+K)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m15 15 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><nav class=wheel__btns aria-label="주 메뉴" data-nav-btns><span class=wheel__indicator aria-hidden=true></span>
+<a class=wbtn style=--led:var(--red-hi) href=/posts/><i class=wbtn__led aria-hidden=true></i><span>Home</span></a><div class=nav__item data-drop><button type=button class="wbtn is-active" style=--led:var(--yellow) aria-expanded=false aria-controls=nav-cats data-drop-toggle>
+<i class=wbtn__led aria-hidden=true></i><span>Categories</span>
+<svg class="wbtn__caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class=drop id=nav-cats tabindex=-1><div class=drop__grid><div class="drop__col drop__col--split"><div class=drop__head><a class=drop__cat href=/posts/untitled_cs/ style=--cat:#db0a40><span class=drop__dot aria-hidden=true></span>
+<span class=drop__name>untitled_cs</span>
+<span class=drop__count>26</span></a></div><ul class=drop__list style=--rows:4><li><a class=is-empty href=/posts/untitled_cs/os/ style=--cat:#3671c6><span class=drop__dot aria-hidden=true></span><span class=drop__name>OS</span><span class=drop__count>0</span></a></li><li><a class=is-empty href=/posts/untitled_cs/csapp/ style=--cat:#00d2be><span class=drop__dot aria-hidden=true></span><span class=drop__name>CS:APP</span><span class=drop__count>0</span></a></li><li><a class=is-empty href=/posts/untitled_cs/cod/ style=--cat:#00a3e0><span class=drop__dot aria-hidden=true></span><span class=drop__name>COD</span><span class=drop__count>0</span></a></li><li><a href=/posts/untitled_cs/clrs/ style=--cat:#ff8000><span class=drop__dot aria-hidden=true></span><span class=drop__name>CLRS</span><span class=drop__count>1</span></a></li><li><a href=/posts/untitled_cs/boj/ style=--cat:#ffd12e><span class=drop__dot aria-hidden=true></span><span class=drop__name>BOJ</span><span class=drop__count>20</span></a></li><li><a href=/posts/untitled_cs/codeforces/ style=--cat:#52e252><span class=drop__dot aria-hidden=true></span><span class=drop__name>Codeforces</span><span class=drop__count>4</span></a></li><li><a href=/posts/untitled_cs/leetcode/ style=--cat:#ff87bc><span class=drop__dot aria-hidden=true></span><span class=drop__name>LeetCode</span><span class=drop__count>1</span></a></li></ul></div><div class=drop__col><div class=drop__head><a class="drop__cat is-empty" href=/posts/research/ style=--cat:#2ee6a8><span class=drop__dot aria-hidden=true></span>
+<span class=drop__name>research</span>
+<span class=drop__count>0</span></a></div><ul class=drop__list><li><a class=is-empty href=/posts/research/paper-review/ style=--cat:#7cc4ff><span class=drop__dot aria-hidden=true></span><span class=drop__name>Paper Review</span><span class=drop__count>0</span></a></li><li><a class=is-empty href=/posts/research/implementation/ style=--cat:#ffb000><span class=drop__dot aria-hidden=true></span><span class=drop__name>Implementation</span><span class=drop__count>0</span></a></li></ul></div><div class=drop__col><div class=drop__head><a class=drop__cat href=/posts/untitled_life/ style=--cat:#27f4d2><span class=drop__dot aria-hidden=true></span>
+<span class=drop__name>untitled_life</span>
+<span class=drop__count>2</span></a></div><ul class=drop__list><li><a class=is-empty href=/posts/untitled_life/movies/ style=--cat:#d9dde7><span class=drop__dot aria-hidden=true></span><span class=drop__name>Movie & Anime</span><span class=drop__count>0</span></a></li><li><a class=is-empty href=/posts/untitled_life/motorsport/ style=--cat:#3671c6><span class=drop__dot aria-hidden=true></span><span class=drop__name>Motorsport</span><span class=drop__count>0</span></a></li><li><a href=/posts/untitled_life/goals/ style=--cat:#ffc906><span class=drop__dot aria-hidden=true></span><span class=drop__name>Goals</span><span class=drop__count>1</span></a></li><li><a href=/posts/untitled_life/monthly/ style=--cat:#64c4ff><span class=drop__dot aria-hidden=true></span><span class=drop__name>Monthly</span><span class=drop__count>1</span></a></li></ul></div><div class=drop__col><div class=drop__head><a class="drop__cat is-empty" href=/posts/projects/ style=--cat:#a855f7><span class=drop__dot aria-hidden=true></span>
+<span class=drop__name>projects</span>
+<span class=drop__count>0</span></a></div></div></div><div class=drop__foot><span>전체 글 <b>28</b>편</span>
+<a href=/posts/#categories>모든 카테고리 보기 <span aria-hidden=true>→</span></a></div></div></div><a class=wbtn style=--led:var(--blue-hi) href=/tags/><i class=wbtn__led aria-hidden=true></i><span>Tags</span></a>
+<a class=wbtn style=--led:var(--text-2) href=/about/><i class=wbtn__led aria-hidden=true></i><span>About</span></a></nav></div><div class=wheel__center><div class=wheel__leds data-shift-lights aria-hidden=true><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class=wheel__display aria-hidden=true data-display><span class="disp__cell disp__gear"><small>Gear</small><b data-gear class=is-n>N</b></span>
+<span class="disp__cell disp__main"><small data-disp-label>Category</small><b data-disp-text>COD · Ch.6</b></span>
+<span class="disp__cell disp__speed"><small>km/h</small><b data-speed>000</b></span></div></div><div class=wheel__right><button type=button class="rotary wheel__search" data-search-open aria-label="검색 (Ctrl+K)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m15 15 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+<a class=drs href=/#/untitled_cs/cod/ch6 data-mode-switch=cli title="터미널(CLI) 모드로 전환"><span class=drs__led aria-hidden=true></span><span class=drs__label>Terminal</span><span class=drs__key aria-hidden=true>>_</span>
+</a><button type=button class="rotary wheel__burger" data-drawer-open aria-label="메뉴 열기" aria-controls=drawer aria-expanded=false>
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14M5 12h14M5 16h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div></header><aside class=drawer id=drawer hidden><div class=drawer__panel role=dialog aria-modal=true aria-label=메뉴><div class=drawer__head><span class=brand__text>Draktharr<b>Lab</b></span>
+<button type=button class=rotary data-drawer-close aria-label="메뉴 닫기">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><a class=drawer__link href=/posts/>Home</a>
+<a class=drawer__link href=/tags/>Tags</a>
+<a class=drawer__link href=/about/>About</a><p class=drawer__label>Categories</p><ul class=cat-tree><li class="cat-tree__item is-active"><a class=cat-tree__link href=/posts/untitled_cs/ style=--cat:#db0a40><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>untitled_cs</span>
+<span class=cat-tree__count>26</span></a><ul class="cat-tree cat-tree--sub"><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/untitled_cs/os/ style=--cat:#3671c6><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>OS</span>
+<span class=cat-tree__count>0</span></a></li><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/untitled_cs/csapp/ style=--cat:#00d2be><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>CS:APP</span>
+<span class=cat-tree__count>0</span></a></li><li class="cat-tree__item is-active is-empty"><a class=cat-tree__link href=/posts/untitled_cs/cod/ style=--cat:#00a3e0><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>COD</span>
+<span class=cat-tree__count>0</span></a></li><li class=cat-tree__item><a class=cat-tree__link href=/posts/untitled_cs/clrs/ style=--cat:#ff8000><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>CLRS</span>
+<span class=cat-tree__count>1</span></a></li><li class=cat-tree__item><a class=cat-tree__link href=/posts/untitled_cs/boj/ style=--cat:#ffd12e><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>BOJ</span>
+<span class=cat-tree__count>20</span></a></li><li class=cat-tree__item><a class=cat-tree__link href=/posts/untitled_cs/codeforces/ style=--cat:#52e252><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>Codeforces</span>
+<span class=cat-tree__count>4</span></a></li><li class=cat-tree__item><a class=cat-tree__link href=/posts/untitled_cs/leetcode/ style=--cat:#ff87bc><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>LeetCode</span>
+<span class=cat-tree__count>1</span></a></li></ul></li><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/research/ style=--cat:#2ee6a8><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>research</span>
+<span class=cat-tree__count>0</span></a><ul class="cat-tree cat-tree--sub"><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/research/paper-review/ style=--cat:#7cc4ff><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>Paper Review</span>
+<span class=cat-tree__count>0</span></a></li><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/research/implementation/ style=--cat:#ffb000><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>Implementation</span>
+<span class=cat-tree__count>0</span></a></li></ul></li><li class=cat-tree__item><a class=cat-tree__link href=/posts/untitled_life/ style=--cat:#27f4d2><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>untitled_life</span>
+<span class=cat-tree__count>2</span></a><ul class="cat-tree cat-tree--sub"><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/untitled_life/movies/ style=--cat:#d9dde7><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>Movie & Anime</span>
+<span class=cat-tree__count>0</span></a></li><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/untitled_life/motorsport/ style=--cat:#3671c6><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>Motorsport</span>
+<span class=cat-tree__count>0</span></a></li><li class=cat-tree__item><a class=cat-tree__link href=/posts/untitled_life/goals/ style=--cat:#ffc906><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>Goals</span>
+<span class=cat-tree__count>1</span></a></li><li class=cat-tree__item><a class=cat-tree__link href=/posts/untitled_life/monthly/ style=--cat:#64c4ff><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>Monthly</span>
+<span class=cat-tree__count>1</span></a></li></ul></li><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/projects/ style=--cat:#a855f7><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>projects</span>
+<span class=cat-tree__count>0</span></a></li></ul><a class="drs drs--block" href=/#/untitled_cs/cod/ch6 data-mode-switch=cli><span class=drs__led aria-hidden=true></span><span class=drs__label>터미널 모드로 보기</span><span class=drs__key aria-hidden=true>>_</span></a></div></aside><main id=main class=site-main tabindex=-1><section class=page-hero style=--cat:#00a3e0><div class=page-hero__bg aria-hidden=true><div class=hero__grid></div></div><div class="sky sky--page" aria-hidden=true data-sky><svg class="sky__svg" focusable="false"/><p class=sky__name></p></div><div class="container page-hero__inner"><nav class=crumbs aria-label="현재 위치"><ol><li><a href=/posts/>Home</a></li><li><a href=/posts/untitled_cs/>untitled_cs</a></li><li><a href=/posts/untitled_cs/cod/>COD</a></li><li aria-current=page><span>Chapter 6</span></li></ol></nav><p class=eyebrow>Book</p><h1 class=page-hero__title style=--n:3>COD</h1><div class=book-meter><p class=book-meter__book><span class=book-meter__en lang=en>Computer Organization and Design RISC-V Edition</span><span class=book-meter__ed lang=en>2nd ed.</span></p><p class=book-meter__ko>컴퓨터 구조 및 설계 RISC-V 2판</p><dl class="page-hero__stats book-meter__stats"><div><dt>Written</dt><dd><span aria-hidden=true>0<span class=book-meter__of>/96</span></span><span class=sr-only>96절 중 0절</span></dd></div><div><dt>Chapters</dt><dd>5</dd></div></dl><div class=book-meter__leds aria-hidden=true><span class=book-meter__ch style=--n:26><span class=book-meter__dots><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+<small>CH2</small>
+</span><span class=book-meter__ch style=--n:13><span class=book-meter__dots><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+<small>CH3</small>
+</span><span class=book-meter__ch style=--n:19><span class=book-meter__dots><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+<small>CH4</small>
+</span><span class=book-meter__ch style=--n:20><span class=book-meter__dots><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+<small>CH5</small>
+</span><span class=book-meter__ch style=--n:18><span class=book-meter__dots><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+<small>CH6</small></span></div></div></div><div class="trace trace--thin" aria-hidden=true data-trace data-circuit=gb-1948><svg class="trace__svg" viewBox="0 0 1200 60" preserveAspectRatio="none" focusable="false"><path class="trace__ghost" d="M0 11.1C1.7 11 3.3 11.1 5 11s3.3-.4 5-.5S13.3 10.4 15 10.4 18.3 10.1 20 10 23.3 10 25 9.9 28.3 9.4 30 9.6s3.3-.5 5 1.1 3.3 6 5 8.5 3.3 3.9 5 5.9 3.3 5 5 6.2S53.3 32.2 55 31.9s3.3-1.8 5-2.5 3.3-1.1 5-1.8 3.3-1.6 5-2.2S73.3 24.7 75 24.2s3.3-1.3 5-1.7S83.3 21.8 85 21.4s3.3-1.1 5-1.5S93.3 19.5 95 19.2 98.3 18.4 1e2 18.1 103.3 17.6 105 17.3 108.3 16.6 110 16.3 113.3 15.9 115 15.7 118.3 15.1 120 14.9 123.3 14.6 125 14.4 128.3 14 130 13.8 133.3 13.5 135 13.3 138.3 13 140 12.9 143.3 12.6 145 12.4 148.3 12 150 11.9 153.3 11.1 155 12.1 158.3 17.2 160 18.1 163.3 17.4 165 17.4 168.3 17.1 170 18.2 173.3 21.9 175 24.2 178.3 30.8 180 32 183.3 32 185 31.4 188.3 29.5 190 28.7 193.3 27.8 195 27.2 198.3 25.5 2e2 25 203.3 23 205 23.7 208.3 28.4 210 29.5 213.3 31 215 30.8 218.3 28.8 220 28.1 223.3 27.1 225 26.5 228.3 23.9 230 24.5 233.3 27.9 235 29.8 238.3 35.3 240 36.4 243.3 37 245 36.6 248.3 34.6 250 33.8 253.3 32.4 255 31.6 258.3 29.6 260 28.9 263.3 27.8 265 27.2 268.3 25.7 270 25.1 273.3 24.4 275 23.9 278.3 22.6 280 22.1 283.3 21.4 285 21 288.3 20.2 290 19.8 293.3 19.2 295 18.8 298.3 18 3e2 17.7 303.3 17.4 305 17.1 308.3 16.4 310 16.2 313.3 15.8 315 15.5 318.3 15 320 14.8 323.3 14.5 325 14.3 328.3 13.8 330 13.7 333.3 13.3 335 13.2 338.3 12.8 340 12.7 343.3 12.5 345 12.4 348.3 12.1 350 11.9 353.3 11.7 355 11.6 358.3 11.2 360 11.1 363.3 11.1 365 11 368.3 10.6 370 10.5 373.3 10.4 375 10.4 378.3 10.1 380 10 383.3 10 385 9.9 388.3 9.7 390 9.6 393.3 9.5 395 9.4 398.3 9.3 4e2 9.3 403.3 9.2 405 9.1 408.3 9 410 8.9 413.3 8.8 415 8.8 418.3 8.7 420 8.6 423.3 7.7 425 8.6 428.3 12.4 430 14.3 433.3 17.5 435 19.9 438.3 26.9 440 29.1 443.3 32.3 445 33 448.3 33.1 450 33 453.3 32.4 455 32.4 458.3 32.4 460 32.5 463.3 33.2 465 32.8 468.3 30.8 470 30 473.3 28.9 475 28.3 478.3 26.7 480 26.1 483.3 25.2 485 24.7 488.3 23.4 490 22.9 493.3 22.2 495 21.8 498.3 20.8 5e2 20.4 503.3 19.8 505 19.5 508.3 18.7 510 18.4 513.3 17.9 515 17.6 518.3 16.9 520 16.6 523.3 15.7 525 16 528.3 17.1 530 18.5 533.3 21.7 535 24.3 538.3 31.4 540 34.2 543.3 39.9 545 41.3 548.3 42.5 550 42.6 553.3 41.7 555 41.5 558.3 41.2 560 41.3 563.3 42.7 565 42.1 568.3 39 570 37.9 573.3 36 575 35 578.3 32.6 580 31.7 583.3 30.6 585 29.8 588.3 26.9 590 27.3 593.3 31.4 595 32.5 598.3 34.2 6e2 34.1 603.3 32.7 605 31.9 608.3 29.8 610 29.1 613.3 28.1 615 27.5 618.3 25.9 620 25.3 623.3 24.5 625 24 628.3 22.8 630 22.3 633.3 21.6 635 21.2 638.3 20.2 640 19.8 643.3 19.3 645 19 648.3 18.2 650 17.9 653.3 17.4 655 17.1 658.3 16.4 660 16.2 663.3 15.9 665 15.7 668.3 15.1 670 14.9 673.3 14.7 675 14.4 678.3 13.8 680 13.7 683.3 13.5 685 13.3 688.3 12.2 690 12.7 693.3 14.5 695 16.6 698.3 23 7e2 25.6 703.3 30.9 705 32 708.3 32.6 710 32.4 713.3 31.1 715 30.3 718.3 28.5 720 27.8 723.3 26.8 725 26.2 728.3 24.9 730 24.3 733.3 23.6 735 23.1 738.3 21.9 740 21.5 743.3 20.6 745 20.6 748.3 21.1 750 21.5 753.3 22.8 755 22.8 758.3 21.6 760 21.2 763.3 20.6 765 20.3 768.3 19.3 770 19 773.3 18.5 775 18.2 778.3 17.4 780 17.1 783.3 15.5 785 16.5 788.3 21.1 790 23.2 793.3 26.6 795 29.5 798.3 38.3 8e2 40.7 803.3 43.9 805 44 808.3 42.3 810 41.3 813.3 39.2 815 38 818.3 35.1 820 34.1 823.3 30.6 825 32 828.3 40.6 830 42.9 833.3 45.6 835 45.7 838.3 44.8 840 43.8 843.3 41.4 845 40.1 848.3 36.8 850 35.7 853.3 34.2 855 33.3 858.3 31 860 30.2 863.3 28.6 865 28.4 868.3 28.4 870 29.4 873.3 33.9 875 34.4 878.3 33 880 32.4 883.3 31.1 885 30.3 888.3 28.5 890 27.8 893.3 26.8 895 26.2 898.3 24.7 9e2 24.2 903.3 23.5 905 23.1 908.3 21.9 910 21.5 913.3 21 915 20.6 918.3 19.5 920 19.2 923.3 18.7 925 18.4 928.3 17.6 930 17.3 933.3 16.9 935 16.6 938.3 16.1 940 15.9 943.3 15.5 945 15.2 948.3 14.7 950 14.4 953.3 14.2 955 14 958.3 13.5 960 13.3 963.3 13.2 965 13 968.3 12.6 970 12.4 973.3 12.2 975 12.1 978.3 11.7 980 11.6 983.3 11.6 985 11.5 988.3 11.1 990 11 993.3 10.8 995 10.8 998.3 10.3 1e3 11.3 1003.3 14.5 1005 17 1008.3 23.5 1010 25.9 1013.3 30.1 1015 31.7 1018.3 34.5 1020 35.5 1023.3 37.2 1025 37.9 1028.3 39.6 1030 39.6 1033.3 38.7 1035 37.7 1038.3 34.8 1040 33.8 1043.3 32 1045 31.6 1048.3 30.1 1050 31.1 1053.3 36 1055 37.7 1058.3 40.7 1060 41.2 1063.3 40.8 1065 40.7 1068.3 40.3 1070 40.2 1073.3 40.4 1075 40.4 1078.3 40.4 1080 39.9 1083.3 38.6 1085 37.5 1088.3 34.6 1090 33.6 1093.3 32.4 1095 31.6 1098.3 29.5 11e2 28.7 1103.3 27.8 1105 27.2 1108.3 25.5 1110 25 1113.3 24.2 1115 23.7 1118.3 22.6 1120 22.1 1123.3 21.5 1125 21 1128.3 20 1130 19.6 1133.3 19.2 1135 18.8 1138.3 18 1140 17.7 1143.3 17.4 1145 17.1 1148.3 16.4 1150 16.2 1153.3 15.8 1155 15.5 1158.3 15 1160 14.8 1163.3 14.5 1165 14.3 1168.3 13.8 1170 13.7 1173.3 13.3 1175 13.2 1178.3 12.8 1180 12.7 1183.3 12.5 1185 12.4 1188.3 12.1 1190 11.9 1193.3 11.7 1195 11.6 1198.3 11.2 12e2 11.1" pathLength="1e3"/><path class="trace__line" d="M0 11.1C1.7 11 3.3 11.1 5 11s3.3-.4 5-.5S13.3 10.4 15 10.4 18.3 10.1 20 10 23.3 10 25 9.9 28.3 9.4 30 9.6s3.3-.5 5 1.1 3.3 6 5 8.5 3.3 3.9 5 5.9 3.3 5 5 6.2S53.3 32.2 55 31.9s3.3-1.8 5-2.5 3.3-1.1 5-1.8 3.3-1.6 5-2.2S73.3 24.7 75 24.2s3.3-1.3 5-1.7S83.3 21.8 85 21.4s3.3-1.1 5-1.5S93.3 19.5 95 19.2 98.3 18.4 1e2 18.1 103.3 17.6 105 17.3 108.3 16.6 110 16.3 113.3 15.9 115 15.7 118.3 15.1 120 14.9 123.3 14.6 125 14.4 128.3 14 130 13.8 133.3 13.5 135 13.3 138.3 13 140 12.9 143.3 12.6 145 12.4 148.3 12 150 11.9 153.3 11.1 155 12.1 158.3 17.2 160 18.1 163.3 17.4 165 17.4 168.3 17.1 170 18.2 173.3 21.9 175 24.2 178.3 30.8 180 32 183.3 32 185 31.4 188.3 29.5 190 28.7 193.3 27.8 195 27.2 198.3 25.5 2e2 25 203.3 23 205 23.7 208.3 28.4 210 29.5 213.3 31 215 30.8 218.3 28.8 220 28.1 223.3 27.1 225 26.5 228.3 23.9 230 24.5 233.3 27.9 235 29.8 238.3 35.3 240 36.4 243.3 37 245 36.6 248.3 34.6 250 33.8 253.3 32.4 255 31.6 258.3 29.6 260 28.9 263.3 27.8 265 27.2 268.3 25.7 270 25.1 273.3 24.4 275 23.9 278.3 22.6 280 22.1 283.3 21.4 285 21 288.3 20.2 290 19.8 293.3 19.2 295 18.8 298.3 18 3e2 17.7 303.3 17.4 305 17.1 308.3 16.4 310 16.2 313.3 15.8 315 15.5 318.3 15 320 14.8 323.3 14.5 325 14.3 328.3 13.8 330 13.7 333.3 13.3 335 13.2 338.3 12.8 340 12.7 343.3 12.5 345 12.4 348.3 12.1 350 11.9 353.3 11.7 355 11.6 358.3 11.2 360 11.1 363.3 11.1 365 11 368.3 10.6 370 10.5 373.3 10.4 375 10.4 378.3 10.1 380 10 383.3 10 385 9.9 388.3 9.7 390 9.6 393.3 9.5 395 9.4 398.3 9.3 4e2 9.3 403.3 9.2 405 9.1 408.3 9 410 8.9 413.3 8.8 415 8.8 418.3 8.7 420 8.6 423.3 7.7 425 8.6 428.3 12.4 430 14.3 433.3 17.5 435 19.9 438.3 26.9 440 29.1 443.3 32.3 445 33 448.3 33.1 450 33 453.3 32.4 455 32.4 458.3 32.4 460 32.5 463.3 33.2 465 32.8 468.3 30.8 470 30 473.3 28.9 475 28.3 478.3 26.7 480 26.1 483.3 25.2 485 24.7 488.3 23.4 490 22.9 493.3 22.2 495 21.8 498.3 20.8 5e2 20.4 503.3 19.8 505 19.5 508.3 18.7 510 18.4 513.3 17.9 515 17.6 518.3 16.9 520 16.6 523.3 15.7 525 16 528.3 17.1 530 18.5 533.3 21.7 535 24.3 538.3 31.4 540 34.2 543.3 39.9 545 41.3 548.3 42.5 550 42.6 553.3 41.7 555 41.5 558.3 41.2 560 41.3 563.3 42.7 565 42.1 568.3 39 570 37.9 573.3 36 575 35 578.3 32.6 580 31.7 583.3 30.6 585 29.8 588.3 26.9 590 27.3 593.3 31.4 595 32.5 598.3 34.2 6e2 34.1 603.3 32.7 605 31.9 608.3 29.8 610 29.1 613.3 28.1 615 27.5 618.3 25.9 620 25.3 623.3 24.5 625 24 628.3 22.8 630 22.3 633.3 21.6 635 21.2 638.3 20.2 640 19.8 643.3 19.3 645 19 648.3 18.2 650 17.9 653.3 17.4 655 17.1 658.3 16.4 660 16.2 663.3 15.9 665 15.7 668.3 15.1 670 14.9 673.3 14.7 675 14.4 678.3 13.8 680 13.7 683.3 13.5 685 13.3 688.3 12.2 690 12.7 693.3 14.5 695 16.6 698.3 23 7e2 25.6 703.3 30.9 705 32 708.3 32.6 710 32.4 713.3 31.1 715 30.3 718.3 28.5 720 27.8 723.3 26.8 725 26.2 728.3 24.9 730 24.3 733.3 23.6 735 23.1 738.3 21.9 740 21.5 743.3 20.6 745 20.6 748.3 21.1 750 21.5 753.3 22.8 755 22.8 758.3 21.6 760 21.2 763.3 20.6 765 20.3 768.3 19.3 770 19 773.3 18.5 775 18.2 778.3 17.4 780 17.1 783.3 15.5 785 16.5 788.3 21.1 790 23.2 793.3 26.6 795 29.5 798.3 38.3 8e2 40.7 803.3 43.9 805 44 808.3 42.3 810 41.3 813.3 39.2 815 38 818.3 35.1 820 34.1 823.3 30.6 825 32 828.3 40.6 830 42.9 833.3 45.6 835 45.7 838.3 44.8 840 43.8 843.3 41.4 845 40.1 848.3 36.8 850 35.7 853.3 34.2 855 33.3 858.3 31 860 30.2 863.3 28.6 865 28.4 868.3 28.4 870 29.4 873.3 33.9 875 34.4 878.3 33 880 32.4 883.3 31.1 885 30.3 888.3 28.5 890 27.8 893.3 26.8 895 26.2 898.3 24.7 9e2 24.2 903.3 23.5 905 23.1 908.3 21.9 910 21.5 913.3 21 915 20.6 918.3 19.5 920 19.2 923.3 18.7 925 18.4 928.3 17.6 930 17.3 933.3 16.9 935 16.6 938.3 16.1 940 15.9 943.3 15.5 945 15.2 948.3 14.7 950 14.4 953.3 14.2 955 14 958.3 13.5 960 13.3 963.3 13.2 965 13 968.3 12.6 970 12.4 973.3 12.2 975 12.1 978.3 11.7 980 11.6 983.3 11.6 985 11.5 988.3 11.1 990 11 993.3 10.8 995 10.8 998.3 10.3 1e3 11.3 1003.3 14.5 1005 17 1008.3 23.5 1010 25.9 1013.3 30.1 1015 31.7 1018.3 34.5 1020 35.5 1023.3 37.2 1025 37.9 1028.3 39.6 1030 39.6 1033.3 38.7 1035 37.7 1038.3 34.8 1040 33.8 1043.3 32 1045 31.6 1048.3 30.1 1050 31.1 1053.3 36 1055 37.7 1058.3 40.7 1060 41.2 1063.3 40.8 1065 40.7 1068.3 40.3 1070 40.2 1073.3 40.4 1075 40.4 1078.3 40.4 1080 39.9 1083.3 38.6 1085 37.5 1088.3 34.6 1090 33.6 1093.3 32.4 1095 31.6 1098.3 29.5 11e2 28.7 1103.3 27.8 1105 27.2 1108.3 25.5 1110 25 1113.3 24.2 1115 23.7 1118.3 22.6 1120 22.1 1123.3 21.5 1125 21 1128.3 20 1130 19.6 1133.3 19.2 1135 18.8 1138.3 18 1140 17.7 1143.3 17.4 1145 17.1 1148.3 16.4 1150 16.2 1153.3 15.8 1155 15.5 1158.3 15 1160 14.8 1163.3 14.5 1165 14.3 1168.3 13.8 1170 13.7 1173.3 13.3 1175 13.2 1178.3 12.8 1180 12.7 1183.3 12.5 1185 12.4 1188.3 12.1 1190 11.9 1193.3 11.7 1195 11.6 1198.3 11.2 12e2 11.1" pathLength="1e3"/><path class="trace__pulse" d="M0 11.1C1.7 11 3.3 11.1 5 11s3.3-.4 5-.5S13.3 10.4 15 10.4 18.3 10.1 20 10 23.3 10 25 9.9 28.3 9.4 30 9.6s3.3-.5 5 1.1 3.3 6 5 8.5 3.3 3.9 5 5.9 3.3 5 5 6.2S53.3 32.2 55 31.9s3.3-1.8 5-2.5 3.3-1.1 5-1.8 3.3-1.6 5-2.2S73.3 24.7 75 24.2s3.3-1.3 5-1.7S83.3 21.8 85 21.4s3.3-1.1 5-1.5S93.3 19.5 95 19.2 98.3 18.4 1e2 18.1 103.3 17.6 105 17.3 108.3 16.6 110 16.3 113.3 15.9 115 15.7 118.3 15.1 120 14.9 123.3 14.6 125 14.4 128.3 14 130 13.8 133.3 13.5 135 13.3 138.3 13 140 12.9 143.3 12.6 145 12.4 148.3 12 150 11.9 153.3 11.1 155 12.1 158.3 17.2 160 18.1 163.3 17.4 165 17.4 168.3 17.1 170 18.2 173.3 21.9 175 24.2 178.3 30.8 180 32 183.3 32 185 31.4 188.3 29.5 190 28.7 193.3 27.8 195 27.2 198.3 25.5 2e2 25 203.3 23 205 23.7 208.3 28.4 210 29.5 213.3 31 215 30.8 218.3 28.8 220 28.1 223.3 27.1 225 26.5 228.3 23.9 230 24.5 233.3 27.9 235 29.8 238.3 35.3 240 36.4 243.3 37 245 36.6 248.3 34.6 250 33.8 253.3 32.4 255 31.6 258.3 29.6 260 28.9 263.3 27.8 265 27.2 268.3 25.7 270 25.1 273.3 24.4 275 23.9 278.3 22.6 280 22.1 283.3 21.4 285 21 288.3 20.2 290 19.8 293.3 19.2 295 18.8 298.3 18 3e2 17.7 303.3 17.4 305 17.1 308.3 16.4 310 16.2 313.3 15.8 315 15.5 318.3 15 320 14.8 323.3 14.5 325 14.3 328.3 13.8 330 13.7 333.3 13.3 335 13.2 338.3 12.8 340 12.7 343.3 12.5 345 12.4 348.3 12.1 350 11.9 353.3 11.7 355 11.6 358.3 11.2 360 11.1 363.3 11.1 365 11 368.3 10.6 370 10.5 373.3 10.4 375 10.4 378.3 10.1 380 10 383.3 10 385 9.9 388.3 9.7 390 9.6 393.3 9.5 395 9.4 398.3 9.3 4e2 9.3 403.3 9.2 405 9.1 408.3 9 410 8.9 413.3 8.8 415 8.8 418.3 8.7 420 8.6 423.3 7.7 425 8.6 428.3 12.4 430 14.3 433.3 17.5 435 19.9 438.3 26.9 440 29.1 443.3 32.3 445 33 448.3 33.1 450 33 453.3 32.4 455 32.4 458.3 32.4 460 32.5 463.3 33.2 465 32.8 468.3 30.8 470 30 473.3 28.9 475 28.3 478.3 26.7 480 26.1 483.3 25.2 485 24.7 488.3 23.4 490 22.9 493.3 22.2 495 21.8 498.3 20.8 5e2 20.4 503.3 19.8 505 19.5 508.3 18.7 510 18.4 513.3 17.9 515 17.6 518.3 16.9 520 16.6 523.3 15.7 525 16 528.3 17.1 530 18.5 533.3 21.7 535 24.3 538.3 31.4 540 34.2 543.3 39.9 545 41.3 548.3 42.5 550 42.6 553.3 41.7 555 41.5 558.3 41.2 560 41.3 563.3 42.7 565 42.1 568.3 39 570 37.9 573.3 36 575 35 578.3 32.6 580 31.7 583.3 30.6 585 29.8 588.3 26.9 590 27.3 593.3 31.4 595 32.5 598.3 34.2 6e2 34.1 603.3 32.7 605 31.9 608.3 29.8 610 29.1 613.3 28.1 615 27.5 618.3 25.9 620 25.3 623.3 24.5 625 24 628.3 22.8 630 22.3 633.3 21.6 635 21.2 638.3 20.2 640 19.8 643.3 19.3 645 19 648.3 18.2 650 17.9 653.3 17.4 655 17.1 658.3 16.4 660 16.2 663.3 15.9 665 15.7 668.3 15.1 670 14.9 673.3 14.7 675 14.4 678.3 13.8 680 13.7 683.3 13.5 685 13.3 688.3 12.2 690 12.7 693.3 14.5 695 16.6 698.3 23 7e2 25.6 703.3 30.9 705 32 708.3 32.6 710 32.4 713.3 31.1 715 30.3 718.3 28.5 720 27.8 723.3 26.8 725 26.2 728.3 24.9 730 24.3 733.3 23.6 735 23.1 738.3 21.9 740 21.5 743.3 20.6 745 20.6 748.3 21.1 750 21.5 753.3 22.8 755 22.8 758.3 21.6 760 21.2 763.3 20.6 765 20.3 768.3 19.3 770 19 773.3 18.5 775 18.2 778.3 17.4 780 17.1 783.3 15.5 785 16.5 788.3 21.1 790 23.2 793.3 26.6 795 29.5 798.3 38.3 8e2 40.7 803.3 43.9 805 44 808.3 42.3 810 41.3 813.3 39.2 815 38 818.3 35.1 820 34.1 823.3 30.6 825 32 828.3 40.6 830 42.9 833.3 45.6 835 45.7 838.3 44.8 840 43.8 843.3 41.4 845 40.1 848.3 36.8 850 35.7 853.3 34.2 855 33.3 858.3 31 860 30.2 863.3 28.6 865 28.4 868.3 28.4 870 29.4 873.3 33.9 875 34.4 878.3 33 880 32.4 883.3 31.1 885 30.3 888.3 28.5 890 27.8 893.3 26.8 895 26.2 898.3 24.7 9e2 24.2 903.3 23.5 905 23.1 908.3 21.9 910 21.5 913.3 21 915 20.6 918.3 19.5 920 19.2 923.3 18.7 925 18.4 928.3 17.6 930 17.3 933.3 16.9 935 16.6 938.3 16.1 940 15.9 943.3 15.5 945 15.2 948.3 14.7 950 14.4 953.3 14.2 955 14 958.3 13.5 960 13.3 963.3 13.2 965 13 968.3 12.6 970 12.4 973.3 12.2 975 12.1 978.3 11.7 980 11.6 983.3 11.6 985 11.5 988.3 11.1 990 11 993.3 10.8 995 10.8 998.3 10.3 1e3 11.3 1003.3 14.5 1005 17 1008.3 23.5 1010 25.9 1013.3 30.1 1015 31.7 1018.3 34.5 1020 35.5 1023.3 37.2 1025 37.9 1028.3 39.6 1030 39.6 1033.3 38.7 1035 37.7 1038.3 34.8 1040 33.8 1043.3 32 1045 31.6 1048.3 30.1 1050 31.1 1053.3 36 1055 37.7 1058.3 40.7 1060 41.2 1063.3 40.8 1065 40.7 1068.3 40.3 1070 40.2 1073.3 40.4 1075 40.4 1078.3 40.4 1080 39.9 1083.3 38.6 1085 37.5 1088.3 34.6 1090 33.6 1093.3 32.4 1095 31.6 1098.3 29.5 11e2 28.7 1103.3 27.8 1105 27.2 1108.3 25.5 1110 25 1113.3 24.2 1115 23.7 1118.3 22.6 1120 22.1 1123.3 21.5 1125 21 1128.3 20 1130 19.6 1133.3 19.2 1135 18.8 1138.3 18 1140 17.7 1143.3 17.4 1145 17.1 1148.3 16.4 1150 16.2 1153.3 15.8 1155 15.5 1158.3 15 1160 14.8 1163.3 14.5 1165 14.3 1168.3 13.8 1170 13.7 1173.3 13.3 1175 13.2 1178.3 12.8 1180 12.7 1183.3 12.5 1185 12.4 1188.3 12.1 1190 11.9 1193.3 11.7 1195 11.6 1198.3 11.2 12e2 11.1" pathLength="1e3"/></svg>
+<span class=trace__base></span>
+<span class=trace__splits><i></i><i></i></span>
+<span class=trace__sectors><i>S1</i><i>S2</i><i>S3</i></span>
+<span class=trace__car></span>
+<span class=trace__cursor><span class=trace__dot></span><span class=trace__read></span></span></div></section><div class="container section-page book" data-book data-root=/posts/untitled_cs/cod/ data-root-title=COD data-root-doc="COD · Draktharr Lab" data-default=ch2 style=--cat:#00a3e0><div class=book__layout><nav class=book__nav aria-labelledby=book-nav-title><p class=book__nav-title id=book-nav-title>Chapters</p><ol class=book__tabs data-book-tabs><li class=book__tabitem><a class=book__tab id=book-tab-ch2 href=/posts/untitled_cs/cod/ch2/ data-book-tab=ch2 data-book-link style=--done:0%><span class=book__tab-num aria-hidden=true>02</span>
+<span class=book__tab-body><span class=sr-only>Chapter 2.</span>
+<span class=book__tab-en lang=en>Instructions: Language of the Computer</span>
+<span class=book__tab-ko>명령어<span class=book__tab-ko-sub>: 컴퓨터 언어</span></span>
+<span class=book__tab-meter aria-hidden=true><span class=book__tab-bar><i></i></span><span class=book__tab-count><b>0</b>/26</span></span>
+<span class=sr-only>26절 중 0절 정리</span></span></a></li><li class=book__tabitem><a class=book__tab id=book-tab-ch3 href=/posts/untitled_cs/cod/ch3/ data-book-tab=ch3 data-book-link style=--done:0%><span class=book__tab-num aria-hidden=true>03</span>
+<span class=book__tab-body><span class=sr-only>Chapter 3.</span>
+<span class=book__tab-en lang=en>Arithmetic for Computers</span>
+<span class=book__tab-ko>컴퓨터 연산</span>
+<span class=book__tab-meter aria-hidden=true><span class=book__tab-bar><i></i></span><span class=book__tab-count><b>0</b>/13</span></span>
+<span class=sr-only>13절 중 0절 정리</span></span></a></li><li class=book__tabitem><a class=book__tab id=book-tab-ch4 href=/posts/untitled_cs/cod/ch4/ data-book-tab=ch4 data-book-link style=--done:0%><span class=book__tab-num aria-hidden=true>04</span>
+<span class=book__tab-body><span class=sr-only>Chapter 4.</span>
+<span class=book__tab-en lang=en>The Processor</span>
+<span class=book__tab-ko>프로세서</span>
+<span class=book__tab-meter aria-hidden=true><span class=book__tab-bar><i></i></span><span class=book__tab-count><b>0</b>/19</span></span>
+<span class=sr-only>19절 중 0절 정리</span></span></a></li><li class=book__tabitem><a class=book__tab id=book-tab-ch5 href=/posts/untitled_cs/cod/ch5/ data-book-tab=ch5 data-book-link style=--done:0%><span class=book__tab-num aria-hidden=true>05</span>
+<span class=book__tab-body><span class=sr-only>Chapter 5.</span>
+<span class=book__tab-en lang=en>Large and Fast: Exploiting Memory Hierarchy</span>
+<span class=book__tab-ko>메모리 계층구조</span>
+<span class=book__tab-meter aria-hidden=true><span class=book__tab-bar><i></i></span><span class=book__tab-count><b>0</b>/20</span></span>
+<span class=sr-only>20절 중 0절 정리</span></span></a></li><li class=book__tabitem><a class="book__tab is-on" id=book-tab-ch6 href=/posts/untitled_cs/cod/ch6/ data-book-tab=ch6 data-book-link aria-current=true style=--done:0%><span class=book__tab-num aria-hidden=true>06</span>
+<span class=book__tab-body><span class=sr-only>Chapter 6.</span>
+<span class=book__tab-en lang=en>Parallel Processors from Client to Cloud</span>
+<span class=book__tab-ko>병렬 프로세서<span class=book__tab-ko-sub>: 클라이언트에서 클라우드까지</span></span>
+<span class=book__tab-meter aria-hidden=true><span class=book__tab-bar><i></i></span><span class=book__tab-count><b>0</b>/18</span></span>
+<span class=sr-only>18절 중 0절 정리</span></span></a></li></ol></nav><div class=book__panels><section class=book__panel id=book-ch2 data-book-panel=ch2 data-url=/posts/untitled_cs/cod/ch2/ data-crumb="Chapter 2" data-label="COD · Ch.2" data-doc="COD · Chapter 2 · Draktharr Lab" aria-labelledby=book-h-ch2 hidden><header class=book__head><div class=book__head-text><p class=book__kicker>Chapter 2</p><h2 class=book__title id=book-h-ch2><span lang=en>Instructions: Language of the Computer</span></h2><p class=book__title-ko>명령어: 컴퓨터 언어</p></div><p class=book__score><span aria-hidden=true><b>0</b><span class=book__score-of>/26</span></span><small aria-hidden=true>Written</small><span class=sr-only>26절 중 0절 정리</span></p></header><div class=book__cols aria-hidden=true><span>No.</span><span>Section</span><span class=book__cols-ko>한국어판</span><span>Date</span></div><ol class=book__list><li class="book__row is-todo" style=--k:0><div class=book__item><span class=book__num>2.1</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Introduction</span>
+<span class=book__ko>서론</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:1><div class=book__item><span class=book__num>2.2</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Operations of the Computer Hardware</span>
+<span class=book__ko>하드웨어 연산</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:2><div class=book__item><span class=book__num>2.3</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Operands of the Computer Hardware</span>
+<span class=book__ko>피연산자</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:3><div class=book__item><span class=book__num>2.4</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Signed and Unsigned Numbers</span>
+<span class=book__ko>부호있는 수와 부호없는 수</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:4><div class=book__item><span class=book__num>2.5</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Representing Instructions in the Computer</span>
+<span class=book__ko>명령어의 컴퓨터 내부 표현</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:5><div class=book__item><span class=book__num>2.6</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Logical Operations</span>
+<span class=book__ko>논리 연산 명령어</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:6><div class=book__item><span class=book__num>2.7</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Instructions for Making Decisions</span>
+<span class=book__ko>판단을 위한 명령어</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:7><div class=book__item><span class=book__num>2.8</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Supporting Procedures in Computer Hardware</span>
+<span class=book__ko>하드웨어의 프로시저 지원</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:8><div class=book__item><span class=book__num>2.9</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Communicating with People</span>
+<span class=book__ko>문자와 문자열</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:9><div class=book__item><span class=book__num>2.10</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>RISC-V Addressing for Wide Immediates and Addresses</span>
+<span class=book__ko>긴 수치와 주소를 위한 RISC-V의 주소지정 방식</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:10><div class=book__item><span class=book__num>2.11</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Parallelism and Instructions: Synchronization</span>
+<span class=book__ko>병렬성과 명령어: 동기화</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:11><div class=book__item><span class=book__num>2.12</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Translating and Starting a Program</span>
+<span class=book__ko>프로그램 번역과 실행</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:12><div class=book__item><span class=book__num>2.13</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>A C Sort Example to Put it All Together</span>
+<span class=book__ko>종합: C 정렬 프로그램</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:13><div class=book__item><span class=book__num>2.14</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Arrays versus Pointers</span>
+<span class=book__ko>배열과 포인터</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:14><div class=book__item><span class=book__num>2.15</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Advanced Material: Compiling C and Interpreting <span class=book__nowrap>Java<span class=book__web title="온라인 전용 절"><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg><span class=sr-only>(온라인 전용 절)</span></span></span></span>
+<span class=book__ko>고급 자료: C 컴파일과 Java 인터프리트</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:15><div class=book__item><span class=book__num>2.16</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Real Stuff: MIPS Instructions</span>
+<span class=book__ko>실례: MIPS 명령어</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:16><div class=book__item><span class=book__num>2.17</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Real Stuff: ARMv7 (32-bit) Instructions</span>
+<span class=book__ko>실례: ARMv7(32비트) 명령어</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:17><div class=book__item><span class=book__num>2.18</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Real Stuff: ARMv8 (64-bit) Instructions</span>
+<span class=book__ko>실례: ARMv8(64비트) 명령어</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:18><div class=book__item><span class=book__num>2.19</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Real Stuff: x86 Instructions</span>
+<span class=book__ko>실례: x86 명령어</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:19><div class=book__item><span class=book__num>2.20</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Real Stuff: The Rest of the RISC-V Instruction Set</span>
+<span class=book__ko>실례: RISC-V 명령어 집합의 나머지 부분</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:20><div class=book__item><span class=book__num>2.21</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Going Faster: Matrix Multiply in C</span>
+<span class=book__ko>더 빠르게: C로 작성한 행렬 곱셈 프로그램</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:21><div class=book__item><span class=book__num>2.22</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Fallacies and Pitfalls</span>
+<span class=book__ko>오류 및 함정</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:22><div class=book__item><span class=book__num>2.23</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Concluding Remarks</span>
+<span class=book__ko>결론</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:23><div class=book__item><span class=book__num>2.24</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Historical Perspective and Further <span class=book__nowrap>Reading<span class=book__web title="온라인 전용 절"><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg><span class=sr-only>(온라인 전용 절)</span></span></span></span>
+<span class=book__ko>역사적 고찰 및 참고문헌</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:24><div class=book__item><span class=book__num>2.25</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Self-Study</span>
+<span class=book__ko>자습</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:25><div class=book__item><span class=book__num>2.26</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Exercises</span>
+<span class=book__ko>연습문제</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li></ol><footer class=book__foot><p class=book__legend><span class=book__web><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg></span>온라인 전용 절 <span class=book__legend-note>책 차례의 지구본 표시 · 본문은 출판사 웹사이트에</span></p><nav class=book__step aria-label="다른 챕터"><a class="book__go book__go--next" href=/posts/untitled_cs/cod/ch3/ data-book-go=ch3 data-book-link><span class=book__go-dir>Chapter 3 →</span><span class=book__go-title>컴퓨터 연산</span></a></nav></footer></section><section class=book__panel id=book-ch3 data-book-panel=ch3 data-url=/posts/untitled_cs/cod/ch3/ data-crumb="Chapter 3" data-label="COD · Ch.3" data-doc="COD · Chapter 3 · Draktharr Lab" aria-labelledby=book-h-ch3 hidden><header class=book__head><div class=book__head-text><p class=book__kicker>Chapter 3</p><h2 class=book__title id=book-h-ch3><span lang=en>Arithmetic for Computers</span></h2><p class=book__title-ko>컴퓨터 연산</p></div><p class=book__score><span aria-hidden=true><b>0</b><span class=book__score-of>/13</span></span><small aria-hidden=true>Written</small><span class=sr-only>13절 중 0절 정리</span></p></header><div class=book__cols aria-hidden=true><span>No.</span><span>Section</span><span class=book__cols-ko>한국어판</span><span>Date</span></div><ol class=book__list><li class="book__row is-todo" style=--k:0><div class=book__item><span class=book__num>3.1</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Introduction</span>
+<span class=book__ko>서론</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:1><div class=book__item><span class=book__num>3.2</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Addition and Subtraction</span>
+<span class=book__ko>덧셈과 뺄셈</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:2><div class=book__item><span class=book__num>3.3</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Multiplication</span>
+<span class=book__ko>곱셈</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:3><div class=book__item><span class=book__num>3.4</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Division</span>
+<span class=book__ko>나눗셈</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:4><div class=book__item><span class=book__num>3.5</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Floating Point</span>
+<span class=book__ko>부동 소수점</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:5><div class=book__item><span class=book__num>3.6</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Parallelism and Computer Arithmetic: Subword Parallelism</span>
+<span class=book__ko>병렬성과 컴퓨터 연산: 서브워드 병렬성</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:6><div class=book__item><span class=book__num>3.7</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Real Stuff: Streaming SIMD Extensions and Advanced Vector Extensions in x86</span>
+<span class=book__ko>실례: x86의 SSE와 AVX</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:7><div class=book__item><span class=book__num>3.8</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Going Faster: Subword Parallelism and Matrix Multiply</span>
+<span class=book__ko>더 빠르게: 서브워드 병렬성과 행렬 곱셈</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:8><div class=book__item><span class=book__num>3.9</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Fallacies and Pitfalls</span>
+<span class=book__ko>오류 및 함정</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:9><div class=book__item><span class=book__num>3.10</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Concluding Remarks</span>
+<span class=book__ko>결론</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:10><div class=book__item><span class=book__num>3.11</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Historical Perspective and Further <span class=book__nowrap>Reading<span class=book__web title="온라인 전용 절"><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg><span class=sr-only>(온라인 전용 절)</span></span></span></span>
+<span class=book__ko>역사적 고찰 및 참고문헌</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:11><div class=book__item><span class=book__num>3.12</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Self-Study</span>
+<span class=book__ko>자습</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:12><div class=book__item><span class=book__num>3.13</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Exercises</span>
+<span class=book__ko>연습문제</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li></ol><footer class=book__foot><p class=book__legend><span class=book__web><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg></span>온라인 전용 절 <span class=book__legend-note>책 차례의 지구본 표시 · 본문은 출판사 웹사이트에</span></p><nav class=book__step aria-label="다른 챕터"><a class="book__go book__go--prev" href=/posts/untitled_cs/cod/ch2/ data-book-go=ch2 data-book-link><span class=book__go-dir>← Chapter 2</span><span class=book__go-title>명령어: 컴퓨터 언어</span></a>
+<a class="book__go book__go--next" href=/posts/untitled_cs/cod/ch4/ data-book-go=ch4 data-book-link><span class=book__go-dir>Chapter 4 →</span><span class=book__go-title>프로세서</span></a></nav></footer></section><section class=book__panel id=book-ch4 data-book-panel=ch4 data-url=/posts/untitled_cs/cod/ch4/ data-crumb="Chapter 4" data-label="COD · Ch.4" data-doc="COD · Chapter 4 · Draktharr Lab" aria-labelledby=book-h-ch4 hidden><header class=book__head><div class=book__head-text><p class=book__kicker>Chapter 4</p><h2 class=book__title id=book-h-ch4><span lang=en>The Processor</span></h2><p class=book__title-ko>프로세서</p></div><p class=book__score><span aria-hidden=true><b>0</b><span class=book__score-of>/19</span></span><small aria-hidden=true>Written</small><span class=sr-only>19절 중 0절 정리</span></p></header><div class=book__cols aria-hidden=true><span>No.</span><span>Section</span><span class=book__cols-ko>한국어판</span><span>Date</span></div><ol class=book__list><li class="book__row is-todo" style=--k:0><div class=book__item><span class=book__num>4.1</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Introduction</span>
+<span class=book__ko>서론</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:1><div class=book__item><span class=book__num>4.2</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Logic Design Conventions</span>
+<span class=book__ko>논리 설계 관례</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:2><div class=book__item><span class=book__num>4.3</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Building a Datapath</span>
+<span class=book__ko>데이터패스 만들기</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:3><div class=book__item><span class=book__num>4.4</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>A Simple Implementation Scheme</span>
+<span class=book__ko>단순한 구현</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:4><div class=book__item><span class=book__num>4.5</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>A Multicycle <span class=book__nowrap>Implementation<span class=book__web title="온라인 전용 절"><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg><span class=sr-only>(온라인 전용 절)</span></span></span></span>
+<span class=book__ko>멀티사이클 구현</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:5><div class=book__item><span class=book__num>4.6</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>An Overview of Pipelining</span>
+<span class=book__ko>파이프라이닝에 대한 개관</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:6><div class=book__item><span class=book__num>4.7</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Pipelined Datapath and Control</span>
+<span class=book__ko>파이프라인 데이터패스 및 제어</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:7><div class=book__item><span class=book__num>4.8</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Data Hazards: Forwarding versus Stalling</span>
+<span class=book__ko>데이터 해저드: 전방전달 대 지연</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:8><div class=book__item><span class=book__num>4.9</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Control Hazards</span>
+<span class=book__ko>제어 해저드</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:9><div class=book__item><span class=book__num>4.10</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Exceptions</span>
+<span class=book__ko>예외</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:10><div class=book__item><span class=book__num>4.11</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Parallelism via Instructions</span>
+<span class=book__ko>명령어를 통한 병렬성</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:11><div class=book__item><span class=book__num>4.12</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Putting it All Together: The Intel Core i7 6700 and ARM Cortex-A53</span>
+<span class=book__ko>실례: Intel Core i7 6700과 ARM Cortex-A53</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:12><div class=book__item><span class=book__num>4.13</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Going Faster: Instruction-Level Parallelism and Matrix Multiply</span>
+<span class=book__ko>더 빠르게: 명령어 수준 병렬성과 행렬 곱셈</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:13><div class=book__item><span class=book__num>4.14</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Advanced Topic: An Introduction to Digital Design Using a Hardware Design Language to Describe and Model a Pipeline and More Pipelining <span class=book__nowrap>Illustrations<span class=book__web title="온라인 전용 절"><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg><span class=sr-only>(온라인 전용 절)</span></span></span></span>
+<span class=book__ko>고급 주제: 파이프라인을 서술하고 모델링하기 위해 하드웨어 설계 언어를 사용하여 논리 회로 설계하기에 대한 소개 및 좀 더 다양한 파이프라인 그림들</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:14><div class=book__item><span class=book__num>4.15</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Fallacies and Pitfalls</span>
+<span class=book__ko>오류 및 함정</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:15><div class=book__item><span class=book__num>4.16</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Concluding Remarks</span>
+<span class=book__ko>결론</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:16><div class=book__item><span class=book__num>4.17</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Historical Perspective and Further <span class=book__nowrap>Reading<span class=book__web title="온라인 전용 절"><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg><span class=sr-only>(온라인 전용 절)</span></span></span></span>
+<span class=book__ko>역사적 고찰 및 참고문헌</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:17><div class=book__item><span class=book__num>4.18</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Self-Study</span>
+<span class=book__ko>자습</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:18><div class=book__item><span class=book__num>4.19</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Exercises</span>
+<span class=book__ko>연습문제</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li></ol><footer class=book__foot><p class=book__legend><span class=book__web><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg></span>온라인 전용 절 <span class=book__legend-note>책 차례의 지구본 표시 · 본문은 출판사 웹사이트에</span></p><nav class=book__step aria-label="다른 챕터"><a class="book__go book__go--prev" href=/posts/untitled_cs/cod/ch3/ data-book-go=ch3 data-book-link><span class=book__go-dir>← Chapter 3</span><span class=book__go-title>컴퓨터 연산</span></a>
+<a class="book__go book__go--next" href=/posts/untitled_cs/cod/ch5/ data-book-go=ch5 data-book-link><span class=book__go-dir>Chapter 5 →</span><span class=book__go-title>메모리 계층구조</span></a></nav></footer></section><section class=book__panel id=book-ch5 data-book-panel=ch5 data-url=/posts/untitled_cs/cod/ch5/ data-crumb="Chapter 5" data-label="COD · Ch.5" data-doc="COD · Chapter 5 · Draktharr Lab" aria-labelledby=book-h-ch5 hidden><header class=book__head><div class=book__head-text><p class=book__kicker>Chapter 5</p><h2 class=book__title id=book-h-ch5><span lang=en>Large and Fast: Exploiting Memory Hierarchy</span></h2><p class=book__title-ko>메모리 계층구조</p></div><p class=book__score><span aria-hidden=true><b>0</b><span class=book__score-of>/20</span></span><small aria-hidden=true>Written</small><span class=sr-only>20절 중 0절 정리</span></p></header><div class=book__cols aria-hidden=true><span>No.</span><span>Section</span><span class=book__cols-ko>한국어판</span><span>Date</span></div><ol class=book__list><li class="book__row is-todo" style=--k:0><div class=book__item><span class=book__num>5.1</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Introduction</span>
+<span class=book__ko>서론</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:1><div class=book__item><span class=book__num>5.2</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Memory Technologies</span>
+<span class=book__ko>메모리 기술</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:2><div class=book__item><span class=book__num>5.3</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>The Basics of Caches</span>
+<span class=book__ko>캐시의 기본</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:3><div class=book__item><span class=book__num>5.4</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Measuring and Improving Cache Performance</span>
+<span class=book__ko>캐시 성능의 측정 및 향상</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:4><div class=book__item><span class=book__num>5.5</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Dependable Memory Hierarchy</span>
+<span class=book__ko>신용도 있는 메모리 계층구조</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:5><div class=book__item><span class=book__num>5.6</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Virtual Machines</span>
+<span class=book__ko>가상 머신</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:6><div class=book__item><span class=book__num>5.7</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Virtual Memory</span>
+<span class=book__ko>가상 메모리</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:7><div class=book__item><span class=book__num>5.8</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>A Common Framework for Memory Hierarchy</span>
+<span class=book__ko>메모리 계층을 위한 공통 프레임워크</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:8><div class=book__item><span class=book__num>5.9</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Using a Finite-State Machine to Control a Simple Cache</span>
+<span class=book__ko>간단한 캐시 제어를 위한 유한상태기</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:9><div class=book__item><span class=book__num>5.10</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Parallelism and Memory Hierarchy: Cache Coherence</span>
+<span class=book__ko>병렬성과 메모리 계층구조: 캐시 일관성</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:10><div class=book__item><span class=book__num>5.11</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Parallelism and Memory Hierarchy: Redundant Arrays of Inexpensive <span class=book__nowrap>Disks<span class=book__web title="온라인 전용 절"><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg><span class=sr-only>(온라인 전용 절)</span></span></span></span>
+<span class=book__ko>병렬성과 메모리 계층구조: RAID</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:11><div class=book__item><span class=book__num>5.12</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Advanced Material: Implementing Cache <span class=book__nowrap>Controllers<span class=book__web title="온라인 전용 절"><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg><span class=sr-only>(온라인 전용 절)</span></span></span></span>
+<span class=book__ko>고급 자료: 캐시 제어기 구현</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:12><div class=book__item><span class=book__num>5.13</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Real Stuff: The ARM Cortex-A53 and Intel Core i7 Memory Hierarchies</span>
+<span class=book__ko>실례: ARM Cortex-A53과 Intel Core i7의 메모리 계층구조</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:13><div class=book__item><span class=book__num>5.14</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Real Stuff: The Rest of the RISC-V System and Special Instructions</span>
+<span class=book__ko>실례: 나머지 RISC-V 시스템과 특수 명령어</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:14><div class=book__item><span class=book__num>5.15</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Going Faster: Cache Blocking and Matrix Multiply</span>
+<span class=book__ko>더 빠르게: 캐시 블로킹과 행렬 곱셈</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:15><div class=book__item><span class=book__num>5.16</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Fallacies and Pitfalls</span>
+<span class=book__ko>오류 및 함정</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:16><div class=book__item><span class=book__num>5.17</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Concluding Remarks</span>
+<span class=book__ko>결론</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:17><div class=book__item><span class=book__num>5.18</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Historical Perspective and Further <span class=book__nowrap>Reading<span class=book__web title="온라인 전용 절"><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg><span class=sr-only>(온라인 전용 절)</span></span></span></span>
+<span class=book__ko>역사적 고찰 및 참고문헌</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:18><div class=book__item><span class=book__num>5.19</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Self-Study</span>
+<span class=book__ko>자습</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:19><div class=book__item><span class=book__num>5.20</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Exercises</span>
+<span class=book__ko>연습문제</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li></ol><footer class=book__foot><p class=book__legend><span class=book__web><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg></span>온라인 전용 절 <span class=book__legend-note>책 차례의 지구본 표시 · 본문은 출판사 웹사이트에</span></p><nav class=book__step aria-label="다른 챕터"><a class="book__go book__go--prev" href=/posts/untitled_cs/cod/ch4/ data-book-go=ch4 data-book-link><span class=book__go-dir>← Chapter 4</span><span class=book__go-title>프로세서</span></a>
+<a class="book__go book__go--next" href=/posts/untitled_cs/cod/ch6/ data-book-go=ch6 data-book-link><span class=book__go-dir>Chapter 6 →</span><span class=book__go-title>병렬 프로세서: 클라이언트에서 클라우드까지</span></a></nav></footer></section><section class=book__panel id=book-ch6 data-book-panel=ch6 data-url=/posts/untitled_cs/cod/ch6/ data-crumb="Chapter 6" data-label="COD · Ch.6" data-doc="COD · Chapter 6 · Draktharr Lab" aria-labelledby=book-h-ch6><header class=book__head><div class=book__head-text><p class=book__kicker>Chapter 6</p><h2 class=book__title id=book-h-ch6><span lang=en>Parallel Processors from Client to Cloud</span></h2><p class=book__title-ko>병렬 프로세서: 클라이언트에서 클라우드까지</p></div><p class=book__score><span aria-hidden=true><b>0</b><span class=book__score-of>/18</span></span><small aria-hidden=true>Written</small><span class=sr-only>18절 중 0절 정리</span></p></header><div class=book__cols aria-hidden=true><span>No.</span><span>Section</span><span class=book__cols-ko>한국어판</span><span>Date</span></div><ol class=book__list><li class="book__row is-todo" style=--k:0><div class=book__item><span class=book__num>6.1</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Introduction</span>
+<span class=book__ko>서론</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:1><div class=book__item><span class=book__num>6.2</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>The Difficulty of Creating Parallel Processing Programs</span>
+<span class=book__ko>병렬 처리 프로그램 개발의 어려움</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:2><div class=book__item><span class=book__num>6.3</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>SISD, MIMD, SIMD, SPMD, and Vector</span>
+<span class=book__ko>SISD, MIMD, SIMD, SPMD와 벡터</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:3><div class=book__item><span class=book__num>6.4</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Hardware Multithreading</span>
+<span class=book__ko>하드웨어 멀티스레딩</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:4><div class=book__item><span class=book__num>6.5</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Multicore and Other Shared Memory Multiprocessors</span>
+<span class=book__ko>멀티코어와 기타 공유 메모리 멀티프로세서</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:5><div class=book__item><span class=book__num>6.6</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Introduction to Graphics Processing Units</span>
+<span class=book__ko>그래픽 처리 유닛의 기초</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:6><div class=book__item><span class=book__num>6.7</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Domain-Specific Architectures</span>
+<span class=book__ko>도메인에 특화된 구조</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:7><div class=book__item><span class=book__num>6.8</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Clusters, Warehouse Scale Computers, and Other Message-Passing Multiprocessors</span>
+<span class=book__ko>클러스터, 창고 규모의 컴퓨터와 기타 메시지 전달 멀티프로세서</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:8><div class=book__item><span class=book__num>6.9</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Introduction to Multiprocessor Network Topologies</span>
+<span class=book__ko>멀티프로세서 네트워크 위상의 기초</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:9><div class=book__item><span class=book__num>6.10</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Communicating to the Outside World: Cluster <span class=book__nowrap>Networking<span class=book__web title="온라인 전용 절"><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg><span class=sr-only>(온라인 전용 절)</span></span></span></span>
+<span class=book__ko>외부 세계와의 통신: 클러스터 네트워킹</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:10><div class=book__item><span class=book__num>6.11</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Multiprocessor Benchmarks and Performance Models</span>
+<span class=book__ko>멀티프로세서 벤치마크와 성능 모델</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:11><div class=book__item><span class=book__num>6.12</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Real Stuff: Benchmarking the Google TPUv3 Supercomputer and an NVIDIA Volta GPU Cluster</span>
+<span class=book__ko>실례: Google TPUv3 수퍼컴퓨터와 NVIDIA Volta GPU 클러스터의 벤치마킹</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:12><div class=book__item><span class=book__num>6.13</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Going Faster: Multiple Processors and Matrix Multiply</span>
+<span class=book__ko>더 빠르게: 복수의 프로세서와 행렬 곱셈</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:13><div class=book__item><span class=book__num>6.14</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Fallacies and Pitfalls</span>
+<span class=book__ko>오류 및 함정</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:14><div class=book__item><span class=book__num>6.15</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Concluding Remarks</span>
+<span class=book__ko>결론</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:15><div class=book__item><span class=book__num>6.16</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Historical Perspective and Further <span class=book__nowrap>Reading<span class=book__web title="온라인 전용 절"><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg><span class=sr-only>(온라인 전용 절)</span></span></span></span>
+<span class=book__ko>역사적 고찰 및 참고문헌</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:16><div class=book__item><span class=book__num>6.17</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Self-Study</span>
+<span class=book__ko>자습</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li><li class="book__row is-todo" style=--k:17><div class=book__item><span class=book__num>6.18</span>
+<i class=book__led aria-hidden=true></i>
+<span class=book__name><span class=book__en lang=en>Exercises</span>
+<span class=book__ko>연습문제</span>
+</span><span class=book__state><span class=sr-only>아직 정리하지 않음</span></span></div></li></ol><footer class=book__foot><p class=book__legend><span class=book__web><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg></span>온라인 전용 절 <span class=book__legend-note>책 차례의 지구본 표시 · 본문은 출판사 웹사이트에</span></p><nav class=book__step aria-label="다른 챕터"><a class="book__go book__go--prev" href=/posts/untitled_cs/cod/ch5/ data-book-go=ch5 data-book-link><span class=book__go-dir>← Chapter 5</span><span class=book__go-title>메모리 계층구조</span></a></nav></footer></section></div></div></div></main><footer class=footer><div class=footer__bull aria-hidden=true><svg viewBox="0 0 400 240" class="bull" aria-hidden="true" focusable="false"><path class="bull__body" d="M94 76l28-14 50-6 50-14 40 12 30 28 20 20 24 24 6 16-16 8-30-10-28 6-18 12 34 18 22 22-10 8-26-22-22-14-16-8-52-2-30-4-30 20-26 28-10-6 20-30-4-44z"/><path class="bull__far" d="M244 166l10 34-10 4-8-36m-68-8-12 38-10-2 10-38"/><path class="bull__horns" d="M296 92q24 4 38-22M288 84q10-18 30-26M284 92l-14 6 14 4"/><path class="bull__tail" d="M94 76Q66 58 56 84m0 0-8 12m8-12 4 14"/><path class="bull__facets" d="M222 42l28 70 18 34m-6-92-12 58-18 50m60-80-42 30m42-30 4 58m16-38-16 38m-46-28-50-4 22-66m-22 66-28-52m28 52-20 52m20-52-52-2 24-50m-24 50-26-44m26 44 2 50m-2-50-48 18m1e2-16 32 54"/><g class="bull__stars"><circle class="bull__star bull__star--1" cx="222" cy="42" r="2.6" style="--t:0.00s;--d:3.20s"/><circle class="bull__star bull__star--1" cx="334" cy="70" r="2.6" style="--t:-2.59s;--d:5.45s"/><circle class="bull__star bull__star--1" cx="342" cy="142" r="2.6" style="--t:-5.18s;--d:3.65s"/><circle class="bull__star bull__star--1" cx="306" cy="198" r="2.6" style="--t:-7.77s;--d:5.90s"/><circle class="bull__star bull__star--1" cx="94" cy="204" r="2.6" style="--t:-1.85s;--d:4.10s"/><circle class="bull__star bull__star--1" cx="56" cy="84" r="2.6" style="--t:-4.44s;--d:6.35s"/><circle class="bull__star bull__star--2" cx="122" cy="62" r="1.7" style="--t:-7.03s;--d:4.55s"/><circle class="bull__star bull__star--2" cx="172" cy="56" r="1.7" style="--t:-1.11s;--d:6.80s"/><circle class="bull__star bull__star--2" cx="262" cy="54" r="1.7" style="--t:-3.70s;--d:5.00s"/><circle class="bull__star bull__star--2" cx="292" cy="82" r="1.7" style="--t:-6.29s;--d:3.20s"/><circle class="bull__star bull__star--2" cx="312" cy="102" r="1.7" style="--t:-0.37s;--d:5.45s"/><circle class="bull__star bull__star--2" cx="326" cy="150" r="1.7" style="--t:-2.96s;--d:3.65s"/><circle class="bull__star bull__star--2" cx="268" cy="146" r="1.7" style="--t:-5.55s;--d:5.90s"/><circle class="bull__star bull__star--2" cx="250" cy="158" r="1.7" style="--t:-8.14s;--d:4.10s"/><circle class="bull__star bull__star--2" cx="284" cy="176" r="1.7" style="--t:-2.22s;--d:6.35s"/><circle class="bull__star bull__star--2" cx="232" cy="162" r="1.7" style="--t:-4.81s;--d:4.55s"/><circle class="bull__star bull__star--2" cx="180" cy="160" r="1.7" style="--t:-7.40s;--d:6.80s"/><circle class="bull__star bull__star--2" cx="150" cy="156" r="1.7" style="--t:-1.48s;--d:5.00s"/><circle class="bull__star bull__star--2" cx="120" cy="176" r="1.7" style="--t:-4.07s;--d:3.20s"/><circle class="bull__star bull__star--2" cx="100" cy="124" r="1.7" style="--t:-6.66s;--d:5.45s"/><circle class="bull__star bull__star--2" cx="94" cy="76" r="1.7" style="--t:-0.74s;--d:3.65s"/><circle class="bull__star bull__star--2" cx="318" cy="58" r="1.7" style="--t:-3.33s;--d:5.90s"/><circle class="bull__star bull__star--2" cx="250" cy="112" r="1.7" style="--t:-5.92s;--d:4.10s"/><circle class="bull__star bull__star--2" cx="200" cy="108" r="1.7" style="--t:0.00s;--d:6.35s"/><circle class="bull__star bull__star--2" cx="148" cy="106" r="1.7" style="--t:-2.59s;--d:4.55s"/><circle class="bull__star bull__star--3" cx="336" cy="126" r="1.1" style="--t:-5.18s;--d:6.80s"/><circle class="bull__star bull__star--3" cx="296" cy="140" r="1.1" style="--t:-7.77s;--d:5.00s"/><circle class="bull__star bull__star--3" cx="296" cy="206" r="1.1" style="--t:-1.85s;--d:3.20s"/><circle class="bull__star bull__star--3" cx="270" cy="184" r="1.1" style="--t:-4.44s;--d:5.45s"/><circle class="bull__star bull__star--3" cx="248" cy="170" r="1.1" style="--t:-7.03s;--d:3.65s"/><circle class="bull__star bull__star--3" cx="84" cy="198" r="1.1" style="--t:-1.11s;--d:5.90s"/><circle class="bull__star bull__star--3" cx="104" cy="168" r="1.1" style="--t:-3.70s;--d:4.10s"/><circle class="bull__star bull__star--3" cx="48" cy="96" r="1.1" style="--t:-6.29s;--d:6.35s"/><circle class="bull__star bull__star--3" cx="60" cy="98" r="1.1" style="--t:-0.37s;--d:4.55s"/><circle class="bull__star bull__star--3" cx="270" cy="98" r="1.1" style="--t:-2.96s;--d:6.80s"/><circle class="bull__star bull__star--3" cx="254" cy="200" r="1.1" style="--t:-5.55s;--d:5.00s"/><circle class="bull__star bull__star--3" cx="244" cy="204" r="1.1" style="--t:-8.14s;--d:3.20s"/><circle class="bull__star bull__star--3" cx="156" cy="198" r="1.1" style="--t:-2.22s;--d:5.45s"/><circle class="bull__star bull__star--3" cx="146" cy="196" r="1.1" style="--t:-4.81s;--d:3.65s"/><circle class="bull__star bull__star--eye" cx="304" cy="111" r="2.4" style="--t:-1.10s;--d:5.40s"/></g><g class="bull__dust"><circle class="bull__star bull__star--dust" cx="26" cy="28" r=".9" style="--t:0.00s;--d:4.00s"/><circle class="bull__star bull__star--dust" cx="138" cy="18" r="1.2" style="--t:-4.51s;--d:4.80s"/><circle class="bull__star bull__star--dust" cx="362" cy="26" r="1.5" style="--t:-2.05s;--d:5.60s"/><circle class="bull__star bull__star--dust" cx="386" cy="178" r=".9" style="--t:-6.56s;--d:6.40s"/><circle class="bull__star bull__star--dust" cx="18" cy="158" r="1.2" style="--t:-4.10s;--d:4.00s"/><circle class="bull__star bull__star--dust" cx="204" cy="226" r="1.5" style="--t:-1.64s;--d:4.80s"/><circle class="bull__star bull__star--dust" cx="334" cy="228" r=".9" style="--t:-6.15s;--d:5.60s"/><circle class="bull__star bull__star--dust" cx="62" cy="230" r="1.2" style="--t:-3.69s;--d:6.40s"/><circle class="bull__star bull__star--dust" cx="392" cy="104" r="1.5" style="--t:-1.23s;--d:4.00s"/><circle class="bull__star bull__star--dust" cx="252" cy="12" r=".9" style="--t:-5.74s;--d:4.80s"/><circle class="bull__star bull__star--dust" cx="8" cy="96" r="1.2" style="--t:-3.28s;--d:5.60s"/><circle class="bull__star bull__star--dust" cx="112" cy="232" r="1.5" style="--t:-0.82s;--d:6.40s"/><circle class="bull__star bull__star--dust" cx="372" cy="64" r=".9" style="--t:-5.33s;--d:4.00s"/><circle class="bull__star bull__star--dust" cx="30" cy="210" r="1.2" style="--t:-2.87s;--d:4.80s"/><circle class="bull__star bull__star--dust" cx="176" cy="12" r="1.5" style="--t:-0.41s;--d:5.60s"/><circle class="bull__star bull__star--dust" cx="300" cy="18" r=".9" style="--t:-4.92s;--d:6.40s"/></g></svg></div><div class=footer__finish aria-hidden=true><span class=footer__line></span><span class=footer__flag></span><span class=footer__line></span></div><div class="container footer__grid"><div class=footer__brand><a class="brand brand--footer" href=/posts/><span class=brand__text>Draktharr<b>Lab</b></span></a><p class=footer__desc>공부한 것과 좋아하는 것을 적어 두는 개인 기록이다.</p><div class=footer__links><a href=https://github.com/ColdBurgundy rel=noopener>GitHub</a>
+<a href=/index.xml>RSS</a>
+<a href=/ data-mode-switch=cli>>_ Terminal</a></div></div><div class=footer__col><p class=eyebrow>Recent posts</p><ul class=footer__list><li><a href=/posts/untitled_cs/boj/2573/><span>$20. [BOJ] 2573 빙산</span><time datetime=2024-01-20>2024.01.20</time></a></li><li><a href=/posts/untitled_cs/boj/11049/><span>$19. [BOJ] 11049 행렬 곱셈 순서</span><time datetime=2024-01-19>2024.01.19</time></a></li><li><a href=/posts/untitled_cs/boj/1987/><span>$18. [BOJ] 1987 알파벳</span><time datetime=2024-01-18>2024.01.18</time></a></li><li><a href=/posts/untitled_cs/boj/17069/><span>$17. [BOJ] 17069 파이프 옮기기 2</span><time datetime=2024-01-17>2024.01.17</time></a></li><li><a href=/posts/untitled_cs/boj/2638/><span>$16. [BOJ] 2638 치즈</span><time datetime=2024-01-16>2024.01.16</time></a></li></ul></div><div class=footer__col><p class=eyebrow>Categories</p><ul class=cat-tree><li class="cat-tree__item is-active"><a class=cat-tree__link href=/posts/untitled_cs/ style=--cat:#db0a40><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>untitled_cs</span>
+<span class=cat-tree__count>26</span></a><ul class="cat-tree cat-tree--sub"><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/untitled_cs/os/ style=--cat:#3671c6><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>OS</span>
+<span class=cat-tree__count>0</span></a></li><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/untitled_cs/csapp/ style=--cat:#00d2be><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>CS:APP</span>
+<span class=cat-tree__count>0</span></a></li><li class="cat-tree__item is-active is-empty"><a class=cat-tree__link href=/posts/untitled_cs/cod/ style=--cat:#00a3e0><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>COD</span>
+<span class=cat-tree__count>0</span></a></li><li class=cat-tree__item><a class=cat-tree__link href=/posts/untitled_cs/clrs/ style=--cat:#ff8000><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>CLRS</span>
+<span class=cat-tree__count>1</span></a></li><li class=cat-tree__item><a class=cat-tree__link href=/posts/untitled_cs/boj/ style=--cat:#ffd12e><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>BOJ</span>
+<span class=cat-tree__count>20</span></a></li><li class=cat-tree__item><a class=cat-tree__link href=/posts/untitled_cs/codeforces/ style=--cat:#52e252><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>Codeforces</span>
+<span class=cat-tree__count>4</span></a></li><li class=cat-tree__item><a class=cat-tree__link href=/posts/untitled_cs/leetcode/ style=--cat:#ff87bc><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>LeetCode</span>
+<span class=cat-tree__count>1</span></a></li></ul></li><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/research/ style=--cat:#2ee6a8><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>research</span>
+<span class=cat-tree__count>0</span></a><ul class="cat-tree cat-tree--sub"><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/research/paper-review/ style=--cat:#7cc4ff><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>Paper Review</span>
+<span class=cat-tree__count>0</span></a></li><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/research/implementation/ style=--cat:#ffb000><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>Implementation</span>
+<span class=cat-tree__count>0</span></a></li></ul></li><li class=cat-tree__item><a class=cat-tree__link href=/posts/untitled_life/ style=--cat:#27f4d2><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>untitled_life</span>
+<span class=cat-tree__count>2</span></a><ul class="cat-tree cat-tree--sub"><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/untitled_life/movies/ style=--cat:#d9dde7><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>Movie & Anime</span>
+<span class=cat-tree__count>0</span></a></li><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/untitled_life/motorsport/ style=--cat:#3671c6><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>Motorsport</span>
+<span class=cat-tree__count>0</span></a></li><li class=cat-tree__item><a class=cat-tree__link href=/posts/untitled_life/goals/ style=--cat:#ffc906><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>Goals</span>
+<span class=cat-tree__count>1</span></a></li><li class=cat-tree__item><a class=cat-tree__link href=/posts/untitled_life/monthly/ style=--cat:#64c4ff><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>Monthly</span>
+<span class=cat-tree__count>1</span></a></li></ul></li><li class="cat-tree__item is-empty"><a class=cat-tree__link href=/posts/projects/ style=--cat:#a855f7><span class=cat-tree__dot aria-hidden=true></span>
+<span class=cat-tree__name>projects</span>
+<span class=cat-tree__count>0</span></a></li></ul></div></div><div class="container footer__bottom"><span>© 2026 ColdBurgundy. Built with Hugo.</span>
+<span class=footer__credits>CLI based on <a href=https://github.com/coolapso/hugo-theme-terminalcv rel=noopener>terminalcv</a> · Mac UI by <a href=https://github.com/sakofchit/system.css rel=noopener>system.css</a> (MIT) · Circuit data by <a href=https://github.com/bacinger/f1-circuits rel=noopener>f1-circuits</a> (MIT)</span></div></footer><button type=button class=to-top data-to-top aria-label="맨 위로">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.4"/></svg></button><div class=search id=search role=dialog aria-modal=true aria-label="글 검색" hidden data-search><div class=search__backdrop data-search-close></div><div class=search__panel><div class=search__bar><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.2"/></svg>
+<input type=search class=search__input placeholder="제목, 태그, 내용으로 검색…" autocomplete=off spellcheck=false role=combobox aria-label=검색어 aria-autocomplete=list aria-expanded=false aria-controls=search-results data-search-input>
+<kbd>Esc</kbd></div><ul class=search__results id=search-results role=listbox aria-label="검색 결과" data-search-results></ul><p class=sr-only aria-live=polite data-search-status></p><p class=search__hint><kbd>↑</kbd><kbd>↓</kbd> 이동 · <kbd>Enter</kbd> 열기 · <kbd>Esc</kbd> 닫기</p></div></div><p class=sr-only aria-live=polite data-announce></p><script>window.DL_GUI={circuitsURL:"/data/circuits.min.b601a46107a6dfd94dc0dbbc22382b15a7824c3c6f43febd133e28306b90f7b5.json",indexURL:"/index.json"}</script><script src=/js/gui.min.d0af263e48dea303421d3a2c85aa5f7a57ed3b23515e5c10190bd42954ebd400.js integrity="sha256-0K8mPkjeowNCHToshapfelftOyNRXlwQGQvUKVTr1AA=" defer></script></body></html>
