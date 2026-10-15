@@ -48,7 +48,8 @@
               {{- range $postsRoot.Sections.ByWeight }}
               {{- $n := len .RegularPagesRecursive }}
               {{- $subs := .Sections.ByWeight }}
-              {{- $split := gt (len $subs) 4 }}
+              {{- /* 하위 항목이 5개를 넘을 때만 두 줄로 나눕니다 (패널은 4~5줄 높이, 너무 넓어져 옆 열이 잘리지 않게) */}}
+              {{- $split := gt (len $subs) 5 }}
               <div class="drop__col{{ if $split }} drop__col--split{{ end }}">
                 <div class="drop__head">
                   <a class="drop__cat{{ if eq $n 0 }} is-empty{{ end }}" href="{{ .RelPermalink }}" style="--cat: {{ partial "gui/cat-color.html" . | safeCSS }}">
