@@ -1,7 +1,7 @@
 {{ define "main" }}
 {{- if eq .Kind "term" -}}
-  {{- /* 태그 하나: 해당 글 목록 */ -}}
-  {{- $pages := .Pages.ByDate.Reverse -}}
+  {{- /* 태그 하나: 해당 글 목록 (최신순 — 같은 날 한 번에 공개한 코스의 강은 커리큘럼 순서대로, gui/newest.html · head.html 과 같은 목록) */ -}}
+  {{- $pages := partial "gui/newest.html" .Pages -}}
   {{- partial "gui/page-hero.html" (dict
       "page" .
       "eyebrow" "Tag"

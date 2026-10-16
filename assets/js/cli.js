@@ -47,6 +47,7 @@
   var TAGS = [];
   var AUTHOR = CFG.author || {};
   var fsReady = null;     // Promise
+  var ALIASES = [];       // 옮긴 폴더의 옛 경로 → 지금 경로 (index.json 의 dirs[].aliases — 예: GRID서당의 옛 주소)
 
   function mkDir(name, path) {
     return { type: 'dir', name: name, path: path, title: name, description: '', count: 0, weight: 0, children: {} };
@@ -75,6 +76,7 @@
       n.count = d.count || 0;
       n.weight = d.weight || 0;
       n.url = d.url;
+      (d.aliases || []).forEach(function (a) { ALIASES.push({ from: decodeURIComponent(a), to: path }); });
     });
     POSTS = (data.posts || []).map(function (p) {
       var path = decodeURIComponent(p.path);
@@ -82,7 +84,8 @@
       var name = segs.pop();
       var post = {
         type: 'post', name: name, path: path, title: p.title, url: p.url, date: p.date,
-        tags: p.tags || [], summary: p.summary || '', words: p.words || 0, readingTime: p.readingTime || 1
+        tags: p.tags || [], summary: p.summary || '', words: p.words || 0, readingTime: p.readingTime || 1,
+        course: !!p.course, order: typeof p.order === 'number' ? p.order : null
       };
       ensureDir(segs.join('/')).children[name] = post;
       return post;
@@ -112,6 +115,8 @@
     return list.sort(function (a, b) {
       if (rank[a.type] !== rank[b.type]) return rank[a.type] - rank[b.type];
       if (a.type === 'dir') return (a.weight - b.weight) || a.name.localeCompare(b.name);
+      // 코스(GRID서당)의 강은 날짜(모두 같은 날) 대신 커리큘럼 순서로 — 1강 → 2강 …
+      if (a.type === 'post' && a.course && b.course && a.order != null && b.order != null) return a.order - b.order;
       if (a.type === 'post') return (b.date || '').localeCompare(a.date || '');
       return a.name.localeCompare(b.name);
     });
@@ -145,7 +150,18 @@
     return segs;
   }
 
+  // 옛 경로(별칭)로 들어오면 지금 경로로 바꿔 읽습니다 — 글 속의 옛 링크 · 북마크
+  function unalias(segs) {
+    var p = segs.join('/');
+    for (var i = 0; i < ALIASES.length; i++) {
+      var a = ALIASES[i];
+      if (p === a.from || p.indexOf(a.from + '/') === 0) return (a.to + p.slice(a.from.length)).split('/').filter(Boolean);
+    }
+    return segs;
+  }
+
   function lookup(segs) {
+    segs = unalias(segs);
     var node = FS;
     for (var i = 0; i < segs.length; i++) {
       if (!node || node.type !== 'dir') return null;
@@ -296,7 +312,7 @@
     if (!node) return err('cd', '그런 디렉터리가 없습니다: ' + target);
     if (node.type !== 'dir') return err('cd', '디렉터리가 아닙니다: ' + target);
     prevCwd = cwd;
-    cwd = segs;
+    cwd = node.path ? node.path.split('/') : [];   // 별칭으로 들어와도 프롬프트에는 지금 경로
   }
 
   function cmdTree(args) {
@@ -1059,7 +1075,7 @@
     if (!(node && node.type === 'post') && reader.isOpen()) reader.close({ silent: true });
     if (node && node.type === 'post') openPost(path, false);
     else if (node && node.type === 'dir') {
-      cwd = path.split('/');
+      cwd = node.path ? node.path.split('/') : [];   // 옛 경로(별칭)로 왔어도 지금 경로로
       term.set_prompt(prompt);
       clearHash();
     } else if (node && node.type === 'file') {
@@ -1182,7 +1198,7 @@
   // [GUI] 버튼 · 모바일 안내의 gui: 명령줄에 gui 를 쳐 보인 뒤 같은 설치 과정으로 갑니다.
   // 처리했으면 true (링크 기본 동작을 막음), 터미널이 아직 준비되지 않았거나 다른 화면(less · 글 창)이 떠 있으면 false.
   var booted = false, pendingRun = null, autoTyping = false;
-  function runCommand(cmd) {
+  function runCommand(cmd, next) {
     if (install || autoTyping) return true;      // 이미 치는 중 · 설치 중 (설치 중 클릭은 window 캡처에서 건너뛰기로 처리됨)
     if (!term) return false;
     if (!booted) { pendingRun = cmd; return true; }   // 부팅 글이 끝나면 이어서
@@ -1193,7 +1209,10 @@
     // 글 경로처럼 긴 명령은 한 글자 간격을 줄여 전체가 0.6초 안팎에 끝나게 합니다
     autoTyping = true;
     var delay = Math.max(18, Math.min(70, Math.round(600 / cmd.length)));
-    term.exec(cmd, reduceMotion ? {} : { typing: true, delay: delay }).always(function () { autoTyping = false; });
+    term.exec(cmd, reduceMotion ? {} : { typing: true, delay: delay }).always(function () {
+      autoTyping = false;
+      if (next) runCommand(next);   // 이어서 칠 명령 (글 속 카테고리 링크: cd 한 뒤 ls)
+    });
     return true;
   }
 
@@ -1257,6 +1276,13 @@
       // 글 안의 링크로 다른 글(또는 같은 글의 #앵커)로 갈 때
       window.MacReader.onNavigate = function (path, hash) {
         var n = lookup(path.split('/'));
+        // 카테고리(폴더) 링크 — 예: 강의 첫머리의 'GRID서당' 시리즈 링크: 창을 닫고 터미널에서 그 폴더로 가서(cd) 목록을 봅니다(ls)
+        if (n && n.type === 'dir' && n.path && booted && !install && !autoTyping) {
+          window.MacReader.close();
+          var arg = '~/' + n.path;
+          if (/\s/.test(arg)) arg = '"' + arg.replace(/"/g, '\\"') + '"';
+          return runCommand('cd ' + arg, 'ls');
+        }
         if (!n || n.type !== 'post') return false;
         if (window.MacReader.currentPath() === path) {
           // 지금 열린 글이면 다시 불러오지 않고(기록도 늘리지 않고) 앵커로만 이동

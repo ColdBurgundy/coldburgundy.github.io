@@ -1090,6 +1090,14 @@ kbd {
 .card--row .card__body { order: 1; }
 .card--row .card__title { font-size: 17px; }
 .card--row .card__excerpt { -webkit-line-clamp: 2; }
+/* 코스 카드(최신순 목록에서 코스를 한 장으로 — gui/card.html): 칩 옆 Course 표시 · 반마다 진행 LED */
+.card__kind { padding: 3px 7px 2px; border: 1px solid var(--hair-2); border-radius: 999px; font: 400 8px/1.4 var(--f-wide); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.card--course .card__excerpt { -webkit-line-clamp: 2; }
+/* 코스 카드의 그림: 첫 강의 시범 장면(글자가 그려진 그림)이라 자르지 않고 통째로 — 강의 본문의 영상 칸처럼 어두운 화면 칸 가운데에.
+   그림 크기 그대로 칸 안에 맞춰 줄이고(비율 유지) 모서리를 둥글게 깎아, 그림 바깥 모서리에 남은 밝은 점이 보이지 않게 */
+.card--course .card__media { background: var(--lcd); }
+.card--course .card__media img { position: absolute; inset: 0; margin: auto; width: auto; height: auto; max-width: 88%; max-height: 84%; object-fit: contain; border-radius: 1.4% / 2.8%; }
+.card__meter { padding: 2px 0 1px; }
 .card--placeholder { justify-content: center; gap: 6px; padding: 22px 24px; background: transparent; border-style: dashed; color: var(--muted); }
 .card--placeholder:hover { translate: none; box-shadow: none; }
 
@@ -1193,6 +1201,21 @@ a.tyre:hover .tyre__ring { animation: tyre-spin .6s linear infinite; }
 .crumbs a { text-decoration: none; transition: color .2s; }
 .crumbs a:hover { color: var(--text); }
 .crumbs [aria-current] span { color: var(--text-2); }
+/* 깊은 경로의 '…' (좁은 화면에서만 — 누르면 접힌 단계를 펼침, gui.js) */
+.crumbs__gap { display: none; }
+.crumbs__more { padding: 0 3px; border: 0; border-radius: 4px; background: none; font: inherit; letter-spacing: .08em; color: var(--muted); cursor: pointer; transition: color .2s; }
+.crumbs__more:hover { color: var(--text); }
+/* 글: 한 줄로 — 마지막 칸(글 제목)만 말줄임으로 줄어듭니다 */
+.crumbs--post ol { flex-wrap: nowrap; }
+.crumbs--post li { flex: none; white-space: nowrap; }
+.crumbs--post li[aria-current] { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 640px) {
+  /* Home · '…' · 마지막 세 칸만 (글은 마지막 칸이 화면 낭독기용이라 보이는 건 두 칸) */
+  .crumbs:not(.is-open) ol > li:not(:first-child):not(.crumbs__gap):not(:nth-last-child(-n+3)) { display: none; }
+  .crumbs:not(.is-open) .crumbs__gap { display: list-item; }
+  .crumbs.is-open ol { flex-wrap: wrap; }
+  .crumbs--post li[aria-current] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); }
+}
 
 .section-page { padding: 48px 0 104px; }
 .subcats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
@@ -1229,6 +1252,149 @@ a.tyre:hover .tyre__ring { animation: tyre-spin .6s linear infinite; }
 .empty__art { display: block; width: 150px; margin: 0 auto 22px; color: var(--blue-hi); --bull-line: .3; --bull-star: .9; }
 .empty__title { margin: 0; font: 400 12px var(--f-wide); letter-spacing: .16em; text-transform: uppercase; color: var(--text-2); }
 .empty__text { margin: 8px 0 0; color: var(--muted); }
+
+/* ---------- 카테고리 판 (partials/gui/hub.html) ----------
+   하위 카테고리마다 한 장: LED · 배지 · 글 수 / 이름 · 설명 / 아래 칸(진행 LED · 하위 이름들 · 최근 글 · 비어 있음 중 하나).
+   판 전체가 링크(이름의 링크가 ::after 로 판을 덮음), 마우스를 올리면 카드처럼 살짝 떠오르고 LED 가 밝아지며 화살표가 밀립니다 */
+.section-page--hub { padding-top: 40px; }
+.hub { margin-bottom: 60px; }
+.hub--c1 { --cols: 1; }
+.hub--c2 { --cols: 2; }
+.hub--c3 { --cols: 3; }
+.hub--c4 { --cols: 4; }
+.hub__grid { display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
+.hub__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 232px;
+  padding: 20px 22px 18px;
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  isolation: isolate;
+  transition: border-color .3s, translate .35s var(--ease), background .3s, box-shadow .35s var(--ease);
+}
+/* 마우스를 올리면 그 카테고리 색이 왼쪽 위에서 아주 옅게 번집니다 */
+.hub__card::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: radial-gradient(110% 80% at 0% 0%, color-mix(in srgb, var(--cat) 9%, transparent), transparent 62%); opacity: 0; transition: opacity .4s var(--ease); pointer-events: none; }
+.hub__card:hover { border-color: var(--hair-2); translate: 0 -3px; background: var(--surface-2); box-shadow: 0 26px 50px -30px rgba(0, 0, 0, .9); }
+.hub__card:hover::before, .hub__card:focus-within::before { opacity: 1; }
+.hub__head { padding-bottom: 22px; }
+.hub__top { display: flex; align-items: center; gap: 10px; min-height: 20px; margin-bottom: 20px; }
+.hub__led { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--cat); box-shadow: 0 0 8px color-mix(in srgb, var(--cat) 65%, transparent); transition: box-shadow .3s; }
+.hub__card:hover .hub__led { box-shadow: 0 0 4px var(--cat), 0 0 14px color-mix(in srgb, var(--cat) 70%, transparent); }
+.hub__badge { font: 400 10px/1 var(--f-wide); letter-spacing: .14em; color: color-mix(in srgb, var(--cat) 75%, #fff); }
+.hub__kind { padding: 4px 8px 3px; border: 1px solid var(--hair-2); border-radius: 999px; font: 400 8px/1 var(--f-wide); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.hub__count { margin-left: auto; font: 500 12px/1 var(--f-tech); color: var(--muted); white-space: nowrap; }
+.hub__count b { margin-right: 2px; font-size: 15px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.hub__name { margin: 0; font-family: var(--f-display); font-weight: 700; font-stretch: 106%; font-size: 24px; line-height: 1.2; letter-spacing: -.015em; }
+.hub__link { color: var(--text); text-decoration: none; }
+.hub__link::after { content: ""; position: absolute; inset: 0; z-index: 3; border-radius: inherit; }
+.hub__link:focus-visible { outline: none; }
+.hub__link:focus-visible::after { outline: 2px solid var(--focus); outline-offset: -3px; border-radius: var(--r-lg); }
+.hub__desc { margin: 8px 0 0; font-size: 13.5px; line-height: 1.6; color: var(--muted); }
+/* 아래 칸: 판 높이가 달라도 같은 자리에 (이름표는 휠 LCD 처럼 작은 넓은 글꼴) — 오른쪽 아래 화살표 자리는 비워 둠 */
+.hub__foot { margin-top: auto; padding: 14px 26px 0 0; border-top: 1px solid var(--hair); }
+/* 한 줄에 놓인 판들이 머리 · 아래 칸 두 줄을 함께 나눠 써서(subgrid) 아래 칸의 구분선이 언제나 같은 높이에 —
+   설명이 두 줄인 판, 진행 계기판이 있는 판이 섞여도 선이 계단지지 않게. subgrid 를 모르는 브라우저는 위의 flex 배치 그대로 */
+@supports (grid-template-rows: subgrid) {
+  .hub__card { display: grid; grid-row: span 2; grid-template-rows: subgrid; grid-template-columns: minmax(0, 1fr); row-gap: 0; min-height: 0; }
+  .hub__foot { margin-top: 0; }
+}
+.hub__kicker { margin: 0 0 10px; font: 400 8.5px/1 var(--f-wide); letter-spacing: .18em; text-transform: uppercase; color: var(--faint); }
+.hub__latest { display: flex; align-items: baseline; gap: 12px; margin: 0; }
+.hub__latest-title { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13.5px; font-weight: 600; color: var(--text-2); }
+.hub__latest time { flex: none; font: 500 11.5px/1 var(--f-tech); letter-spacing: .02em; font-variant-numeric: tabular-nums; color: var(--muted); }
+.hub__kids { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: 13px; font-weight: 600; line-height: 1.5; color: var(--text-2); }
+.hub__kids li { display: inline-flex; align-items: center; gap: 7px; }
+.hub__kids i { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--cat); }
+.hub__kids .is-empty { font-weight: 500; color: var(--muted); }
+.hub__kids .is-empty i { background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cat) 65%, transparent); }
+.hub__kid-n { font: 500 11px/1 var(--f-tech); font-variant-numeric: tabular-nums; color: var(--faint); }
+.hub__none { margin: 0; font-size: 13px; color: var(--faint); }
+.hub__meter { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 14px; }
+.hub__meter .mini-meter--bars { flex: 1 1 160px; }
+.hub__score { flex: none; font: 500 12px/1 var(--f-tech); color: var(--muted); white-space: nowrap; }
+.hub__score b { margin-right: 1px; font-size: 15px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+/* 좁은 판(4열 · 태블릿)에서는 최근 글 날짜를 접어 제목이 숨 쉴 자리를 — 판 자체를 컨테이너로 두면 subgrid 가 풀리므로 아래 칸을 잽니다 */
+.hub__foot { container: hub-foot / inline-size; }
+@container hub-foot (max-width: 192px) { .hub__latest time { display: none; } }
+.hub__go { position: absolute; right: 18px; bottom: 17px; display: block; width: 16px; height: 16px; color: var(--faint); transition: color .25s, translate .35s var(--ease); }
+.hub__go svg { display: block; width: 100%; height: 100%; }
+.hub__card:hover .hub__go, .hub__card:focus-within .hub__go { color: var(--text); translate: 3px 0; }
+/* 아직 글이 없는 카테고리: LED 는 테두리만, 숫자 · 배지는 흐리게 — 비어 있는 것도 제자리에 놓인 모양으로 */
+.hub__card.is-empty .hub__led { background: transparent; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--cat) 70%, transparent); }
+.hub__card.is-empty:hover .hub__led { box-shadow: inset 0 0 0 1.5px var(--cat), 0 0 10px color-mix(in srgb, var(--cat) 45%, transparent); }
+.hub__card.is-empty .hub__badge { color: var(--muted); }
+.hub__card.is-empty .hub__count b { color: var(--muted); }
+/* 최근 30일 안에 새 글이 있으면 LED 가 천천히 숨 쉽니다 */
+@media (prefers-reduced-motion: no-preference) {
+  .hub__card.is-live .hub__led { animation: hub-live 3.6s ease-in-out infinite; }
+}
+@keyframes hub-live { 50% { box-shadow: 0 0 2px color-mix(in srgb, var(--cat) 35%, transparent); opacity: .72; } }
+
+/* 작은 진행 계기판 (partials/gui/book-mini.html — 카테고리 판 · 코스 카드): 반(챕터)마다 어두운 집 안의 LED, 절이 많으면 얇은 막대 */
+.mini-meter { display: flex; flex-wrap: wrap; gap: 8px; }
+.mini-meter__grp { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.mini-meter__dots { display: flex; gap: 3px; padding: 4px 6px; background: #03060e; border: 1px solid rgba(214, 224, 255, .07); border-radius: 999px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .8); }
+.mini-meter__dots i { width: 5px; height: 5px; border-radius: 50%; background: #161d33; }
+.mini-meter__dots i.is-on { background: var(--cat); box-shadow: 0 0 5px color-mix(in srgb, var(--cat) 80%, transparent); }
+.mini-meter small { padding-left: 6px; font: 600 9px/1 var(--f-tech); letter-spacing: .12em; white-space: nowrap; color: var(--faint); }
+.mini-meter--bars { flex-wrap: nowrap; gap: 4px; }
+.mini-meter--bars .mini-meter__grp { flex: var(--n, 1) 1 0; min-width: 30px; }
+.mini-meter__bar { display: block; height: 5px; border-radius: 3px; background: #161d33; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6); overflow: hidden; }
+.mini-meter__bar i { display: block; height: 100%; border-radius: inherit; background: var(--cat); }
+.mini-meter--bars small { padding-left: 0; }
+
+/* 판 아래 최근 글 머리 */
+.feed-head { margin: 0 0 18px; }
+.feed-head__kicker { margin: 0 0 10px; font: 400 9.5px/1 var(--f-wide); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.feed-head__title { margin: 0; font-family: var(--f-display); font-weight: 700; font-stretch: 106%; font-size: 22px; line-height: 1.2; }
+
+@media (max-width: 1099.98px) {
+  .hub__card { padding: 18px 18px 16px; }
+  .hub__name { font-size: 22px; }
+}
+@media (max-width: 899.98px) {
+  .hub--c4 { --cols: 2; }
+}
+@media (max-width: 759.98px) {
+  .hub--c3 { --cols: 1; }
+  .hub__card { min-height: 0; }
+}
+@media (max-width: 599.98px) {
+  .section-page--hub { padding-top: 28px; }
+  .hub { margin-bottom: 44px; }
+  .hub--c2, .hub--c4 { --cols: 1; }
+  .hub__grid { gap: 10px; }
+  .hub__card { border-radius: var(--r); }
+  .hub__link:focus-visible::after { border-radius: var(--r); }
+  .hub__top { margin-bottom: 14px; }
+  .hub__head { padding-bottom: 18px; }
+  .hub__name { font-size: 21px; }
+  /* 하위가 넷 이상: 설명 · 이름표를 접은 작은 판 두 줄 (LED · 배지 · 글 수 / 이름 / 아래 칸 한 줄) */
+  .hub--many { --cols: 2; }
+  .hub--many .hub__card { padding: 14px 14px 12px; }
+  .hub--many .hub__top { gap: 8px; margin-bottom: 10px; }
+  .hub--many .hub__kind { display: none; }
+  .hub--many .hub__name { font-size: 17px; }
+  .hub--many .hub__desc, .hub--many .hub__kicker { display: none; }
+  .hub--many .hub__head { padding-bottom: 12px; }
+  .hub--many .hub__foot { padding: 10px 20px 0 0; }
+  .hub--many .hub__latest time { display: none; }
+  .hub--many .hub__latest-title, .hub--many .hub__none { font-size: 12.5px; }
+  .hub--many .hub__kids { gap: 4px 10px; font-size: 12px; }
+  .hub--many .mini-meter--bars small { display: none; }
+  .hub--many .hub__go { right: 12px; bottom: 12px; width: 14px; height: 14px; }
+  /* 작은 판의 책 진행: 막대(이름표 없이)와 쓴 절 / 전체를 한 줄로 — 막대는 판 너비에 맞춰 줄어들고, 아주 좁으면 숫자만 */
+  .hub--many .hub__meter { flex-wrap: nowrap; align-items: center; gap: 8px; min-height: 19px; }
+  .hub--many .hub__meter .mini-meter--bars { flex: 1 1 0; min-width: 0; }
+  .hub--many .mini-meter--bars .mini-meter__grp { min-width: 0; }
+  .hub--many .hub__score { font-size: 11px; }
+  .hub--many .hub__score b { font-size: 12.5px; }
+}
+@container hub-foot (max-width: 100px) { .hub--many .hub__meter .mini-meter--bars { display: none; } }
 
 /* ==========================================================================
    BOOK — 책 목차 (partials/gui/book-toc.html · book-meter.html, 탭 동작은 gui.js)
@@ -1432,6 +1598,11 @@ a.book__item:focus-visible { outline-offset: -2px; border-radius: 10px; }
   .book__tab-ko-sub { display: none; }
   .book__tab-meter { flex-direction: column-reverse; align-self: stretch; gap: 7px; margin-top: auto; padding-top: 5px; }
   .book__tab-bar { flex: none; width: 100%; }
+}
+/* 코스(GRID서당): 좁은 화면의 가로 칸에도 반 이름(기초반 · 심화반 · 급수반)을 — 설명 줄 대신 */
+@media (max-width: 899.98px) {
+  .book--course .book__tab-en { display: block; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13px; }
+  .book--course .book__tab-ko { display: none; }
 }
 @media (max-width: 599.98px) {
   .book-meter__book { font-size: 15.5px; }
@@ -2024,6 +2195,41 @@ html:not(.dl-js) .lang-switch, html:not(.dl-js) .dock__sep:has(+ .dock__lang) { 
 .prose img:hover { box-shadow: 0 0 0 1px var(--hair-3), 0 24px 50px -24px rgba(0, 0, 0, .9); }
 .prose figure { width: fit-content; max-width: 100%; margin: 1.9em auto; text-align: center; }
 .prose figcaption { margin-top: 10px; font-size: 13px; color: var(--muted); }
+/* 반복 영상 (common/video-loops.html · gui.js): 열 너비 가득, 그림처럼 둥근 모서리. 비율은 포스터 크기(width · height)로 미리 잡고,
+   보일 때만 재생. 재생 버튼은 오른쪽 아래에 작게 — 마우스를 올리거나 멈춰 있을 때(움직임 줄이기 · 직접 멈춤)만 보입니다 */
+.prose figure:has(> .vloop) { width: 100%; }
+.vloop { position: relative; display: block; border-radius: 12px; overflow: hidden; background: var(--lcd); box-shadow: 0 0 0 1px var(--hair); transition: box-shadow .35s var(--ease); }
+.vloop:hover { box-shadow: 0 0 0 1px var(--hair-3), 0 24px 50px -24px rgba(0, 0, 0, .9); }
+.vloop video { display: block; width: 100% !important; max-width: none !important; height: auto; aspect-ratio: 950 / 480; }
+.vloop video[width][height] { aspect-ratio: auto; }
+/* 스크립트가 켜진 화면에서는 gui.js 가 버튼을 붙이기 전 잠깐도 기본 컨트롤이 비치지 않게 (Chromium · Safari — 스크립트가 없으면 기본 컨트롤 그대로) */
+.dl-js .vloop video::-webkit-media-controls { display: none !important; }
+.vloop__btn {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(214, 224, 255, .18);
+  border-radius: 50%;
+  background: rgba(4, 7, 15, .66);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: var(--text);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .25s, background .2s, border-color .2s;
+}
+.vloop__btn[hidden] { display: none; }
+.vloop__btn svg { width: 14px; height: 14px; fill: currentColor; }
+.vloop__btn:hover { background: rgba(4, 7, 15, .85); border-color: var(--hair-3); }
+.vloop:hover .vloop__btn, .vloop__btn:focus-visible, .vloop.is-held .vloop__btn { opacity: 1; }
+.vloop__pause, .vloop.is-playing .vloop__play { display: none; }
+.vloop.is-playing .vloop__pause { display: block; }
+@media (hover: none) { .vloop__btn { opacity: .8; } }
 .prose .table-wrap { position: relative; margin: 1.8em 0; overflow-x: auto; border: 1px solid var(--hair); border-radius: var(--r); }
 /* 넓은 표는 가로 스크롤: 짧은 셀은 한 줄로, 긴 설명 셀만 36em 에서 줄바꿈 */
 .prose table { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 15px; }
@@ -2470,6 +2676,9 @@ html:not(.read-en) [data-lang-only="en"], .read-en [data-lang-only="ko"] { displ
   .card--row .card__body { padding: 14px 16px; }
   .card--row .card__title { font-size: 16px; }
   .card--row .card__tags, .card--row .card__excerpt { display: none; }
+  /* 코스 카드는 그림이 가로로 긴 화면이라 좁은 세로 칸에 넣지 않고 위에 넓게 */
+  .card--row.card--course { flex-direction: column; }
+  .card--row.card--course .card__media { order: 0; width: auto; aspect-ratio: 2 / 1; min-height: 0; }
   .latest--solo .card--feature .card__body { padding: 20px; }
   .section-head--row { flex-direction: column; align-items: flex-start; }
   .footer__grid { grid-template-columns: 1fr; gap: 36px; }
@@ -2538,3 +2747,8 @@ html:not(.read-en) [data-lang-only="en"], .read-en [data-lang-only="ko"] { displ
   .tyre { min-height: 40px; }
   .chip { min-height: 28px; }
 }
+
+/* 넓은 이름표 글꼴(Michroma)에는 한글이 없어 본문 글꼴(Pretendard)로 대신 그려집니다. 카테고리 이름이 들어가는 이름표에서는
+   대신 그린 글자의 대문자 높이를 Michroma 에 맞춰(약 6% 크게) 'GRID서당 · 기초반' 처럼 섞인 이름에서 한글만 작아 보이지 않게.
+   Michroma 글자는 그대로, 지원하지 않는 브라우저도 예전 그대로입니다. font 묶음 속성이 이 값을 되돌리므로 파일 맨 끝에 둡니다 */
+.eyebrow, .chip, .hub__badge, .team__badge, .tower__cat, .livery__badge { font-size-adjust: cap-height from-font; }

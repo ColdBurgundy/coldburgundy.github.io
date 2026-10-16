@@ -1,7 +1,8 @@
 {{ define "main" }}
 {{- partial "gui/page-hero.html" (dict "page" . "eyebrow" "List" "title" .Title "desc" .Description) -}}
 <div class="container section-page">
-  {{- $pager := .Paginate .RegularPagesRecursive.ByDate.Reverse }}
+  {{- /* head.html 의 페이지 나누기와 같은 목록 */}}
+  {{- $pager := .Paginate (partialCached "gui/section-posts.html" . .Path) }}
   {{- if $pager.Pages }}
   <div class="post-list">
     {{- range $pager.Pages }}{{ partial "gui/card.html" (dict "page" . "variant" "row" "level" 2) }}{{ end }}

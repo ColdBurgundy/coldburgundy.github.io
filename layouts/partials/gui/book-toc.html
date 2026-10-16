@@ -6,6 +6,8 @@
      · 모든 챕터를 미리 그려 두고 고른 챕터만 보입니다. 스크립트가 없으면 챕터는 그냥 링크(챕터 페이지 = 그 챕터가 열린 같은 화면),
        스크립트가 있으면 gui.js 가 탭(role=tablist)으로 바꿔 같은 페이지에서 바꾸고 주소를 그 챕터 페이지로 (뒤로 · 앞으로 · 공유)
      · 책 첫 화면에서 열려 있는 챕터: 가장 최근에 쓴 절이 든 챕터 (아직 없으면 첫 챕터)
+     코스(yaml 의 kind: course — GRID서당): 같은 화면을 반 · 강의 말로 — 머리 이름표 Course, 고르개는 반(Classes),
+       줄은 번호(1강 · 9급 · 졸업) · LED · 제목 · 부제 · 읽는 시간, 영어 제목 없이 한국어만. 코스 첫 화면은 언제나 첫 반부터(커리큘럼의 시작)
      입력: dict "page" 지금 섹션 "ctx" gui/book.html 결과 */ -}}
 {{- $p := .page -}}
 {{- $ctx := .ctx -}}
@@ -13,23 +15,30 @@
 {{- $root := $bd.root -}}
 {{- $color := partial "gui/cat-color.html" $root -}}
 {{- $chapters := $bd.chapters -}}
+{{- $course := eq $bd.kind "course" -}}
 {{- $default := $bd.latest | default (index $chapters 0).slug -}}
+{{- if $course }}{{ $default = (index $chapters 0).slug }}{{ end -}}
+{{- /* 말: 책은 Chapter · 절, 코스는 Class · 강 */ -}}
+{{- $chWord := cond $course "Class" "Chapter" -}}
+{{- $unit := cond $course "강" "절" -}}
+{{- $doneWord := cond $course "공개" "정리" -}}
 {{- $cur := $default -}}
 {{- with $ctx.chapter }}{{ $cur = .slug }}{{ end -}}
 {{- $globe := `<svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.75"/><ellipse cx="6" cy="6" rx="2.1" ry="4.75"/><path d="M1.25 6h9.5"/></svg>` -}}
 
 {{- partial "gui/page-hero.html" (dict
     "page" $p
-    "eyebrow" "Book"
+    "eyebrow" (cond $course "Course" "Book")
     "title" $root.Title
+    "desc" (cond $course $root.Description "")
     "color" $color
     "extra" (partial "gui/book-meter.html" $bd)
 ) -}}
 
-<div class="container section-page book" data-book data-root="{{ $root.RelPermalink }}" data-root-title="{{ $root.Title }}" data-root-doc="{{ printf "%s · %s" $root.Title site.Title }}" data-default="{{ $default }}" style="--cat: {{ $color | safeCSS }}">
+<div class="container section-page book{{ if $course }} book--course{{ end }}" data-book data-root="{{ $root.RelPermalink }}" data-root-title="{{ $root.Title }}" data-root-doc="{{ printf "%s · %s" $root.Title site.Title }}" data-default="{{ $default }}" style="--cat: {{ $color | safeCSS }}">
   <div class="book__layout">
     <nav class="book__nav" aria-labelledby="book-nav-title">
-      <p class="book__nav-title" id="book-nav-title">Chapters</p>
+      <p class="book__nav-title" id="book-nav-title">{{ cond $course "Classes" "Chapters" }}</p>
       <ol class="book__tabs" data-book-tabs>
         {{- range $chapters }}
         {{- $on := eq .slug $cur }}
@@ -38,13 +47,19 @@
           <a class="book__tab{{ if $on }} is-on{{ end }}" id="book-tab-{{ .slug }}" href="{{ $url }}" data-book-tab="{{ .slug }}" data-book-link{{ if $on }} aria-current="true"{{ end }} style="--done: {{ cond (gt .total 0) (div (mul .written 100.0) .total) 0 }}%">
             <span class="book__tab-num" aria-hidden="true">{{ printf "%02d" (int .num) }}</span>
             <span class="book__tab-body">
-              <span class="sr-only">Chapter {{ .num }}.</span>
+              <span class="sr-only">{{ $chWord }} {{ .num }}.</span>
+              {{- if $course }}
+              {{- /* 코스: 반 이름(기초반) 아래에 그 반 설명의 ' — ' 앞(예: '장비와 자세부터 깃발의 언어까지'). 좁은 화면의 가로 한 줄에선 반 이름만 */}}
+              <span class="book__tab-en">{{ .title }}</span>
+              {{- with .desc }}<span class="book__tab-ko">{{ index (split . " — ") 0 }}</span>{{ end }}
+              {{- else }}
               <span class="book__tab-en" lang="en">{{ .title }}</span>
               {{- /* 좁은 화면의 가로 한 줄에서는 ':' 앞(예: '병렬 프로세서')만 — 칸마다 한 줄로 고르게 (전체 제목은 아래 목록 머리에) */}}
               {{- $koMain := index (split .titleKo ":") 0 }}
               <span class="book__tab-ko">{{ $koMain }}{{ with strings.TrimPrefix $koMain .titleKo }}<span class="book__tab-ko-sub">{{ . }}</span>{{ end }}</span>
+              {{- end }}
               <span class="book__tab-meter" aria-hidden="true"><span class="book__tab-bar"><i></i></span><span class="book__tab-count"><b>{{ .written }}</b>/{{ .total }}</span></span>
-              <span class="sr-only">{{ .total }}절 중 {{ .written }}절 정리</span>
+              <span class="sr-only">{{ .total }}{{ $unit }} 중 {{ .written }}{{ $unit }} {{ $doneWord }}</span>
             </span>
           </a>
         </li>
@@ -66,14 +81,26 @@
       <section class="book__panel" id="book-{{ .slug }}" data-book-panel="{{ .slug }}" data-url="{{ $url }}" data-crumb="{{ with .page }}{{ .Title }}{{ end }}" data-label="{{ $label }}" data-doc="{{ $docTitle }}" aria-labelledby="book-h-{{ .slug }}"{{ if not $on }} hidden{{ end }}>
         <header class="book__head">
           <div class="book__head-text">
-            <p class="book__kicker">Chapter {{ .num }}</p>
+            <p class="book__kicker">{{ $chWord }} {{ .num }}</p>
+            {{- if $course }}
+            <h2 class="book__title" id="book-h-{{ .slug }}">{{ .title }}</h2>
+            {{- with .desc }}
+            <p class="book__title-ko">{{ . }}</p>
+            {{- end }}
+            {{- else }}
             <h2 class="book__title" id="book-h-{{ .slug }}"><span lang="en">{{ .title }}</span></h2>
             <p class="book__title-ko">{{ .titleKo }}</p>
+            {{- end }}
           </div>
-          <p class="book__score"><span aria-hidden="true"><b>{{ .written }}</b><span class="book__score-of">/{{ .total }}</span></span><small aria-hidden="true">Written</small><span class="sr-only">{{ .total }}절 중 {{ .written }}절 정리</span></p>
+          <p class="book__score"><span aria-hidden="true"><b>{{ .written }}</b><span class="book__score-of">/{{ .total }}</span></span><small aria-hidden="true">{{ cond $course "Lessons" "Written" }}</small><span class="sr-only">{{ .total }}{{ $unit }} 중 {{ .written }}{{ $unit }} {{ $doneWord }}</span></p>
         </header>
 
+        {{- /* 코스: 오른쪽 칸은 날짜 대신 읽는 시간 (한 번에 공개한 강의라 날짜가 모두 같음), 부제 칸은 머리 없이 */}}
+        {{- if $course }}
+        <div class="book__cols" aria-hidden="true"><span>No.</span><span>Lesson</span><span class="book__cols-ko"></span><span>Time</span></div>
+        {{- else }}
         <div class="book__cols" aria-hidden="true"><span>No.</span><span>Section</span><span class="book__cols-ko">한국어판</span><span>Date</span></div>
+        {{- end }}
         <ol class="book__list">
           {{- range $i, $s := .sections }}
           {{- $state := cond $s.written "is-written" (cond $s.draft "is-draft" "is-todo") }}
@@ -89,17 +116,26 @@
                 {{- /* 지구본이 홀로 다음 줄로 넘어가지 않게 마지막 낱말과 묶음 */}}
                 {{- $words := split $s.title " " }}
                 {{- $tail := index (last 1 $words) 0 }}
+                {{- if $course }}
+                <span class="book__en">{{ $s.title }}</span>
+                {{- with $s.sub }}
+                <span class="book__ko"><span class="sr-only">— </span>{{ . }}</span>
+                {{- end }}
+                {{- else }}
                 <span class="book__en" lang="en">
                   {{- if $s.online }}{{ strings.TrimSuffix $tail $s.title }}<span class="book__nowrap">{{ $tail }}<span class="book__web" title="온라인 전용 절">{{ $globe | safeHTML }}<span class="sr-only">(온라인 전용 절)</span></span></span>
                   {{- else }}{{ $s.title }}{{ end -}}
                 </span>
                 <span class="book__ko">{{ $s.titleKo }}</span>
+                {{- end }}
               </span>
               <span class="book__state">
-                {{- if $s.written }}
+                {{- if and $s.written $course }}
+                {{- with $s.page }}<span class="book__time">{{ .ReadingTime }} min<span class="sr-only"> 분량</span></span>{{ end }}
+                {{- else if $s.written }}
                 {{- with $s.page }}{{ if not .Date.IsZero }}<time datetime="{{ .Date.Format "2006-01-02" }}"><span class="book__yr">{{ .Date.Format "2006." }}</span>{{ .Date.Format "01.02" }}</time>{{ end }}{{ end }}
                 {{- else if $s.draft }}<span class="book__tag">Draft</span>
-                {{- else }}<span class="sr-only">아직 정리하지 않음</span>
+                {{- else }}<span class="sr-only">아직 {{ $doneWord }}하지 않음</span>
                 {{- end }}
               </span>
             {{- if $s.page }}
@@ -140,12 +176,12 @@
           {{- $prev := false }}{{ if gt $ci 0 }}{{ $prev = index $chapters (sub $ci 1) }}{{ end }}
           {{- $next := false }}{{ if lt (add $ci 1) (len $chapters) }}{{ $next = index $chapters (add $ci 1) }}{{ end }}
           {{- if or $prev $next }}
-          <nav class="book__step" aria-label="다른 챕터">
+          <nav class="book__step" aria-label="{{ cond $course "다른 반" "다른 챕터" }}">
             {{- with $prev }}
-            <a class="book__go book__go--prev" href="{{ with .page }}{{ .RelPermalink }}{{ else }}{{ $root.RelPermalink }}{{ end }}" data-book-go="{{ .slug }}" data-book-link><span class="book__go-dir">← Chapter {{ .num }}</span><span class="book__go-title">{{ .titleKo }}</span></a>
+            <a class="book__go book__go--prev" href="{{ with .page }}{{ .RelPermalink }}{{ else }}{{ $root.RelPermalink }}{{ end }}" data-book-go="{{ .slug }}" data-book-link><span class="book__go-dir">← {{ $chWord }} {{ .num }}</span><span class="book__go-title">{{ cond $course .title .titleKo }}</span></a>
             {{- end }}
             {{- with $next }}
-            <a class="book__go book__go--next" href="{{ with .page }}{{ .RelPermalink }}{{ else }}{{ $root.RelPermalink }}{{ end }}" data-book-go="{{ .slug }}" data-book-link><span class="book__go-dir">Chapter {{ .num }} →</span><span class="book__go-title">{{ .titleKo }}</span></a>
+            <a class="book__go book__go--next" href="{{ with .page }}{{ .RelPermalink }}{{ else }}{{ $root.RelPermalink }}{{ end }}" data-book-go="{{ .slug }}" data-book-link><span class="book__go-dir">{{ $chWord }} {{ .num }} →</span><span class="book__go-title">{{ cond $course .title .titleKo }}</span></a>
             {{- end }}
           </nav>
           {{- end }}

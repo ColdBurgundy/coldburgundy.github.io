@@ -1,5 +1,6 @@
 {{- $root := site.GetPage "/posts" -}}
-{{- $recent := first 5 (where site.RegularPages "Section" "posts").ByDate.Reverse -}}
+{{- /* 최근 글: 코스(GRID서당)는 한 줄로 묶어서 (gui/feed.html) */ -}}
+{{- $recent := first 5 (partialCached "gui/feed.html" (dict "pages" (where site.RegularPages "Section" "posts")) "site") -}}
 <footer class="footer">
   <div class="footer__bull" aria-hidden="true">{{ partial "gui/bull.html" "" }}</div>
   <div class="footer__finish" aria-hidden="true"><span class="footer__line"></span><span class="footer__flag"></span><span class="footer__line"></span></div>
@@ -19,7 +20,7 @@
       <p class="eyebrow">Recent posts</p>
       <ul class="footer__list">
         {{- range $recent }}
-        <li><a href="{{ .RelPermalink }}"><span>{{ .Title }}</span><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time></a></li>
+        <li><a href="{{ .RelPermalink }}"><span>{{ .Title }}{{ if .IsSection }} · {{ len .RegularPagesRecursive }}강{{ end }}</span><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time></a></li>
         {{- else }}
         <li class="muted">아직 게시물이 없습니다.</li>
         {{- end }}

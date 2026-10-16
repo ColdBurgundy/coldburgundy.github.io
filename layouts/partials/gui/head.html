@@ -18,7 +18,9 @@
 
 {{- /* 페이지네이션: 2페이지 이후는 자기 URL 을 canonical 로 (본문과 같은 컬렉션으로 호출해야 캐시가 맞습니다) */ -}}
 {{- if and (or (eq .Kind "section") (eq .Kind "term")) (not $isGuiHome) (not $book.key) -}}
-  {{- $pg := .Paginate (cond (eq .Kind "term") .Pages.ByDate.Reverse .RegularPagesRecursive.ByDate.Reverse) -}}
+  {{- $list := partial "gui/newest.html" .Pages -}}
+  {{- if eq .Kind "section" }}{{ $list = partialCached "gui/section-posts.html" . .Path }}{{ end -}}
+  {{- $pg := .Paginate $list -}}
   {{- if gt $pg.PageNumber 1 -}}
     {{- $canon = $pg.URL | absURL -}}
     {{- $title = printf "%s (%d페이지) · %s" .Title $pg.PageNumber site.Title -}}

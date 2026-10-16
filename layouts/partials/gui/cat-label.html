@@ -1,16 +1,19 @@
 {{- /* 카테고리 이름표 (카드 칩 · 타이밍 타워 · 휠 LCD · 검색 · '전체 보기' 링크): 보통은 섹션 제목 그대로.
      책의 챕터(data/books — 예: COD 의 Chapter 2)는 책 이름과 함께 짧게 "COD · Ch.2",
-     그 밖의 3단계 섹션(카테고리 › 하위 카테고리 › 그 아래)은 "상위 · 제목". 입력: 섹션 페이지 */ -}}
+     코스의 반(data/books 의 kind: course — 예: GRID서당 기초반)은 "GRID서당 · 기초반", 책 · 코스 첫 화면은 제 이름만("GRID서당").
+     그 밖의 깊은 섹션(Motorsport › Sim Racing › Logbook 등)도 제 이름만 — 휠 LCD 칸(약 160px)에 들어가는 짧은 이름표로,
+     어디에 있는지는 경로 줄(breadcrumbs)이 말해 줍니다. 입력: 섹션 페이지 */ -}}
 {{- $s := . -}}
 {{- $label := "" -}}
 {{- if $s -}}
   {{- $label = $s.Title -}}
-  {{- $root := site.GetPage "/posts" -}}
   {{- $bk := partialCached "gui/book.html" $s $s.Path -}}
   {{- if and $bk.chapterPage (eq $bk.chapterPage $s) -}}
-    {{- $label = printf "%s · Ch.%v" $bk.root.Title $bk.chapter.num -}}
-  {{- else if and $s.IsSection $s.Parent $s.Parent.Parent (ne $s.Parent $root) (ne $s.Parent.Parent $root) (not $s.Parent.Parent.IsHome) -}}
-    {{- $label = printf "%s · %s" $s.Parent.Title $s.Title -}}
+    {{- if eq $bk.book.kind "course" -}}
+      {{- $label = printf "%s · %s" $bk.root.Title $s.Title -}}
+    {{- else -}}
+      {{- $label = printf "%s · Ch.%v" $bk.root.Title $bk.chapter.num -}}
+    {{- end -}}
   {{- end -}}
 {{- end -}}
 {{- return $label -}}

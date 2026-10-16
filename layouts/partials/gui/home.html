@@ -1,6 +1,8 @@
 {{- $g := site.Params.gui | default dict -}}
 {{- $root := . -}}
 {{- $pages := (where site.RegularPages "Section" "posts").ByDate.Reverse -}}
+{{- /* 최신 글 · 카테고리 미리보기: 코스(GRID서당)는 강 22편 대신 코스 한 장으로 (gui/feed.html) */ -}}
+{{- $feed := partialCached "gui/feed.html" (dict "pages" (where site.RegularPages "Section" "posts")) "site" -}}
 {{- /* 카테고리 = /posts 아래 두 단계(카테고리 › 하위 카테고리)까지. 그 아래(책의 챕터 등)는 카테고리로 세지 않습니다 */ -}}
 {{- $sections := slice -}}
 {{- range where site.Pages "Kind" "section" -}}
@@ -151,12 +153,12 @@
       <span class="section-index">02</span>
       <h2 class="section-title">최신 글</h2>
     </header>
-    {{- if $pages }}
-    <div class="latest{{ if eq (len $pages) 1 }} latest--solo{{ end }}">
-      <div class="latest__feature">{{ partial "gui/card.html" (dict "page" (index $pages 0) "variant" "feature") }}</div>
-      {{- if gt (len $pages) 1 }}
+    {{- if $feed }}
+    <div class="latest{{ if eq (len $feed) 1 }} latest--solo{{ end }}">
+      <div class="latest__feature">{{ partial "gui/card.html" (dict "page" (index $feed 0) "variant" "feature") }}</div>
+      {{- if gt (len $feed) 1 }}
       <div class="latest__list">
-        {{- range after 1 (first 4 $pages) }}
+        {{- range after 1 (first 4 $feed) }}
         {{ partial "gui/card.html" (dict "page" . "variant" "row") }}
         {{- end }}
       </div>
@@ -171,7 +173,7 @@
 {{/* ───────────── 카테고리별 ───────────── */}}
 {{- $idx := 2 }}
 {{- range $root.Sections.ByWeight }}
-{{- $list := .RegularPagesRecursive.ByDate.Reverse }}
+{{- $list := partialCached "gui/section-posts.html" . .Path }}
 {{- if $list }}
 {{- $idx = add $idx 1 }}
 <section class="section">

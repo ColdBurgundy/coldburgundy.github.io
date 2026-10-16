@@ -187,6 +187,19 @@
     w.addEventListener('pageshow', function () { item.classList.remove('is-leaving'); });
   });
 
+  /* ---------- 경로 줄 (partials/gui/breadcrumbs.html) ----------
+     좁은 화면에서 가운데 단계를 접어 둔 '…' 를 누르면 모두 펼치고, 처음 펼쳐진 단계로 포커스를 옮깁니다 (버튼은 펼치면 사라짐) */
+  d.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-crumbs-more]');
+    if (!b) return;
+    var nav = b.closest('.crumbs');
+    if (!nav) return;
+    nav.classList.add('is-open');
+    b.setAttribute('aria-expanded', 'true');
+    var first = $('ol > li:nth-child(3) a', nav);
+    if (first) first.focus();
+  });
+
   /* ---------- mobile drawer ---------- */
   var drawer = $('#drawer');
   var drawerBtn = $('[data-drawer-open]');
@@ -540,7 +553,7 @@
     })();
   }
   var counters = $$('[data-count]');
-  var revealEls = reduce ? [] : $$('.stat, .team, .card, .lap, .flag, .race-plan, .radio');
+  var revealEls = reduce ? [] : $$('.stat, .team, .hub__card, .card, .lap, .flag, .race-plan, .radio');
   if ('IntersectionObserver' in w) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
@@ -1648,7 +1661,7 @@
   var finePointer = w.matchMedia && w.matchMedia('(hover: hover) and (pointer: fine)').matches;
   var fxRefresh = null;   // 스크롤로 포인터 아래 요소가 바뀌면 scroll loop 가 다시 불러 줍니다
   if (finePointer && !reduce) {
-    $$('.card:not(.card--placeholder), .team, .stat, .lap, .radio, .race-plan, .telemetry, .codeblock, .callout, .subcat, .driver-card, .flag, .empty, .search__panel').forEach(function (el) {
+    $$('.card:not(.card--placeholder), .team, .hub__card, .stat, .lap, .radio, .race-plan, .telemetry, .codeblock, .callout, .subcat, .driver-card, .flag, .empty, .search__panel').forEach(function (el) {
       el.classList.add('fx');
       ['fx__glow', 'fx__edge'].forEach(function (cls) {
         var sp = d.createElement('span');
@@ -1659,6 +1672,7 @@
     });
     $$('.card--feature, .card--grid, .team, .stat, .driver-card').forEach(function (el) { el.classList.add('fx-tilt'); el.setAttribute('data-tilt', '4'); });
     $$('.card--row').forEach(function (el) { el.classList.add('fx-tilt'); el.setAttribute('data-tilt', '1.5'); });
+    $$('.hub__card').forEach(function (el) { el.classList.add('fx-tilt'); el.setAttribute('data-tilt', '2.5'); });
     // 자석은 따로 떠 있는 버튼에만, 아주 살짝. 휠에 달린 하드웨어(.drs · .rotary)와 코드 복사 버튼은 제자리에 둡니다
     $$('.btn, .hero__scroll, .to-top, .toc-fab, .radio__next, .pager__btn').forEach(function (el) { el.classList.add('fx-mag'); });
 
@@ -1890,6 +1904,59 @@
     } catch (err) {}
   });
   syncSwitches();
+
+  /* ---------- 본문의 반복 영상 (common/video-loops.html — GRID서당 강의의 시범 애니메이션) ----------
+     자동 재생 대신 화면에 보일 때만(4분의 1 이상) 재생하고, 벗어나면 멈춥니다 — 영상은 그때 처음 받습니다(preload none).
+     움직임 줄이기 설정이면 포스터와 재생 버튼만(누르면 재생 — 그 뒤로는 보일 때만 도는 같은 규칙). 오른쪽 아래 버튼으로 언제든 멈춤 · 재생,
+     직접 멈춘 영상은 다시 보여도 멈춘 채로. 소리 없이(muted) · 페이지 안에서(playsinline) 반복합니다 */
+  var loops = $$('[data-vloop]');
+  if (loops.length) (function () {
+    var rm = w.matchMedia('(prefers-reduced-motion: reduce)');
+    var items = [];
+    function sync(it) {
+      var go = it.seen && !it.held && !d.hidden;
+      it.box.classList.toggle('is-held', it.held);
+      if (go) {
+        var pr = it.v.play();
+        // 브라우저가 재생을 막으면(절전 모드 등) 멈춘 것으로 — 버튼이 보이고, 누르면 다시 시도
+        if (pr && pr.catch) pr.catch(function () { if (!it.v.paused) return; it.held = true; it.box.classList.add('is-held'); label(it); });
+      } else if (!it.v.paused) it.v.pause();
+      label(it);
+    }
+    function label(it) { if (it.btn) it.btn.setAttribute('aria-label', it.held ? '영상 재생' : '영상 일시정지'); }
+    var vio = 'IntersectionObserver' in w ? new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var it = en.target._vloop;
+        if (!it) return;
+        it.seen = en.isIntersecting && en.intersectionRatio >= 0.25;
+        sync(it);
+      });
+    }, { threshold: [0, 0.25, 0.6] }) : null;
+    loops.forEach(function (box) {
+      var v = $('video', box);
+      if (!v) return;
+      var it = { box: box, v: v, btn: $('[data-vloop-btn]', box), held: rm.matches, touched: false, seen: !vio };
+      v.muted = true;
+      v.playsInline = true;
+      v.addEventListener('playing', function () { box.classList.add('is-playing'); });
+      v.addEventListener('pause', function () { box.classList.remove('is-playing'); });
+      if (it.btn) {
+        // 스크립트가 없을 때를 위해 붙여 둔 기본 컨트롤은 지우고 이 버튼으로
+        v.controls = false;
+        v.removeAttribute('controls');
+        it.btn.hidden = false;
+        it.btn.addEventListener('click', function () { it.touched = true; it.held = !it.held; sync(it); });
+      }
+      box._vloop = it;
+      items.push(it);
+      if (vio) vio.observe(box); else sync(it);
+    });
+    // 설정을 바꾸면: 움직임 줄이기를 켜면 모두 멈추고, 끄면 직접 멈추지 않은 영상만 다시
+    var onRm = function () { items.forEach(function (it) { if (!it.touched) it.held = rm.matches; else if (rm.matches) it.held = true; sync(it); }); };
+    if (rm.addEventListener) rm.addEventListener('change', onRm); else if (rm.addListener) rm.addListener(onRm);
+    // 다른 탭으로 가 있는 동안은 쉬고, 돌아오면 보이는 영상만 다시
+    d.addEventListener('visibilitychange', function () { items.forEach(sync); });
+  })();
 
   /* ---------- 책 목차 (partials/gui/book-toc.html) ----------
      챕터 고르개를 탭(role=tablist)으로 바꿉니다. 고르면 같은 페이지에서 그 챕터의 절 목록으로 바꾸고 주소를 그 챕터 페이지로(pushState) —

@@ -258,6 +258,36 @@
   border: 1px solid #000;
 }
 .mac-overlay .paper figure { margin: 1.4em 0; text-align: center; }
+/* 반복 영상 (GRID서당 시범 애니메이션 — mac-reader.js 의 loopVideos): 그림처럼 검은 1px 테두리, 비율은 포스터 크기(width · height)로 미리,
+   오른쪽 아래에 System 7 식 작은 버튼 (재생 ▸ · 일시정지 ❙❙) */
+.mac-overlay .paper .vloop { position: relative; display: block; border: 1px solid #000; background: #000; line-height: 0; }
+.mac-overlay .paper .vloop video { display: block; width: 100% !important; max-width: none !important; height: auto; aspect-ratio: 950 / 480; }
+.mac-overlay .paper .vloop video[width][height] { aspect-ratio: auto; }
+.mac-overlay .paper .vloop__btn {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  min-width: 0;
+  height: 22px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+  border: 1px solid #000;
+  border-radius: 4px;
+  box-shadow: 1px 1px 0 #000;
+  color: #000;
+  cursor: pointer;
+}
+.mac-overlay .paper .vloop__btn[hidden] { display: none; }
+.mac-overlay .paper .vloop__btn svg { width: 11px; height: 11px; fill: currentColor; }
+.mac-overlay .paper .vloop__btn:active { background: #000; color: #fff; }
+.mac-overlay .paper .vloop__btn:focus-visible { outline: 2px solid #000; outline-offset: 1px; }
+.mac-overlay .paper .vloop__pause, .mac-overlay .paper .vloop.is-playing .vloop__play { display: none; }
+.mac-overlay .paper .vloop.is-playing .vloop__pause { display: block; }
 .mac-overlay .paper figcaption { font: 12px/1.6 var(--mac-small); margin-top: .4em; }
 
 /* position: relative — 표 칸 속 KaTeX 의 MathML(position: absolute)이 가로 스크롤 상자 밖으로 새어 나가 창 폭을 늘리지 않게 */

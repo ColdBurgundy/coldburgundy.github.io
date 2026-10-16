@@ -4,6 +4,10 @@
   책(data/books/*.yaml)의 챕터도 폴더(dirs)로 들어갑니다 (예: untitled_cs/cod/ch2 — chapter 에 챕터 번호, 책 폴더는 book 에 책 이름).
   책의 글에는 num(절 번호, 예: "2.1") · order(책 순서, 0부터 — 발행된 절만)가 붙고, category 는 "COD · Ch.2" 처럼 (gui/cat-label.html).
   books: 책마다 차례 전체(아직 안 쓴 절까지 — url 은 쓴 절에만). 초안은 어디에도 들어가지 않습니다(빌드에 없으므로).
+  코스(yaml 의 kind: course — GRID서당)도 책과 같은 자리에 kind "course" 로: 반 = 챕터, 강 = 절(num "1강" · title · sub 부제).
+  코스의 글에는 course: true 도 붙어, 터미널의 ls · tree 가 날짜 대신 커리큘럼 순서(order)로 늘어놓습니다.
+  posts 는 최신순 — 같은 날 한 번에 공개한 코스의 강은 커리큘럼 순서대로 (gui/newest.html).
+  dirs 의 aliases: 옮긴 폴더의 옛 경로(같은 기준의 상대 경로) — 터미널이 옛 링크(강의 본문의 시리즈 링크)를 지금 폴더로 읽습니다.
 */ -}}
 {{- $root := site.GetPage "/posts" -}}
 {{- $prefix := $root.RelPermalink -}}
@@ -22,11 +26,18 @@
         "badge" (.Params.badge | default "")
         "url" .RelPermalink
       -}}
+    {{- /* 옮긴 폴더의 옛 주소(front matter 의 aliases — 예: GRID서당)도 같은 기준의 상대 경로로: 터미널이 옛 링크 · 북마크를 지금 폴더로 읽습니다 */ -}}
+    {{- with .Aliases -}}
+      {{- $al := slice -}}
+      {{- range . }}{{ $al = $al | append (strings.Trim (strings.TrimPrefix $prefix (printf "/%s" (strings.TrimPrefix "/" .))) "/") }}{{ end -}}
+      {{- $dir = merge $dir (dict "aliases" $al) -}}
+    {{- end -}}
     {{- $sec := . -}}
     {{- $bk := partialCached "gui/book.html" . .Path -}}
     {{- if $bk.key -}}
-      {{- if eq $bk.root $sec }}{{ $dir = merge $dir (dict "book" $bk.book.title) }}{{ end -}}
-      {{- with $bk.chapterPage }}{{ if eq . $sec }}{{ $dir = merge $dir (dict "chapter" $bk.chapter.num) }}{{ end }}{{ end -}}
+      {{- $kind := $bk.book.kind | default "book" -}}
+      {{- if eq $bk.root $sec }}{{ $dir = merge $dir (dict "book" $bk.book.title "kind" $kind) }}{{ end -}}
+      {{- with $bk.chapterPage }}{{ if eq . $sec }}{{ $dir = merge $dir (dict "chapter" $bk.chapter.num "kind" $kind) }}{{ end }}{{ end -}}
     {{- end -}}
     {{- $dirs = $dirs | append $dir -}}
   {{- end -}}
@@ -42,17 +53,18 @@
     {{- range $bd.chapters -}}
       {{- $secs := slice -}}
       {{- range .sections -}}
-        {{- $sec := dict "num" .num "title" .title "titleKo" .titleKo "online" (.online | default false) -}}
+        {{- $sec := dict "num" .num "title" .title "titleKo" (.titleKo | default "") "online" (.online | default false) -}}
+        {{- with .sub }}{{ $sec = merge $sec (dict "sub" .) }}{{ end -}}
         {{- if .written }}{{ with .page }}{{ $sec = merge $sec (dict "url" .RelPermalink "date" (.Date.Format "2006-01-02")) }}{{ end }}{{ end -}}
         {{- $secs = $secs | append $sec -}}
       {{- end -}}
-      {{- $chs = $chs | append (dict "num" .num "path" (printf "%s/%s" $b.section .slug) "title" .title "titleKo" .titleKo "written" .written "total" .total "sections" $secs) -}}
+      {{- $chs = $chs | append (dict "num" .num "path" (printf "%s/%s" $b.section .slug) "title" .title "titleKo" (.titleKo | default "") "written" .written "total" .total "sections" $secs) -}}
     {{- end -}}
-    {{- $books = $books | append (dict "path" $b.section "title" $b.title "titleKo" ($b.titleKo | default "") "edition" ($b.edition | default "") "written" $bd.written "total" $bd.total "chapters" $chs) -}}
+    {{- $books = $books | append (dict "kind" $bd.kind "path" $b.section "title" $b.title "titleKo" ($b.titleKo | default "") "edition" ($b.edition | default "") "written" $bd.written "total" $bd.total "chapters" $chs) -}}
   {{- end -}}
 {{- end -}}
 {{- $posts := slice -}}
-{{- range (where site.RegularPages "Section" "posts").ByDate.Reverse -}}
+{{- range partial "gui/newest.html" (where site.RegularPages "Section" "posts") -}}
   {{- $path := strings.TrimSuffix "/" (strings.TrimPrefix $prefix .RelPermalink) -}}
   {{- /* 태그는 용어(term) 기준: tags = ["DP", "dp"] 처럼 대소문자만 다른 태그는 하나로 합쳐지고 이름은 태그 페이지와 같게 */ -}}
   {{- $tagNames := slice -}}
@@ -73,6 +85,7 @@
     {{- $bd := partialCached "gui/book-data.html" $bk.key $bk.key -}}
     {{- with index $bd.num .Path }}{{ $post = merge $post (dict "num" .) }}{{ end -}}
     {{- if isset $bookOrder .Path }}{{ $post = merge $post (dict "order" (index $bookOrder .Path)) }}{{ end -}}
+    {{- if eq $bd.kind "course" }}{{ $post = merge $post (dict "course" true) }}{{ end -}}
   {{- end -}}
   {{- $posts = $posts | append $post -}}
 {{- end -}}

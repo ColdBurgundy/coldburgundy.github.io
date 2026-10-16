@@ -191,6 +191,7 @@ window.MacReader = (function () {
   function absolutize(body, base) {
     function abs(u) { try { return new URL(u, base).href; } catch (e) { return u; } }
     [].forEach.call(body.querySelectorAll('[src]'), function (n) { n.setAttribute('src', abs(n.getAttribute('src'))); });
+    [].forEach.call(body.querySelectorAll('video[poster]'), function (n) { n.setAttribute('poster', abs(n.getAttribute('poster'))); });
     [].forEach.call(body.querySelectorAll('[srcset]'), function (n) {
       n.setAttribute('srcset', n.getAttribute('srcset').split(',').map(function (part) {
         var bits = part.trim().split(/\s+/);
@@ -202,6 +203,58 @@ window.MacReader = (function () {
       var h = n.getAttribute('href');
       if (h.charAt(0) !== '#') n.setAttribute('href', abs(h));
     });
+  }
+
+  // 반복 영상(GRID서당 시범 애니메이션 — common/video-loops.html 이 감싼 [data-vloop]): GUI 와 같은 규칙.
+  // 창 안에서 4분의 1 이상 보일 때만 재생(그때 처음 받음), 움직임 줄이기 설정이면 포스터 + 버튼만, 직접 멈춘 영상은 멈춘 채로.
+  // 돌려줌: 창을 닫을 때 부를 정리 함수
+  function loopVideos(root) {
+    var boxes = [].slice.call(root.querySelectorAll('[data-vloop]'));
+    if (!boxes.length) return function () {};
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function label(it) { if (it.btn) it.btn.setAttribute('aria-label', it.held ? '영상 재생' : '영상 일시정지'); }
+    function sync(it) {
+      it.box.classList.toggle('is-held', it.held);
+      if (it.seen && !it.held && !document.hidden) {
+        var pr = it.v.play();
+        if (pr && pr.catch) pr.catch(function () { if (!it.v.paused) return; it.held = true; it.box.classList.add('is-held'); label(it); });
+      } else if (!it.v.paused) it.v.pause();
+      label(it);
+    }
+    var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var it = en.target._vloop;
+        if (!it) return;
+        it.seen = en.isIntersecting && en.intersectionRatio >= 0.25;
+        sync(it);
+      });
+    }, { threshold: [0, 0.25, 0.6] }) : null;
+    var items = boxes.map(function (box) {
+      var v = box.querySelector('video');
+      if (!v) return null;
+      var it = { box: box, v: v, btn: box.querySelector('[data-vloop-btn]'), held: !!reduce, seen: !io };
+      v.muted = true;
+      v.playsInline = true;
+      v.addEventListener('playing', function () { box.classList.add('is-playing'); });
+      v.addEventListener('pause', function () { box.classList.remove('is-playing'); });
+      if (it.btn) {
+        // 스크립트가 없는 GUI 를 위해 붙여 둔 기본 컨트롤은 지우고 System 7 식 버튼으로
+        v.controls = false;
+        v.removeAttribute('controls');
+        it.btn.hidden = false;
+        it.btn.addEventListener('click', function () { it.held = !it.held; sync(it); });
+      }
+      box._vloop = it;
+      if (io) io.observe(box); else sync(it);
+      return it;
+    }).filter(Boolean);
+    function onVis() { items.forEach(sync); }
+    document.addEventListener('visibilitychange', onVis);
+    return function () {
+      if (io) io.disconnect();
+      document.removeEventListener('visibilitychange', onVis);
+      items.forEach(function (it) { it.v.pause(); });
+    };
   }
 
   function extract(html, url) {
@@ -433,6 +486,7 @@ window.MacReader = (function () {
 
     var sync = TocSync(toc, contents, tocData.items);
     cleanup.push(sync.destroy);
+    cleanup.push(loopVideos(paper));
 
     // 탭·방문 기록·북마크 제목을 글 제목으로 (cli.js 가 pushState 한 뒤에 여기로 오므로 새 항목에 붙습니다)
     var prevTitle = document.title;

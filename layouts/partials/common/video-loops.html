@@ -1,0 +1,37 @@
+{{- /* 본문의 반복 영상(<video autoplay loop muted> — GRID서당 강의의 시범 애니메이션)을 다듬어 내보냅니다. 글 파일은 그대로 두고 출력만:
+     · autoplay 를 빼고 preload="none" — 화면에 보일 때만 재생하고(gui.js · mac-reader.js 의 IntersectionObserver),
+       움직임 줄이기 설정이면 포스터 + 재생 버튼만 (스크립트가 자동 재생을 맡으므로, 첫 그림 전에 돌기 시작하는 일이 없음)
+     · 포스터 그림(글 폴더의 images/xx_poster.png)의 크기를 width · height 로 — 영상이 오기 전부터 그 비율의 자리를 잡아 아래 글이 밀리지 않게
+     · <div class="vloop" data-vloop> 로 감싸고 재생 · 일시정지 버튼(스크립트가 켜기 전엔 hidden)을 함께
+     · controls 를 붙여 둡니다 — 스크립트가 없으면 기본 컨트롤로 재생, 스크립트가 버튼을 켜면 지웁니다
+     autoplay 가 없는 영상(직접 컨트롤을 붙인 영상 등)은 건드리지 않습니다.
+     입력: dict "page" 글 "html" 본문(.Content) · 돌려줌: HTML */ -}}
+{{- $p := .page -}}
+{{- $html := string .html -}}
+{{- if strings.Contains $html "<video" -}}
+  {{- $play := `<svg class="vloop__play" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.5 3.6v8.8a.5.5 0 0 0 .76.43l7.04-4.4a.5.5 0 0 0 0-.86L6.26 3.17a.5.5 0 0 0-.76.43z"/></svg>` -}}
+  {{- $pause := `<svg class="vloop__pause" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="4" y="3.5" width="2.6" height="9" rx=".6"/><rect x="9.4" y="3.5" width="2.6" height="9" rx=".6"/></svg>` -}}
+  {{- range uniq (findRE `(?s)<video\b[^>]*\bautoplay\b[^>]*>.*?</video>` $html) -}}
+    {{- $el := . -}}
+    {{- $open := index (findRE `<video\b[^>]*>` $el 1) 0 -}}
+    {{- $tag := replaceRE `\s+autoplay(?:=(?:"[^"]*"|'[^']*'|[^\s>]+))?` "" $open -}}
+    {{- if not (findRE `\spreload=` $tag 1) }}{{ $tag = replace $tag "<video" `<video preload="none"` 1 }}{{ end -}}
+    {{- /* 스크립트가 없는 방문자에게는 브라우저 기본 컨트롤이 유일한 재생 수단 — 스크립트가 버튼을 켜면서 지웁니다 (gui.js · mac-reader.js) */ -}}
+    {{- if not (findRE `\scontrols\b` $tag 1) }}{{ $tag = replace $tag "<video" "<video controls" 1 }}{{ end -}}
+    {{- /* 포스터 크기로 자리 잡기 (이미 width 를 적은 영상은 그대로) */ -}}
+    {{- if not (findRE `\swidth=` $tag 1) -}}
+      {{- with findRESubmatch `\sposter="([^"]+)"` $tag 1 -}}
+        {{- $src := index (index . 0) 1 -}}
+        {{- with $p.Resources.Get (strings.TrimPrefix "./" $src) -}}
+          {{- if eq .ResourceType "image" -}}
+            {{- $tag = replace $tag "<video" (printf `<video width="%d" height="%d"` .Width .Height) 1 -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $new := replace $el $open $tag 1 -}}
+    {{- $btn := printf `<button type="button" class="vloop__btn" aria-label="재생" data-vloop-btn hidden>%s%s</button>` $play $pause -}}
+    {{- $html = replace $html $el (printf `<div class="vloop" data-vloop>%s%s</div>` $new $btn) -}}
+  {{- end -}}
+{{- end -}}
+{{- return (safeHTML $html) -}}

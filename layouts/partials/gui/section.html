@@ -1,42 +1,46 @@
-{{- /* 카테고리(섹션) 페이지 — 책(data/books/*.yaml 의 section 과 경로가 같은 카테고리)과 그 챕터는 책 목차 화면으로 */ -}}
+{{- /* 카테고리(섹션) 페이지 — 책(data/books/*.yaml 의 section 과 경로가 같은 카테고리)과 그 챕터는 책 목차 화면으로.
+     하위 카테고리가 있으면 머리 아래에 카테고리 판(gui/hub.html — 첫 쪽에만), 그 아래에 최근 글 (코스는 한 장으로 묶어서 — gui/section-posts.html).
+     판이 있는 페이지는 글이 없어도 빈 화면 안내 없이 판만 (판이 곧 이 페이지의 내용) */ -}}
 {{- $bk := partialCached "gui/book.html" . .Path -}}
 {{- if $bk.key -}}
 {{- partial "gui/book-toc.html" (dict "page" . "ctx" $bk) -}}
 {{- else -}}
 {{- $color := partial "gui/cat-color.html" . -}}
-{{- $all := .RegularPagesRecursive.ByDate.Reverse -}}
+{{- $all := partialCached "gui/section-posts.html" . .Path -}}
 {{- $subs := .Sections.ByWeight -}}
+{{- $stats := slice (dict "label" "Posts" "value" (len .RegularPagesRecursive)) -}}
+{{- with $subs }}{{ $stats = $stats | append (dict "label" "Sub-categories" "value" (len .)) }}{{ end -}}
 {{- partial "gui/page-hero.html" (dict
     "page" .
     "eyebrow" (partial "gui/badge.html" .)
     "title" .Title
     "desc" .Description
     "color" $color
-    "stats" (slice (dict "label" "Posts" "value" (len $all)) (dict "label" "Sub-categories" "value" (len $subs)))
+    "stats" $stats
 ) -}}
 
-<div class="container section-page">
-  {{- with $subs }}
-  <nav class="subcats" aria-label="하위 카테고리">
-    {{- range . }}
-    <a class="subcat" href="{{ .RelPermalink }}" style="--cat: {{ partial "gui/cat-color.html" . | safeCSS }}">
-      <span class="subcat__badge">{{ partial "gui/badge.html" . }}</span>
-      <span class="subcat__name">{{ .Title }}</span>
-      <span class="subcat__count">{{ len .RegularPagesRecursive }}</span>
-    </a>
-    {{- end }}
-  </nav>
+{{- $pager := .Paginate $all }}
+{{- /* 판은 첫 쪽에만 — 2쪽부터는 넘겨 온 글 목록이 바로 보이게 (머리의 Sub-categories 수 · 경로 줄은 그대로) */}}
+{{- $hub := and $subs (eq $pager.PageNumber 1) }}
+<div class="container section-page{{ if $hub }} section-page--hub{{ end }}">
+  {{- if $hub }}
+  {{ partial "gui/hub.html" $ }}
   {{- end }}
 
-  {{- $pager := .Paginate $all }}
   {{- if $pager.Pages }}
+  {{- if $subs }}
+  <header class="feed-head">
+    <p class="feed-head__kicker" aria-hidden="true">Recent</p>
+    <h2 class="feed-head__title">최근 글</h2>
+  </header>
+  {{- end }}
   <div class="post-list">
     {{- range $pager.Pages }}
-    {{ partial "gui/card.html" (dict "page" . "variant" "row" "level" 2) }}
+    {{ partial "gui/card.html" (dict "page" . "variant" "row" "level" (cond (gt (len $subs) 0) 3 2)) }}
     {{- end }}
   </div>
   {{ partial "gui/pagination.html" $pager }}
-  {{- else }}
+  {{- else if not $subs }}
   {{ partial "gui/empty.html" "이 카테고리에는 아직 게시물이 없습니다." }}
   {{- end }}
 </div>

@@ -1,0 +1,43 @@
+# GRID서당 : iRacing — 심레이싱 입문 드라이빙 아카데미(직접 만든 프로그램)의 커리큘럼을 옮긴 시리즈.
+# kind: course — 책 목차 화면(gui/book-toc.html)이 '코스'로 그립니다: 반(chapters) 고르개 + 고른 반의 강 목록, 이전 · 다음 · 타워는 이 순서대로.
+# chapters = 반(기초반 → 심화반 → 급수반, 글 폴더 이름 slug), sections = 그 반의 강(커리큘럼 순서 = 글의 weight 순서).
+# 강의 num · title · sub 는 글 제목("기초 1강 · 심레이싱과 장비 — 첫 좌석 [GRID서당]")을 번호 · 제목 · 부제로 나눈 것 — 새 글자는 없습니다.
+# 반의 이름 · 짧은 이름(badge) · 설명은 각 반의 _index.md 에서 그대로 가져옵니다.
+kind: course
+title: "GRID서당"
+section: "untitled_life/motorsport/sim-racing/grid-seodang"
+chapters:
+  - num: 1
+    slug: "basics"
+    title: "기초반"
+    sections:
+      - { num: "1강", slug: "f1-first-seat", title: "심레이싱과 장비", sub: "첫 좌석" }
+      - { num: "2강", slug: "f2-first-steps", title: "iRacing 첫 발", sub: "첫 주행까지" }
+      - { num: "3강", slug: "f3-first-dialogue", title: "차와 첫 대화", sub: "시동부터 완주까지" }
+      - { num: "4강", slug: "f4-racing-line", title: "레이싱 라인의 문법", sub: "네 점의 문장" }
+      - { num: "5강", slug: "f5-flags-etiquette", title: "서킷의 예절", sub: "깃발의 언어" }
+  - num: 2
+    slug: "advanced"
+    title: "심화반"
+    sections:
+      - { num: "1강", slug: "d1-the-start", title: "출발의 기술", sub: "레이스의 처음 60초" }
+      - { num: "2강", slug: "d2-five-corner-faces", title: "코너의 다섯 얼굴", sub: "헤어핀부터 시케인까지" }
+      - { num: "3강", slug: "d3-situational-lines", title: "상황의 라인", sub: "혼자가 아닌 트랙" }
+      - { num: "4강", slug: "d4-car-balance", title: "차의 균형", sub: "그립, 하중, 언더와 오버" }
+      - { num: "5강", slug: "d5-weather-setup", title: "날씨와 세팅", sub: "조건을 읽는 눈" }
+      - { num: "6강", slug: "d6-pedal-grammar", title: "페달의 문법", sub: "밟기와 떼기" }
+      - { num: "7강", slug: "d7-banked-track", title: "기울어진 트랙", sub: "뱅크와 고저차" }
+  - num: 3
+    slug: "grades"
+    title: "급수반"
+    sections:
+      - { num: "9급", slug: "g9-first-finish", title: "첫 완주", sub: "완주의 리듬" }
+      - { num: "8급", slug: "g8-braking-basics", title: "제동의 기본", sub: "직선에서 강하게, 그러나 점진적으로" }
+      - { num: "7급", slug: "g7-release", title: "릴리스 수양", sub: "떼는 발이 실력" }
+      - { num: "6급", slug: "g6-trail-intro", title: "트레일 입문", sub: "턴인까지 끌고 간다" }
+      - { num: "5급", slug: "g5-trail-mastery", title: "트레일 숙달", sub: "깊게, 부드럽게" }
+      - { num: "4급", slug: "g4-transition", title: "전환 수련", sub: "발이 쉬면 차도 쉰다" }
+      - { num: "3급", slug: "g3-throttle-calligraphy", title: "스로틀 서예", sub: "한 번에, 끝까지" }
+      - { num: "2급", slug: "g2-one-stroke-steering", title: "스티어링 일필휘지", sub: "한 획으로" }
+      - { num: "1급", slug: "g1-consistency", title: "일관성 담금질", sub: "같음이 빠름을 만든다" }
+      - { num: "졸업", slug: "graduation", title: "출사표", sub: "스스로 서는 법" }

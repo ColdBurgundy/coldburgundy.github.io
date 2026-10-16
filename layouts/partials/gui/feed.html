@@ -1,0 +1,29 @@
+{{- /* 최신순 글 목록에서 코스를 한 줄로 묶습니다 (홈의 최신 글 · 카테고리 미리보기 · 카테고리 페이지 · 푸터의 최근 글).
+     코스(data/books 의 kind: course — GRID서당)는 한 번에 공개한 강의 묶음이라, 강 22편을 날짜순 카드로 흩어 놓지 않고
+     코스 뿌리 섹션 한 장으로 — 카드(gui/card.html)가 섹션을 받으면 코스 카드로 그립니다. 날짜는 그 코스의 가장 최근 강(섹션의 .Date).
+     책(kind 가 없는 COD 등)은 쓰는 대로 날짜순에 섞이는 노트라 그대로 둡니다.
+     입력: dict "pages" 글 목록 "scope" 지금 섹션(없으면 사이트 전체) — 코스 뿌리가 scope 자신이거나 그 위에 있으면 묶지 않습니다
+           (코스 안의 화면은 책 목차 화면이 맡으므로 여기로 오지 않음)
+     돌려줌: Pages (최신순 — 같은 날짜는 gui/newest.html 의 규칙) */ -}}
+{{- $pages := .pages -}}
+{{- $scope := .scope -}}
+{{- $skip := slice -}}
+{{- $roots := slice -}}
+{{- range $key, $b := site.Data.books -}}
+  {{- if eq $b.kind "course" -}}
+    {{- with site.GetPage (printf "/posts/%s" $b.section) -}}
+      {{- if or (not $scope) (and (ne . $scope) (.IsDescendant $scope)) -}}
+        {{- $paths := slice -}}
+        {{- range .RegularPagesRecursive }}{{ $paths = $paths | append .Path }}{{ end -}}
+        {{- if and $paths (where $pages "Path" "in" $paths) -}}
+          {{- $roots = $roots | append . -}}
+          {{- $skip = $skip | append $paths -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $out := $pages -}}
+{{- with $skip }}{{ $out = where $pages "Path" "not in" . }}{{ end -}}
+{{- range $roots }}{{ $out = $out | append . }}{{ end -}}
+{{- return partial "gui/newest.html" $out -}}

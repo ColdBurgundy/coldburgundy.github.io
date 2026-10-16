@@ -124,7 +124,8 @@
       {{- end }}
 
       <div class="post-body prose" data-post-body>
-        {{ .Content }}
+        {{- /* 반복 영상(GRID서당 시범 애니메이션)은 보일 때만 재생 · 비율 자리 잡기 · 재생 버튼 (common/video-loops.html) */}}
+        {{ partial "common/video-loops.html" (dict "page" . "html" .Content) }}
       </div>
       {{- if $hasEn }}
       {{- /* EN 으로 읽는 방문자(head.html 이 html.read-en 을 붙임): 영어 영역을 첫 그림 전에 펼쳐 둡니다 */}}
@@ -148,7 +149,8 @@
 
       {{- /* 최신순 목록에서 Prev = 더 오래된 글, Next = 더 최근 글 (같은 날짜도 순서대로).
              책(data/books)의 글은 날짜 대신 책 순서로 (발행된 글만, 챕터를 넘어 이어짐 — gui/book-data.html).
-             이 글과 이웃이 둘 다 차례의 절이면 '이전 절 · 다음 절', 하나라도 차례 밖의 노트면 '이전 글 · 다음 글' */ -}}
+             이 글과 이웃이 둘 다 차례의 절이면 '이전 절 · 다음 절'(코스는 '이전 강 · 다음 강' — 반을 넘어 커리큘럼 순서로),
+             하나라도 차례 밖의 노트면 '이전 글 · 다음 글' */ -}}
       {{- $pages := (where site.RegularPages "Section" "posts").ByDate.Reverse -}}
       {{- $older := $pages.Prev . -}}
       {{- $newer := $pages.Next . -}}
@@ -162,9 +164,10 @@
         {{- $older = false }}{{ $newer = false -}}
         {{- if gt $at 0 }}{{ $older = index $ord (sub $at 1) }}{{ end -}}
         {{- if and (ge $at 0) (lt (add $at 1) (len $ord)) }}{{ $newer = index $ord (add $at 1) }}{{ end -}}
+        {{- $secWord := cond (eq $bd.kind "course") "강" "절" -}}
         {{- if index $bd.num .Path -}}
-          {{- with $older }}{{ if index $bd.num .Path }}{{ $olderWord = "절" }}{{ end }}{{ end -}}
-          {{- with $newer }}{{ if index $bd.num .Path }}{{ $newerWord = "절" }}{{ end }}{{ end -}}
+          {{- with $older }}{{ if index $bd.num .Path }}{{ $olderWord = $secWord }}{{ end }}{{ end -}}
+          {{- with $newer }}{{ if index $bd.num .Path }}{{ $newerWord = $secWord }}{{ end }}{{ end -}}
         {{- end -}}
       {{- end -}}
       {{- if or $older $newer }}

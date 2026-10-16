@@ -3,12 +3,16 @@
      초안은 hugo -D 로 미리 볼 때만 빌드에 있으므로, 그때는 링크는 걸되 쓴 절로 세지 않습니다(draft).
      차례에 없는 글(챕터 폴더에 따로 둔 노트 등)은 그 챕터의 extras, 챕터 밖(책 폴더 바로 아래)의 글은 책의 extras.
      책 순서(order) = 챕터 밖의 글(머리말 자리, 날짜순) → 챕터마다 절 번호순 → 그 챕터의 extras(날짜순).
+     코스(yaml 의 kind: course — 예: GRID서당)도 같은 모양: 챕터 = 반, 절 = 강(title 제목 · sub 부제 — 영어 제목 없이 한국어만).
+     글이 있는 강의 번호 · 제목 · 부제는 글 제목에서 나눠 쓰고, yaml 의 것은 아직 글이 없는 강에만 씁니다.
+     반의 짧은 이름(badge) · 설명(description)은 그 반 폴더의 _index.md 에서.
      돌려줌: dict
-       "book" yaml · "root" 책 섹션 · "total" 절 수 · "written" 쓴 절 수 · "latest" 가장 최근에 쓴 절이 든 챕터의 slug(없으면 "")
-       "chapters" [dict num slug title titleKo page total written online extras sections[dict num slug title titleKo online page written draft]]
+       "kind" "book" | "course" · "book" yaml · "root" 책 섹션 · "total" 절 수 · "written" 쓴 절 수 · "latest" 가장 최근에 쓴 절이 든 챕터의 slug(없으면 "")
+       "chapters" [dict num slug title titleKo badge desc page total written online extras sections[dict num slug title titleKo sub online page written draft]]
        "order" 책 순서의 발행된 글 · "orderAll" 초안까지 (-D 미리보기의 초안 글에서만 씀) · "num" 글 경로(.Path) → 절 번호 */ -}}
 {{- $b := index site.Data.books . -}}
 {{- $root := site.GetPage (printf "/posts/%s" $b.section) -}}
+{{- $isCourse := eq $b.kind "course" -}}
 {{- $chapters := slice -}}
 {{- $total := 0 -}}
 {{- $written := 0 -}}
@@ -28,6 +32,20 @@
     {{- $isW := false -}}
     {{- $isD := false -}}
     {{- $sn := .num -}}
+    {{- $st := .title -}}
+    {{- $ss := .sub -}}
+    {{- /* 코스: 글이 있는 강은 번호 · 제목 · 부제를 글 제목에서 직접 나눕니다 ('기초 1강 · 심레이싱과 장비 — 첫 좌석 [GRID서당]' → 1강 · 심레이싱과 장비 · 첫 좌석).
+           강의를 다시 내보내 제목이 바뀌어도 목록 · 타워 · 터미널이 글과 어긋나지 않게 — yaml 의 값은 아직 글이 없는 강에서만 씁니다 */ -}}
+    {{- if and $isCourse $pg -}}
+      {{- $t := replaceRE `\s*\[[^\]]+\]\s*$` "" $pg.Title -}}
+      {{- with findRESubmatch `^\s*([^·]{1,12}?)\s+·\s+(.+)$` $t 1 -}}
+        {{- $sn = index (last 1 (split (strings.TrimSpace (index (index . 0) 1)) " ")) 0 -}}
+        {{- $t = index (index . 0) 2 -}}
+      {{- end -}}
+      {{- $parts := split $t " — " -}}
+      {{- $st = strings.TrimSpace (index $parts 0) -}}
+      {{- $ss = strings.TrimSpace (delimit (after 1 $parts) " — ") -}}
+    {{- end -}}
     {{- with $pg -}}
       {{- $seen = $seen | append .Path -}}
       {{- $num = merge $num (dict .Path $sn) -}}
@@ -42,7 +60,7 @@
     {{- end -}}
     {{- if $isW }}{{ $cw = add $cw 1 }}{{ end -}}
     {{- if .online }}{{ $online = add $online 1 }}{{ end -}}
-    {{- $secs = $secs | append (dict "num" .num "slug" .slug "title" .title "titleKo" .titleKo "online" .online "page" $pg "written" $isW "draft" $isD) -}}
+    {{- $secs = $secs | append (dict "num" $sn "slug" .slug "title" $st "titleKo" .titleKo "sub" $ss "online" .online "page" $pg "written" $isW "draft" $isD) -}}
   {{- end -}}
   {{- /* 차례에 없는 글: 그 챕터 안에서 날짜순으로, 챕터의 절들 뒤에 */ -}}
   {{- $extras := slice -}}
@@ -58,7 +76,9 @@
   {{- end -}}
   {{- $total = add $total (len $c.sections) -}}
   {{- $written = add $written $cw -}}
-  {{- $chapters = $chapters | append (dict "num" $c.num "slug" $c.slug "title" $c.title "titleKo" $c.titleKo "page" $cp "total" (len $c.sections) "written" $cw "online" $online "extras" $extras "sections" $secs) -}}
+  {{- $badge := "" }}{{ $desc := "" -}}
+  {{- with $cp }}{{ $badge = .Params.badge | default "" }}{{ $desc = .Description }}{{ end -}}
+  {{- $chapters = $chapters | append (dict "num" $c.num "slug" $c.slug "title" $c.title "titleKo" $c.titleKo "badge" $badge "desc" $desc "page" $cp "total" (len $c.sections) "written" $cw "online" $online "extras" $extras "sections" $secs) -}}
 {{- end -}}
 {{- /* 챕터 밖(책 폴더 바로 아래)의 글은 책의 머리말처럼 책 순서의 맨 앞에(날짜순) — 이전 · 다음이 챕터 6 뒤로 밀리지 않게 */ -}}
 {{- $rootExtras := slice -}}
@@ -77,4 +97,4 @@
 {{- range $order }}{{ $head = $head | append . }}{{ end -}}
 {{- $orderAll = $headAll -}}
 {{- $order = $head -}}
-{{- return dict "book" $b "root" $root "chapters" $chapters "total" $total "written" $written "latest" $latest "order" $order "orderAll" $orderAll "num" $num "extras" $rootExtras -}}
+{{- return dict "kind" ($b.kind | default "book") "book" $b "root" $root "chapters" $chapters "total" $total "written" $written "latest" $latest "order" $order "orderAll" $orderAll "num" $num "extras" $rootExtras -}}

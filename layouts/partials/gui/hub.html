@@ -1,0 +1,78 @@
+{{- /* 카테고리 판 — 하위 카테고리가 있는 카테고리 페이지(section.html)의 머리 바로 아래, 하위 카테고리마다 한 장씩 (Motorsport → Sim Racing · F1 · Other Motorsport).
+     넓은 화면은 한 줄에 셋(하위가 넷이면 넷, 일곱 이상이면 넷씩), 좁으면 둘 → 하나로 쌓입니다. 하위가 넷 이상이면(hub--many) 휴대폰에서는
+     설명을 접은 작은 판 두 줄로 — 일곱 장이 화면 몇 개를 차지하지 않게. 판 전체가 그 카테고리로 가는 링크(이름의 링크가 판을 덮음).
+     판: LED(카테고리 색) · 배지 · 글 수(그 아래 전부) · 이름 · 짧은 설명, 아래 칸은 그 카테고리에 맞는 한 가지만 —
+       · 책 · 코스(data/books — COD · GRID서당): 챕터(반)마다 진행 LED (gui/book-mini.html) + 쓴 절 / 전체
+       · 하위 카테고리가 또 있으면: 그 이름들과 글 수 (Sim Racing → GRID서당 22 · Logbook 0 · Gear 0)
+       · 글이 있으면: 가장 최근 글 제목 · 날짜 (코스는 한 장으로 묶어서 — gui/feed.html)
+       · 비어 있으면: Latest 이름표 아래 '아직 글이 없습니다' (LED 도 꺼진 채)
+     한 줄에 놓인 판들은 머리 · 아래 칸 두 줄을 함께 써서(CSS subgrid) 아래 칸의 구분선 · 이름표가 같은 높이에 섭니다.
+     최근 30일 안에 새 글이 있는 카테고리는 LED 가 천천히 숨 쉽니다(움직임 줄이기 설정이면 켜진 채로).
+     입력: 섹션 페이지 */ -}}
+{{- $s := . -}}
+{{- $subs := $s.Sections.ByWeight -}}
+{{- $n := len $subs -}}
+{{- $cols := 3 -}}
+{{- if le $n 3 }}{{ $cols = $n }}{{ else if or (eq $n 4) (ge $n 7) }}{{ $cols = 4 }}{{ end -}}
+{{- $fresh := (now.AddDate 0 0 -30).Unix -}}
+{{- $arrow := `<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8h9.5M9 4.5 12.5 8 9 11.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` -}}
+<nav class="hub hub--c{{ $cols }}{{ if ge $n 4 }} hub--many{{ end }}" aria-labelledby="hub-title">
+  <h2 class="sr-only" id="hub-title">{{ $s.Title }}의 하위 카테고리</h2>
+  <ul class="hub__grid">
+    {{- range $i, $c := $subs }}
+    {{- $count := len $c.RegularPagesRecursive }}
+    {{- $bk := partialCached "gui/book.html" $c $c.Path }}
+    {{- $bd := false }}
+    {{- if and $bk.key (eq $bk.root $c) }}{{ $bd = partialCached "gui/book-data.html" $bk.key $bk.key }}{{ end }}
+    {{- $course := and $bd (eq $bd.kind "course") }}
+    {{- /* 책의 챕터 폴더는 카테고리가 아니므로 '하위 카테고리'로 늘어놓지 않습니다 */}}
+    {{- $kids := cond (not $bd) $c.Sections.ByWeight slice }}
+    {{- $latest := false }}
+    {{- with partial "gui/feed.html" (dict "pages" $c.RegularPagesRecursive "scope" $c) }}{{ $latest = index . 0 }}{{ end }}
+    {{- $live := and $latest (gt $latest.Date.Unix $fresh) }}
+    <li class="hub__card{{ if not $count }} is-empty{{ end }}{{ if $live }} is-live{{ end }}" style="--cat: {{ partial "gui/cat-color.html" $c | safeCSS }}; --k: {{ $i }}">
+      <div class="hub__head">
+        <div class="hub__top">
+          <span class="hub__led" aria-hidden="true"></span>
+          <span class="hub__badge" aria-hidden="true">{{ partial "gui/badge.html" $c }}</span>
+          {{- with $bd }}<span class="hub__kind" aria-hidden="true">{{ cond $course "Course" "Book" }}</span>{{ end }}
+          <span class="hub__count"><b>{{ $count }}</b>{{ cond $course "강" "편" }}</span>
+        </div>
+        <h3 class="hub__name"><a class="hub__link" href="{{ $c.RelPermalink }}">{{ $c.Title }}</a></h3>
+        {{- with $c.Description }}
+        <p class="hub__desc">{{ . }}</p>
+        {{- end }}
+      </div>
+      <div class="hub__foot">
+        {{- if $bd }}
+        <p class="hub__kicker">{{ cond $course "Curriculum" "Progress" }}</p>
+        <div class="hub__meter">
+          {{ partial "gui/book-mini.html" $bd }}
+          <span class="hub__score"><b>{{ $bd.written }}</b>/{{ $bd.total }}<span class="sr-only">{{ cond $course "강 공개" "절 정리" }}</span></span>
+        </div>
+        {{- else if $kids }}
+        <p class="hub__kicker">Sub-categories</p>
+        <ul class="hub__kids">
+          {{- range $kids }}
+          {{- $m := len .RegularPagesRecursive }}
+          <li{{ if not $m }} class="is-empty"{{ end }} style="--cat: {{ partial "gui/cat-color.html" . | safeCSS }}"><i aria-hidden="true"></i>{{ .Title }}<span class="hub__kid-n">{{ $m }}</span></li>
+          {{- end }}
+        </ul>
+        {{- else if $latest }}
+        <p class="hub__kicker">Latest</p>
+        <p class="hub__latest">
+          <span class="hub__latest-title">{{ $latest.Title }}</span>
+          <time datetime="{{ $latest.Date.Format "2006-01-02" }}">{{ $latest.Date.Format "2006.01.02" }}</time>
+        </p>
+        {{- else }}
+        {{- /* 빈 판도 이름표 + 한 줄 — 옆 판들과 같은 자리에 같은 모양으로 */}}
+        <p class="hub__kicker">Latest</p>
+        <p class="hub__none">아직 글이 없습니다</p>
+        {{- end }}
+      </div>
+      <span class="hub__go" aria-hidden="true">{{ $arrow | safeHTML }}</span>
+    </li>
+    {{- end }}
+  </ul>
+</nav>
+{{- /**/ -}}

@@ -1,0 +1,20 @@
+{{- /* 작은 진행 계기판 — 카테고리 판(gui/hub.html)과 코스 카드(gui/card.html)에서 책 · 코스를 한 줄로.
+     챕터(반)마다 한 무리: 절(강)이 32개 이하면 절마다 LED 하나(쓴 절은 켜짐 — 머리의 book-meter 와 같은 모양),
+     그보다 많으면(COD 96절) 챕터마다 얇은 막대 하나(길이 = 절 수, 채움 = 쓴 비율). 무리 아래 이름표: 코스는 반의 짧은 이름(기초 · 심화 · 급수), 책은 CH2 …
+     입력: gui/book-data.html 결과 */ -}}
+{{- $bd := . -}}
+{{- $course := eq $bd.kind "course" -}}
+{{- $dots := le $bd.total 32 -}}
+<span class="mini-meter{{ if not $dots }} mini-meter--bars{{ end }}" aria-hidden="true">
+  {{- range $bd.chapters }}
+  <span class="mini-meter__grp" style="--n: {{ .total }}">
+    {{- if $dots }}
+    <span class="mini-meter__dots">{{ range .sections }}<i{{ if .written }} class="is-on"{{ end }}></i>{{ end }}</span>
+    {{- else }}
+    <span class="mini-meter__bar"><i style="width: {{ cond (gt .total 0) (div (mul .written 100.0) .total) 0 }}%"></i></span>
+    {{- end }}
+    <small>{{ if $course }}{{ .badge | default .title }}{{ else }}CH{{ .num }}{{ end }}</small>
+  </span>
+  {{- end }}
+</span>
+{{- /**/ -}}

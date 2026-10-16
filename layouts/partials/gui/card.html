@@ -1,21 +1,57 @@
-{{- /* 글 카드. 입력: dict "page" 글 "variant" (feature | row | grid) "level" 제목 레벨(기본 3) */ -}}
+{{- /* 글 카드. 입력: dict "page" 글 "variant" (feature | row | grid) "level" 제목 레벨(기본 3)
+     page 가 코스 뿌리 섹션이면(최신순 목록에서 코스를 한 장으로 묶은 것 — gui/feed.html) 코스 카드:
+     그림은 첫 강의 대표 이미지(자르지 않고 통째로), 칩은 코스가 든 카테고리 + Course 표시, 제목 · 설명은 코스의 것, 아래에 반마다 진행 LED(gui/book-mini.html),
+     맨 아래 줄은 마지막 공개일 · 강 수 · 반 수 */ -}}
 {{- $p := .page -}}
 {{- $v := .variant | default "row" -}}
 {{- $lvl := .level | default 3 -}}
 {{- $color := partial "gui/cat-color.html" $p -}}
-{{- $thumb := partial "gui/thumb.html" $p -}}
+{{- $bd := false -}}
+{{- $lead := $p -}}
+{{- if $p.IsSection -}}
+  {{- $bk := partialCached "gui/book.html" $p $p.Path -}}
+  {{- with $bk.key }}{{ $bd = partialCached "gui/book-data.html" . . }}{{ end -}}
+  {{- with $bd }}{{ with .order }}{{ $lead = index . 0 }}{{ end }}{{ end -}}
+{{- end -}}
+{{- $thumb := partial "gui/thumb.html" $lead -}}
 {{- $sizes := dict "feature" "960x540" "row" "480x360" "grid" "720x405" -}}
-<article class="card card--{{ $v }}" style="--cat: {{ $color | safeCSS }}">
+{{- $widths := dict "feature" 960 "row" 480 "grid" 720 -}}
+<article class="card card--{{ $v }}{{ if $bd }} card--course{{ end }}" style="--cat: {{ $color | safeCSS }}">
   <a class="card__media" href="{{ $p.RelPermalink }}" tabindex="-1" aria-hidden="true">
     {{- with $thumb }}
+    {{- if $bd }}
+    {{- /* 코스 카드: 첫 강의 그림은 시범 영상의 한 장면이라 글자(캡션 · 이름표)가 가장자리까지 그려져 있습니다 —
+           잘라 내지 않고 비율 그대로 줄여서, 강의 본문의 영상 칸처럼 어두운 화면 칸 가운데에 (CSS .card--course) */}}
+    {{- $w := index $widths $v }}{{ if lt .Width $w }}{{ $w = .Width }}{{ end }}
+    {{- $t := .Resize (printf "%dx webp q80" $w) }}
+    <img src="{{ $t.RelPermalink }}" width="{{ $t.Width }}" height="{{ $t.Height }}" alt="" loading="lazy" decoding="async">
+    {{- else }}
     {{- $t := .Fill (printf "%s Center webp q78" (index $sizes $v)) }}
     <img src="{{ $t.RelPermalink }}" width="{{ $t.Width }}" height="{{ $t.Height }}" alt="" loading="lazy" decoding="async">
+    {{- end }}
     {{- else }}
     {{- partial "gui/livery.html" $p }}
     {{- end }}
     <span class="card__scan" aria-hidden="true"></span>
   </a>
   <div class="card__body">
+    {{- if $bd }}
+    <div class="card__top">{{ partial "gui/chip.html" $p.Parent }}<span class="card__kind">{{ cond (eq $bd.kind "course") "Course" "Book" }}</span></div>
+    <h{{ $lvl }} class="card__title"><a href="{{ $p.RelPermalink }}">{{ $p.Title }}</a></h{{ $lvl }}>
+    {{- with $p.Description }}
+    <p class="card__excerpt">{{ . }}</p>
+    {{- end }}
+    <div class="card__meter">{{ partial "gui/book-mini.html" $bd }}</div>
+    <div class="card__foot">
+      <time datetime="{{ $p.Date.Format "2006-01-02" }}">{{ $p.Date.Format "2006.01.02" }}</time>
+      <span class="card__sep" aria-hidden="true">/</span>
+      {{- if eq $bd.kind "course" }}
+      <span>{{ $bd.written }}강 · {{ len $bd.chapters }}반</span>
+      {{- else }}
+      <span>{{ $bd.written }}/{{ $bd.total }}절</span>
+      {{- end }}
+    </div>
+    {{- else }}
     <div class="card__top">{{ partial "gui/chip.html" $p.Parent }}</div>
     <h{{ $lvl }} class="card__title"><a href="{{ $p.RelPermalink }}">{{ $p.Title }}</a></h{{ $lvl }}>
     <p class="card__excerpt">{{ partial "common/excerpt.html" $p }}</p>
@@ -27,5 +63,6 @@
       <span class="card__tags">{{ range first 2 . }}<span>#{{ .LinkTitle }}</span>{{ end }}</span>
       {{- end }}
     </div>
+    {{- end }}
   </div>
 </article>

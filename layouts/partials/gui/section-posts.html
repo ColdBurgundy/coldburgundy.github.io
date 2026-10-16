@@ -1,0 +1,9 @@
+{{- /* 카테고리(섹션) 페이지가 늘어놓을 글: 그 아래 모든 글을 최신순으로, 코스는 한 장으로 묶어서 (gui/feed.html).
+     바로 아래 하위 카테고리인 코스(Sim Racing 의 GRID서당)는 위의 카테고리 판(gui/hub.html)에 이미 한 장으로 있으므로 목록에서는 뺍니다.
+     head.html(페이지 나누기 canonical)과 section.html 이 같은 목록으로 페이지를 나누도록 partialCached (섹션 경로를 키로) 로 부릅니다.
+     입력: 섹션 페이지 · 돌려줌: Pages */ -}}
+{{- $list := partial "gui/feed.html" (dict "pages" .RegularPagesRecursive "scope" .) -}}
+{{- $kids := slice -}}
+{{- range .Sections }}{{ $kids = $kids | append .Path }}{{ end -}}
+{{- with $kids }}{{ $list = where $list "Path" "not in" . }}{{ end -}}
+{{- return $list -}}

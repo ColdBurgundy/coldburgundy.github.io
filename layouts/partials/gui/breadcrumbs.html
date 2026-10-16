@@ -1,3 +1,7 @@
+{{- /* 경로 줄 — Home / 카테고리 / … / 지금 페이지.
+     깊은 곳(GRID서당의 강은 Home 아래 6단계)은 좁은 화면(≤640px)에서 가운데를 '…' 하나로 접고 마지막 둘 · 셋만 보입니다 (gui.css).
+     '…' 를 누르면 접힌 단계가 모두 펼쳐집니다(gui.js). 글 페이지의 마지막 칸(글 제목)은 바로 아래 큰 제목과 같아서
+     넓은 화면에선 한 줄에 맞게 말줄임, 좁은 화면에선 화면 낭독기에만 */ -}}
 {{- $root := site.GetPage "/posts" -}}
 {{- $chain := slice -}}
 {{- $p := .Parent -}}
@@ -7,9 +11,12 @@
     {{- $p = $p.Parent -}}
   {{- end -}}
 {{- end -}}
-<nav class="crumbs" aria-label="현재 위치">
+<nav class="crumbs{{ if .IsPage }} crumbs--post{{ end }}" aria-label="현재 위치">
   <ol>
     <li><a href="{{ $root.RelPermalink }}">Home</a></li>
+    {{- if ge (len $chain) 3 }}
+    <li class="crumbs__gap"><button type="button" class="crumbs__more" aria-expanded="false" aria-label="경로 모두 보기" data-crumbs-more>…</button></li>
+    {{- end }}
     {{- range sort $chain "RelPermalink" }}
     <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
     {{- end }}
