@@ -1947,6 +1947,8 @@
         it.btn.hidden = false;
         it.btn.addEventListener('click', function () { it.touched = true; it.held = !it.held; sync(it); });
       }
+      // 영상 자체를 눌러도 재생 · 일시정지 — 구석의 작은 버튼을 찾지 않아도 되게 (멈춰 있으면 가운데에 재생 표시, gui.css)
+      v.addEventListener('click', function () { it.touched = true; it.held = !it.held; sync(it); });
       box._vloop = it;
       items.push(it);
       if (vio) vio.observe(box); else sync(it);

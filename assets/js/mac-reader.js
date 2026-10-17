@@ -244,6 +244,8 @@ window.MacReader = (function () {
         it.btn.hidden = false;
         it.btn.addEventListener('click', function () { it.held = !it.held; sync(it); });
       }
+      // 영상 자체를 눌러도 재생 · 일시정지 (멈춰 있으면 가운데에 재생 표시, mac-reader.css)
+      v.addEventListener('click', function () { it.held = !it.held; sync(it); });
       box._vloop = it;
       if (io) io.observe(box); else sync(it);
       return it;

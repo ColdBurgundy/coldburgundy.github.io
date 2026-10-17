@@ -2229,6 +2229,23 @@ html:not(.dl-js) .lang-switch, html:not(.dl-js) .dock__sep:has(+ .dock__lang) { 
 .vloop:hover .vloop__btn, .vloop__btn:focus-visible, .vloop.is-held .vloop__btn { opacity: 1; }
 .vloop__pause, .vloop.is-playing .vloop__play { display: none; }
 .vloop.is-playing .vloop__pause { display: block; }
+/* 영상을 눌러도 재생 · 일시정지(gui.js). 멈춰 있을 때는 가운데에 재생 표시 — 누르는 곳은 아래 영상 그대로 */
+.vloop video { cursor: pointer; }
+.vloop.is-held::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  border-radius: 50%;
+  background: rgba(4, 7, 15, .62) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23f2f3f5' d='M5.5 3.6v8.8a.5.5 0 0 0 .76.43l7.04-4.4a.5.5 0 0 0 0-.86L6.26 3.17a.5.5 0 0 0-.76.43z'/%3E%3C/svg%3E") 54% 50% / 22px no-repeat;
+  box-shadow: 0 0 0 1px var(--hair-3);
+  pointer-events: none;
+  transition: transform .2s var(--ease), background-color .2s;
+}
+.vloop.is-held:hover::after { transform: scale(1.06); background-color: rgba(4, 7, 15, .78); }
 @media (hover: none) { .vloop__btn { opacity: .8; } }
 .prose .table-wrap { position: relative; margin: 1.8em 0; overflow-x: auto; border: 1px solid var(--hair); border-radius: var(--r); }
 /* 넓은 표는 가로 스크롤: 짧은 셀은 한 줄로, 긴 설명 셀만 36em 에서 줄바꿈 */
