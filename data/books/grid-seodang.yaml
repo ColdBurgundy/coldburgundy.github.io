@@ -1,6 +1,6 @@
 # GRID서당 : iRacing — 심레이싱 입문 드라이빙 아카데미(직접 만든 프로그램)의 커리큘럼을 옮긴 시리즈.
 # kind: course — 책 목차 화면(gui/book-toc.html)이 '코스'로 그립니다: 반(chapters) 고르개 + 고른 반의 강 목록, 이전 · 다음 · 타워는 이 순서대로.
-# chapters = 반(기초반 → 심화반 → 급수반, 글 폴더 이름 slug), sections = 그 반의 강(커리큘럼 순서 = 글의 weight 순서).
+# chapters = 반(기초반 → 심화반 → 급수반 → 서킷 공략, 글 폴더 이름 slug), sections = 그 반의 강(커리큘럼 순서 = 글의 weight 순서).
 # 강의 num · title · sub 는 글 제목("기초 1강 · 심레이싱과 장비 — 첫 좌석 [GRID서당]")을 번호 · 제목 · 부제로 나눈 것 — 새 글자는 없습니다.
 # 반의 이름 · 짧은 이름(badge) · 설명은 각 반의 _index.md 에서 그대로 가져옵니다.
 kind: course
@@ -16,6 +16,7 @@ chapters:
       - { num: "3강", slug: "f3-first-dialogue", title: "차와 첫 대화", sub: "시동부터 완주까지" }
       - { num: "4강", slug: "f4-racing-line", title: "레이싱 라인의 문법", sub: "네 점의 문장" }
       - { num: "5강", slug: "f5-flags-etiquette", title: "서킷의 예절", sub: "깃발의 언어" }
+      - { num: "6강", slug: "f6-first-official-race", title: "첫 공식전", sub: "등록부터 체커까지" }
   - num: 2
     slug: "advanced"
     title: "심화반"
@@ -25,8 +26,11 @@ chapters:
       - { num: "3강", slug: "d3-situational-lines", title: "상황의 라인", sub: "혼자가 아닌 트랙" }
       - { num: "4강", slug: "d4-car-balance", title: "차의 균형", sub: "그립, 하중, 언더와 오버" }
       - { num: "5강", slug: "d5-weather-setup", title: "날씨와 세팅", sub: "조건을 읽는 눈" }
-      - { num: "6강", slug: "d6-pedal-grammar", title: "페달의 문법", sub: "밟기와 떼기" }
-      - { num: "7강", slug: "d7-banked-track", title: "기울어진 트랙", sub: "뱅크와 고저차" }
+      - { num: "6강", slug: "d8-training-car-and-shifting", title: "교본 차 해부", sub: "FF1600과 변속의 문법" }
+      - { num: "7강", slug: "d9-signals-at-the-limit", title: "한계의 신호", sub: "잠김·헛돎·가벼워지는 핸들" }
+      - { num: "8강", slug: "d6-pedal-grammar", title: "페달의 문법", sub: "밟기와 떼기" }
+      - { num: "9강", slug: "d7-banked-track", title: "기울어진 트랙", sub: "뱅크와 고저차" }
+      - { num: "10강", slug: "d11-lime-rock-textbook", title: "라임락 교본", sub: "한 바퀴의 지도" }
   - num: 3
     slug: "grades"
     title: "급수반"
@@ -41,3 +45,25 @@ chapters:
       - { num: "2급", slug: "g2-one-stroke-steering", title: "스티어링 일필휘지", sub: "한 획으로" }
       - { num: "1급", slug: "g1-consistency", title: "일관성 담금질", sub: "같음이 빠름을 만든다" }
       - { num: "졸업", slug: "graduation", title: "출사표", sub: "스스로 서는 법" }
+  - num: 4
+    slug: "circuits"
+    title: "서킷 공략"
+    # 강의가 아닌 묶음: 진도 계기판 · 카드의 강 수 · 반 수에서 빠지고 따로 셉니다(서킷 공략 12곳).
+    # word = 이 묶음을 부르는 말(목록 머리 · 점수 이름표), item = 목록 칸 머리, unit = 세는 단위
+    extra: true
+    word: "Circuits"
+    item: "Circuit"
+    unit: "곳"
+    sections:
+      - { num: "1주차", slug: "w01-summit-point-raceway", title: "서밋 포인트 레이스웨이", sub: "메인 서킷" }
+      - { num: "2주차", slug: "w02-rudskogen", title: "루드스코겐 모터센터", sub: "단일 코스" }
+      - { num: "3주차", slug: "w03-oulton-park-international", title: "올턴 파크 서킷", sub: "인터내셔널" }
+      - { num: "4주차", slug: "w04-lime-rock-gp", title: "라임 락 파크", sub: "그랑프리" }
+      - { num: "5주차", slug: "w05-winton-club", title: "윈턴 모터 레이스웨이", sub: "클럽 서킷" }
+      - { num: "6주차", slug: "w06-ledenon", title: "르드농 서킷", sub: "단일 코스" }
+      - { num: "7주차", slug: "w07-tsukuba-2000-full", title: "츠쿠바 서킷", sub: "코스 2000 풀" }
+      - { num: "8주차", slug: "w08-oschersleben-gp", title: "모터스포트 아레나 오셔슬레벤", sub: "그랑프리" }
+      - { num: "9주차", slug: "w09-okayama-full", title: "오카야마 국제 서킷", sub: "풀 코스" }
+      - { num: "10주차", slug: "w10-navarra-speed-medium", title: "나바라 서킷", sub: "스피드 서킷 미디엄" }
+      - { num: "11주차", slug: "w11-oran-park-gp", title: "오란 파크 레이스웨이", sub: "그랑프리" }
+      - { num: "12주차", slug: "w12-vir-north", title: "버지니아 인터내셔널 레이스웨이", sub: "노스 코스" }

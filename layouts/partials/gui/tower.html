@@ -49,7 +49,10 @@
   {{- if lt $start3 0 }}{{ $start3 = 0 }}{{ end -}}
   {{- if gt (add $start3 3) $n }}{{ $start3 = sub $n 3 }}{{ end -}}
 {{- end -}}
-<section class="tower{{ with .class }} {{ . }}{{ end }}{{ if $bk.key }} tower--book{{ end }}{{ if $isCourse }} tower--course{{ end }}" aria-labelledby="{{ .id }}" style="--cat: {{ partial "gui/cat-color.html" $cat | safeCSS }}">
+{{- /* 번호가 '10주차'처럼 긴 줄(GRID서당 서킷 공략)이 끼면 번호 칸을 넓힘 (절 번호 2.10 · 10강 · 졸업은 그대로) */ -}}
+{{- $widePos := false -}}
+{{- if $bk.key }}{{ range $list }}{{ with index $bd.num .Path }}{{ if findRE `\d[가-힣]{2}` . }}{{ $widePos = true }}{{ end }}{{ end }}{{ end }}{{ end -}}
+<section class="tower{{ with .class }} {{ . }}{{ end }}{{ if $bk.key }} tower--book{{ end }}{{ if $isCourse }} tower--course{{ end }}{{ if $widePos }} tower--widepos{{ end }}" aria-labelledby="{{ .id }}" style="--cat: {{ partial "gui/cat-color.html" $cat | safeCSS }}">
   <header class="tower__head">
     <h2 class="tower__title" id="{{ .id }}">같은 카테고리</h2>
     {{- if ne $cat $root }}

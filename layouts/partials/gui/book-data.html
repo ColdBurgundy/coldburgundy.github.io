@@ -2,13 +2,15 @@
      절의 글 = content/posts/<section>/<챕터 slug>/<절 slug>/ 의 글. 그 글이 발행돼 있으면(초안 아님) '쓴 절'.
      초안은 hugo -D 로 미리 볼 때만 빌드에 있으므로, 그때는 링크는 걸되 쓴 절로 세지 않습니다(draft).
      차례에 없는 글(챕터 폴더에 따로 둔 노트 등)은 그 챕터의 extras, 챕터 밖(책 폴더 바로 아래)의 글은 책의 extras.
-     책 순서(order) = 챕터 밖의 글(머리말 자리, 날짜순) → 챕터마다 절 번호순 → 그 챕터의 extras(날짜순).
+     책 순서(order) = 챕터 밖의 글(머리말 자리, 날짜순) → 챕터마다 절 번호순 → 그 챕터의 extras(날짜순). 코스는 챕터 밖의 글이 맨 뒤(부록 자리).
      코스(yaml 의 kind: course — 예: GRID서당)도 같은 모양: 챕터 = 반, 절 = 강(title 제목 · sub 부제 — 영어 제목 없이 한국어만).
      글이 있는 강의 번호 · 제목 · 부제는 글 제목에서 나눠 쓰고, yaml 의 것은 아직 글이 없는 강에만 씁니다.
      반의 짧은 이름(badge) · 설명(description)은 그 반 폴더의 _index.md 에서.
      돌려줌: dict
        "kind" "book" | "course" · "book" yaml · "root" 책 섹션 · "total" 절 수 · "written" 쓴 절 수 · "latest" 가장 최근에 쓴 절이 든 챕터의 slug(없으면 "")
-       "chapters" [dict num slug title titleKo badge desc page total written online extras sections[dict num slug title titleKo sub online page written draft]]
+       "classes" 챕터(반) 수 · "guides" [dict title word unit written total] — yaml 에서 extra: true 인 챕터(코스의 강의가 아닌 묶음, 예: GRID서당 서킷 공략)는
+         total · written · classes 에서 빠지고 여기에 따로 (목차의 탭 · 패널 · 책 순서에는 그대로 들어감)
+       "chapters" [dict num slug title titleKo badge desc page total written online extras extra word item unit sections[dict num slug title titleKo sub online page written draft]]
        "order" 책 순서의 발행된 글 · "orderAll" 초안까지 (-D 미리보기의 초안 글에서만 씀) · "num" 글 경로(.Path) → 절 번호 */ -}}
 {{- $b := index site.Data.books . -}}
 {{- $root := site.GetPage (printf "/posts/%s" $b.section) -}}
@@ -19,6 +21,8 @@
 {{- $order := slice -}}
 {{- $orderAll := slice -}}
 {{- $num := dict -}}
+{{- $classes := 0 -}}
+{{- $guides := slice -}}
 {{- $seen := slice -}}
 {{- $latest := "" -}}
 {{- $latestAt := 0 -}}
@@ -74,27 +78,38 @@
       {{- end -}}
     {{- end -}}
   {{- end -}}
-  {{- $total = add $total (len $c.sections) -}}
-  {{- $written = add $written $cw -}}
+  {{- if $c.extra -}}
+    {{- $guides = $guides | append (dict "title" $c.title "word" $c.word "unit" $c.unit "written" $cw "total" (len $c.sections)) -}}
+  {{- else -}}
+    {{- $total = add $total (len $c.sections) -}}
+    {{- $written = add $written $cw -}}
+    {{- $classes = add $classes 1 -}}
+  {{- end -}}
   {{- $badge := "" }}{{ $desc := "" -}}
   {{- with $cp }}{{ $badge = .Params.badge | default "" }}{{ $desc = .Description }}{{ end -}}
-  {{- $chapters = $chapters | append (dict "num" $c.num "slug" $c.slug "title" $c.title "titleKo" $c.titleKo "badge" $badge "desc" $desc "page" $cp "total" (len $c.sections) "written" $cw "online" $online "extras" $extras "sections" $secs) -}}
+  {{- $chapters = $chapters | append (dict "num" $c.num "slug" $c.slug "title" $c.title "titleKo" $c.titleKo "badge" $badge "desc" $desc "page" $cp "total" (len $c.sections) "written" $cw "online" $online "extras" $extras "extra" ($c.extra | default false) "word" ($c.word | default "") "item" ($c.item | default "") "unit" ($c.unit | default "") "sections" $secs) -}}
 {{- end -}}
-{{- /* 챕터 밖(책 폴더 바로 아래)의 글은 책의 머리말처럼 책 순서의 맨 앞에(날짜순) — 이전 · 다음이 챕터 6 뒤로 밀리지 않게 */ -}}
+{{- /* 챕터 밖(책 폴더 바로 아래)의 글은 책의 머리말처럼 책 순서의 맨 앞에(날짜순) — 이전 · 다음이 챕터 6 뒤로 밀리지 않게.
+       코스는 부록처럼 맨 뒤에 — GRID서당의 용어 사전은 졸업 · 서킷 공략 다음(커리큘럼을 따라가다 찾아보는 자리라 첫 강보다 앞에 서지 않게) */ -}}
 {{- $rootExtras := slice -}}
-{{- $headAll := slice -}}
-{{- $head := slice -}}
+{{- $rootAll := slice -}}
+{{- $rootPub := slice -}}
 {{- with $root -}}
   {{- range .RegularPagesRecursive.ByDate -}}
     {{- if not (in $seen .Path) -}}
       {{- $rootExtras = $rootExtras | append . -}}
-      {{- $headAll = $headAll | append . -}}
-      {{- if not .Draft }}{{ $head = $head | append . }}{{ end -}}
+      {{- $rootAll = $rootAll | append . -}}
+      {{- if not .Draft }}{{ $rootPub = $rootPub | append . }}{{ end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- range $orderAll }}{{ $headAll = $headAll | append . }}{{ end -}}
-{{- range $order }}{{ $head = $head | append . }}{{ end -}}
-{{- $orderAll = $headAll -}}
-{{- $order = $head -}}
-{{- return dict "kind" ($b.kind | default "book") "book" $b "root" $root "chapters" $chapters "total" $total "written" $written "latest" $latest "order" $order "orderAll" $orderAll "num" $num "extras" $rootExtras -}}
+{{- if $isCourse -}}
+  {{- range $rootAll }}{{ $orderAll = $orderAll | append . }}{{ end -}}
+  {{- range $rootPub }}{{ $order = $order | append . }}{{ end -}}
+{{- else -}}
+  {{- range $orderAll }}{{ $rootAll = $rootAll | append . }}{{ end -}}
+  {{- range $order }}{{ $rootPub = $rootPub | append . }}{{ end -}}
+  {{- $orderAll = $rootAll -}}
+  {{- $order = $rootPub -}}
+{{- end -}}
+{{- return dict "kind" ($b.kind | default "book") "book" $b "root" $root "chapters" $chapters "total" $total "written" $written "classes" $classes "guides" $guides "latest" $latest "order" $order "orderAll" $orderAll "num" $num "extras" $rootExtras -}}

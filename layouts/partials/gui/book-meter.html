@@ -20,7 +20,10 @@
   <dl class="page-hero__stats book-meter__stats">
     {{- if $course }}
     <div><dt>Lessons</dt><dd><span aria-hidden="true">{{ $bd.written }}<span class="book-meter__of">/{{ $bd.total }}</span></span><span class="sr-only">{{ $bd.total }}강 중 {{ $bd.written }}강 공개</span></dd></div>
-    <div><dt>Classes</dt><dd>{{ len $bd.chapters }}</dd></div>
+    <div><dt>Classes</dt><dd>{{ $bd.classes }}</dd></div>
+    {{- range $bd.guides }}
+    <div><dt>{{ .word }}</dt><dd><span aria-hidden="true">{{ .written }}</span><span class="sr-only">{{ .title }} {{ .written }}{{ .unit }} 공개</span></dd></div>
+    {{- end }}
     {{- else }}
     <div><dt>Written</dt><dd><span aria-hidden="true">{{ $bd.written }}<span class="book-meter__of">/{{ $bd.total }}</span></span><span class="sr-only">{{ $bd.total }}절 중 {{ $bd.written }}절</span></dd></div>
     <div><dt>Chapters</dt><dd>{{ len $bd.chapters }}</dd></div>

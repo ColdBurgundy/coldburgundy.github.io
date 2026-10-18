@@ -3,7 +3,8 @@
   입력: dict "page" .Page "src" "images/x.png"
   반환: dict "src" (루트 기준 URL) "width" "height"
   - 번들 안에 있으면 RelPermalink(/posts/.../images/x.png)로 바꿔서 CLI 창/직접 접속/RSS 어디서든 깨지지 않게 합니다.
-  - 가로 1400px 보다 큰 래스터 이미지는 webp 로 줄입니다.
+  - 가로 1400px 보다 큰 래스터 이미지는 webp 로 줄입니다. 다만 200KB 이하의 PNG(선 그림 · 스크린샷 — 예: GRID서당 서킷 지도 map.png ·
+    rhythm.png)는 원본 그대로: 줄여도 용량은 그대로이고 글자(지도 아래 띠의 출처 표기 등)만 흐려집니다.
 */ -}}
 {{- $src := .src -}}
 {{- $out := dict "src" $src "width" 0 "height" 0 -}}
@@ -13,7 +14,8 @@
   {{- with $res -}}
     {{- $img := . -}}
     {{- $raster := and (eq $img.ResourceType "image") (not (in (slice "svg" "svg+xml" "gif") $img.MediaType.SubType)) -}}
-    {{- if and $raster (gt $img.Width 1400) -}}
+    {{- $smallPNG := and (eq $img.MediaType.SubType "png") (le (len $img.Content) 204800) -}}
+    {{- if and $raster (gt $img.Width 1400) (not $smallPNG) -}}
       {{- $img = $img.Resize "1400x webp q82" -}}
     {{- end -}}
     {{- if $raster -}}

@@ -47,7 +47,7 @@
           <a class="book__tab{{ if $on }} is-on{{ end }}" id="book-tab-{{ .slug }}" href="{{ $url }}" data-book-tab="{{ .slug }}" data-book-link{{ if $on }} aria-current="true"{{ end }} style="--done: {{ cond (gt .total 0) (div (mul .written 100.0) .total) 0 }}%">
             <span class="book__tab-num" aria-hidden="true">{{ printf "%02d" (int .num) }}</span>
             <span class="book__tab-body">
-              <span class="sr-only">{{ $chWord }} {{ .num }}.</span>
+              <span class="sr-only">{{ cond (ne .word "") .word (printf "%s %v" $chWord .num) }}.</span>
               {{- if $course }}
               {{- /* 코스: 반 이름(기초반) 아래에 그 반 설명의 ' — ' 앞(예: '장비와 자세부터 깃발의 언어까지'). 좁은 화면의 가로 한 줄에선 반 이름만 */}}
               <span class="book__tab-en">{{ .title }}</span>
@@ -59,7 +59,8 @@
               <span class="book__tab-ko">{{ $koMain }}{{ with strings.TrimPrefix $koMain .titleKo }}<span class="book__tab-ko-sub">{{ . }}</span>{{ end }}</span>
               {{- end }}
               <span class="book__tab-meter" aria-hidden="true"><span class="book__tab-bar"><i></i></span><span class="book__tab-count"><b>{{ .written }}</b>/{{ .total }}</span></span>
-              <span class="sr-only">{{ .total }}{{ $unit }} 중 {{ .written }}{{ $unit }} {{ $doneWord }}</span>
+              {{- $u := cond (ne .unit "") .unit $unit }}
+              <span class="sr-only">{{ .total }}{{ $u }} 중 {{ .written }}{{ $u }} {{ $doneWord }}</span>
             </span>
           </a>
         </li>
@@ -78,10 +79,11 @@
         {{- $label = partial "gui/cat-label.html" . }}
         {{- $docTitle = printf "%s · %s · %s" $root.Title .Title site.Title }}
       {{- end }}
-      <section class="book__panel" id="book-{{ .slug }}" data-book-panel="{{ .slug }}" data-url="{{ $url }}" data-crumb="{{ with .page }}{{ .Title }}{{ end }}" data-label="{{ $label }}" data-doc="{{ $docTitle }}" aria-labelledby="book-h-{{ .slug }}"{{ if not $on }} hidden{{ end }}>
+      <section class="book__panel{{ if .extra }} book__panel--guide{{ end }}" id="book-{{ .slug }}" data-book-panel="{{ .slug }}" data-url="{{ $url }}" data-crumb="{{ with .page }}{{ .Title }}{{ end }}" data-label="{{ $label }}" data-doc="{{ $docTitle }}" aria-labelledby="book-h-{{ .slug }}"{{ if not $on }} hidden{{ end }}>
         <header class="book__head">
           <div class="book__head-text">
-            <p class="book__kicker">{{ $chWord }} {{ .num }}</p>
+            {{- /* 강의가 아닌 묶음(yaml extra — 서킷 공략)은 'Class 4 · Lessons · Lesson · 강' 대신 제 말(word · item · unit)로 */}}
+            <p class="book__kicker">{{ cond (ne .word "") .word (printf "%s %v" $chWord .num) }}</p>
             {{- if $course }}
             <h2 class="book__title" id="book-h-{{ .slug }}">{{ .title }}</h2>
             {{- with .desc }}
@@ -92,12 +94,13 @@
             <p class="book__title-ko">{{ .titleKo }}</p>
             {{- end }}
           </div>
-          <p class="book__score"><span aria-hidden="true"><b>{{ .written }}</b><span class="book__score-of">/{{ .total }}</span></span><small aria-hidden="true">{{ cond $course "Lessons" "Written" }}</small><span class="sr-only">{{ .total }}{{ $unit }} 중 {{ .written }}{{ $unit }} {{ $doneWord }}</span></p>
+          {{- $u := cond (ne .unit "") .unit $unit }}
+          <p class="book__score"><span aria-hidden="true"><b>{{ .written }}</b><span class="book__score-of">/{{ .total }}</span></span><small aria-hidden="true">{{ cond (ne .word "") .word (cond $course "Lessons" "Written") }}</small><span class="sr-only">{{ .total }}{{ $u }} 중 {{ .written }}{{ $u }} {{ $doneWord }}</span></p>
         </header>
 
         {{- /* 코스: 오른쪽 칸은 날짜 대신 읽는 시간 (한 번에 공개한 강의라 날짜가 모두 같음), 부제 칸은 머리 없이 */}}
         {{- if $course }}
-        <div class="book__cols" aria-hidden="true"><span>No.</span><span>Lesson</span><span class="book__cols-ko"></span><span>Time</span></div>
+        <div class="book__cols" aria-hidden="true"><span>No.</span><span>{{ cond (ne .item "") .item "Lesson" }}</span><span class="book__cols-ko"></span><span>Time</span></div>
         {{- else }}
         <div class="book__cols" aria-hidden="true"><span>No.</span><span>Section</span><span class="book__cols-ko">한국어판</span><span>Date</span></div>
         {{- end }}
@@ -178,10 +181,10 @@
           {{- if or $prev $next }}
           <nav class="book__step" aria-label="{{ cond $course "다른 반" "다른 챕터" }}">
             {{- with $prev }}
-            <a class="book__go book__go--prev" href="{{ with .page }}{{ .RelPermalink }}{{ else }}{{ $root.RelPermalink }}{{ end }}" data-book-go="{{ .slug }}" data-book-link><span class="book__go-dir">← {{ $chWord }} {{ .num }}</span><span class="book__go-title">{{ cond $course .title .titleKo }}</span></a>
+            <a class="book__go book__go--prev" href="{{ with .page }}{{ .RelPermalink }}{{ else }}{{ $root.RelPermalink }}{{ end }}" data-book-go="{{ .slug }}" data-book-link><span class="book__go-dir">← {{ cond (ne .word "") .word (printf "%s %v" $chWord .num) }}</span><span class="book__go-title">{{ cond $course .title .titleKo }}</span></a>
             {{- end }}
             {{- with $next }}
-            <a class="book__go book__go--next" href="{{ with .page }}{{ .RelPermalink }}{{ else }}{{ $root.RelPermalink }}{{ end }}" data-book-go="{{ .slug }}" data-book-link><span class="book__go-dir">{{ $chWord }} {{ .num }} →</span><span class="book__go-title">{{ cond $course .title .titleKo }}</span></a>
+            <a class="book__go book__go--next" href="{{ with .page }}{{ .RelPermalink }}{{ else }}{{ $root.RelPermalink }}{{ end }}" data-book-go="{{ .slug }}" data-book-link><span class="book__go-dir">{{ cond (ne .word "") .word (printf "%s %v" $chWord .num) }} →</span><span class="book__go-title">{{ cond $course .title .titleKo }}</span></a>
             {{- end }}
           </nav>
           {{- end }}
@@ -191,10 +194,11 @@
     </div>
   </div>
 
-  {{- /* 책 폴더 바로 아래(챕터 밖)에 둔 글 */}}
+  {{- /* 책 폴더 바로 아래(챕터 밖)에 둔 글 — 코스는 부록(용어 사전 등) */}}
   {{- with $bd.extras }}
   <section class="book__more" aria-labelledby="book-more-title">
-    <h2 class="book__more-title" id="book-more-title">{{ $root.Title }} 노트</h2>
+    {{- /* 코스는 반 밖의 글이 부록(GRID서당의 용어 사전)이라 '함께 보기' */}}
+    <h2 class="book__more-title" id="book-more-title">{{ if $course }}함께 보기{{ else }}{{ $root.Title }} 노트{{ end }}</h2>
     <div class="post-list">
       {{- range . }}{{ partial "gui/card.html" (dict "page" . "variant" "row" "level" 3) }}{{ end }}
     </div>

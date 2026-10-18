@@ -7,6 +7,9 @@
   사용: {{ $toc := partial "common/toc.html" . }}
 */ -}}
 {{- $toc := string .TableOfContents -}}
+{{- /* 소제목이 아주 많은 글(목차 40줄 넘게 — GRID서당 서킷 공략: 코너마다 접근 · 제동 · 턴인 …의 h4)은 목차를 h3(코너 이름)까지만.
+       레이스 플랜이 90줄 넘게 늘어지지 않게 — 코너 안의 단계는 본문에서 바로 보입니다 */ -}}
+{{- if gt (len (findRE `<a href="#` $toc)) 40 }}{{ $toc = string (.Fragments.ToHTML 2 3 false) }}{{ end -}}
 {{- if strings.Contains (string .Content) "data-label=" -}}
   {{- $c := replaceRE `(?s)<details\b.*?</details>` "" (string .Content) -}}
   {{- $heads := slice -}}

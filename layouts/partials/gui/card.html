@@ -46,7 +46,7 @@
       <time datetime="{{ $p.Date.Format "2006-01-02" }}">{{ $p.Date.Format "2006.01.02" }}</time>
       <span class="card__sep" aria-hidden="true">/</span>
       {{- if eq $bd.kind "course" }}
-      <span>{{ $bd.written }}강 · {{ len $bd.chapters }}반</span>
+      <span>{{ $bd.written }}강 · {{ $bd.classes }}반{{ range $bd.guides }} · {{ .title }} {{ .written }}{{ .unit }}{{ end }}</span>
       {{- else }}
       <span>{{ $bd.written }}/{{ $bd.total }}절</span>
       {{- end }}
